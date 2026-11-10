@@ -7,7 +7,18 @@ import { useDemo } from "@/context/demo-context";
 import { BOROUGHS, PRICE_FILTERS, SORTS } from "@/lib/constants";
 import { money } from "@/lib/format";
 import { filterArtists, type ArtistQuery, type ArtistSort, type AvailabilityFilter, type PriceFilter } from "@/lib/filters";
-import { Button, Empty, frame, Photo, Rating, SelectInput, TextInput } from "@/components/ui";
+import { Button, Empty, frame, Photo, Rating } from "@/components/ui";
+
+const inkField = "h-11 w-full border border-detail bg-ink px-3 text-sm text-white outline-none";
+
+function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block min-w-0">
+      <span className="mb-2 block font-display text-[0.68rem] uppercase tracking-[0.18em] text-mute">{label}</span>
+      {children}
+    </label>
+  );
+}
 
 export function ArtistCard({ artistId }: { artistId: string }) {
   const { state } = useDemo();
@@ -15,17 +26,17 @@ export function ArtistCard({ artistId }: { artistId: string }) {
   if (!artist) return null;
   const styles = artist.styleIds.map((id) => state.styles.find((style) => style.id === id)?.name).filter(Boolean).slice(0, 3);
   return (
-    <Link href={`/artists/${artist.slug}`} className="group block border border-line bg-white">
-      <Photo src={artist.photo} alt="" className="aspect-[4/5] w-full transition-transform duration-300 group-hover:scale-[1.02]" />
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <h2 className="font-display text-2xl">{artist.name}</h2>
-          <p className="text-sm">From {money(artist.startingPrice)}</p>
-        </div>
-        <p className="mt-1 text-sm text-mute">{artist.neighborhood}, {artist.borough}</p>
-        <p className="mt-3 text-sm">{styles.join(" · ")}</p>
-        <div className="mt-3"><Rating value={artist.rating} count={artist.reviewCount} /></div>
+    <Link href={`/artists/${artist.slug}`} className="group block">
+      <div className="overflow-hidden">
+        <Photo src={artist.photo} alt={artist.name} className="aspect-[4/5] w-full" />
       </div>
+      <div className="mt-4 flex items-start justify-between gap-3">
+        <h2 className="font-display text-2xl tracking-tight group-hover:text-mute">{artist.name}</h2>
+        <p className="pt-1 text-sm">From {money(artist.startingPrice)}</p>
+      </div>
+      <p className="mt-1 text-sm text-mute">{artist.neighborhood}, {artist.borough}</p>
+      <p className="mt-3 text-sm text-mist">{styles.join(" · ")}</p>
+      <div className="mt-3"><Rating value={artist.rating} count={artist.reviewCount} /></div>
     </Link>
   );
 }
@@ -63,66 +74,79 @@ export function Discovery() {
     router.replace(`/artists?${search.toString()}`, { scroll: false });
   }
 
+  const filtered = Boolean(query.q || query.style || query.borough || query.neighborhood || query.specialty || query.price !== "any" || query.availability !== "any");
+
   return (
-    <div className={`${frame} py-10 md:py-14`}>
-      <header className="max-w-3xl">
-        <p className="text-xs uppercase tracking-[0.18em] text-mute">The index</p>
-        <h1 className="mt-3 font-express text-5xl leading-none md:text-7xl">Artists across the city.</h1>
+    <div className={`${frame} py-10 md:py-16`}>
+      <header className="grid items-end gap-6 border-b border-panel pb-8 lg:grid-cols-[1.4fr_0.6fr]">
+        <div>
+          <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">The index</p>
+          <h1 className="mt-4 max-w-3xl font-express text-[clamp(2.75rem,5vw,5.5rem)] leading-[0.9] tracking-[-0.045em]">Artists across the city.</h1>
+        </div>
+        <p className="max-w-sm text-sm leading-6 text-mist lg:justify-self-end">Approved studios, read by style, neighborhood, and the next open date.</p>
       </header>
-      <form className="mt-8 grid gap-3 border border-line bg-white p-4 md:grid-cols-4" onSubmit={(event) => event.preventDefault()}>
-        <label className="md:col-span-2 text-sm">
-          <span className="mb-2 block">Search</span>
-          <TextInput value={query.q} onChange={(event) => update({ q: event.target.value })} placeholder="Name, studio, neighborhood" />
+      <form className="mt-8 grid gap-6" onSubmit={(event) => event.preventDefault()}>
+        <label className="block">
+          <span className="sr-only">Search artists</span>
+          <input value={query.q} onChange={(event) => update({ q: event.target.value })} placeholder="Search name, studio, or neighborhood" className={`${inkField} h-12 px-4`} />
         </label>
-        <label className="text-sm"><span className="mb-2 block">Style</span>
-          <SelectInput value={query.style} onChange={(event) => update({ style: event.target.value })}>
-            <option value="">Any style</option>
-            {state.styles.map((style) => <option key={style.id} value={style.id}>{style.name}</option>)}
-          </SelectInput>
-        </label>
-        <label className="text-sm"><span className="mb-2 block">Borough</span>
-          <SelectInput value={query.borough} onChange={(event) => update({ borough: event.target.value, neighborhood: "" })}>
-            <option value="">Any borough</option>
-            {BOROUGHS.map((borough) => <option key={borough}>{borough}</option>)}
-          </SelectInput>
-        </label>
-        <label className="text-sm"><span className="mb-2 block">Neighborhood</span>
-          <SelectInput value={query.neighborhood} onChange={(event) => update({ neighborhood: event.target.value })}>
-            <option value="">Any neighborhood</option>
-            {neighborhoods.map((item) => <option key={item}>{item}</option>)}
-          </SelectInput>
-        </label>
-        <label className="text-sm"><span className="mb-2 block">Specialty</span>
-          <SelectInput value={query.specialty} onChange={(event) => update({ specialty: event.target.value })}>
-            <option value="">Any specialty</option>
-            {specialties.map((item) => <option key={item}>{item}</option>)}
-          </SelectInput>
-        </label>
-        <label className="text-sm"><span className="mb-2 block">Price</span>
-          <SelectInput value={query.price} onChange={(event) => update({ price: event.target.value })}>
-            {PRICE_FILTERS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-          </SelectInput>
-        </label>
-        <label className="text-sm"><span className="mb-2 block">Availability</span>
-          <SelectInput value={query.availability} onChange={(event) => update({ availability: event.target.value })}>
-            <option value="any">Any time</option>
-            <option value="open-7">Open in 7 days</option>
-            <option value="open-30">Open in 30 days</option>
-          </SelectInput>
-        </label>
-        <label className="text-sm"><span className="mb-2 block">Sort</span>
-          <SelectInput value={query.sort} onChange={(event) => update({ sort: event.target.value })}>
-            {SORTS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-          </SelectInput>
-        </label>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <FilterField label="Style">
+            <select value={query.style} onChange={(event) => update({ style: event.target.value })} className={inkField}>
+              <option value="">Any style</option>
+              {state.styles.map((style) => <option key={style.id} value={style.id}>{style.name}</option>)}
+            </select>
+          </FilterField>
+          <FilterField label="Borough">
+            <select value={query.borough} onChange={(event) => update({ borough: event.target.value, neighborhood: "" })} className={inkField}>
+              <option value="">Any borough</option>
+              {BOROUGHS.map((borough) => <option key={borough}>{borough}</option>)}
+            </select>
+          </FilterField>
+          <FilterField label="Neighborhood">
+            <select value={query.neighborhood} onChange={(event) => update({ neighborhood: event.target.value })} className={inkField}>
+              <option value="">Any neighborhood</option>
+              {neighborhoods.map((item) => <option key={item}>{item}</option>)}
+            </select>
+          </FilterField>
+          <FilterField label="Specialty">
+            <select value={query.specialty} onChange={(event) => update({ specialty: event.target.value })} className={inkField}>
+              <option value="">Any specialty</option>
+              {specialties.map((item) => <option key={item}>{item}</option>)}
+            </select>
+          </FilterField>
+          <FilterField label="Price">
+            <select value={query.price} onChange={(event) => update({ price: event.target.value })} className={inkField}>
+              {PRICE_FILTERS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+            </select>
+          </FilterField>
+          <FilterField label="Availability">
+            <select value={query.availability} onChange={(event) => update({ availability: event.target.value })} className={inkField}>
+              <option value="any">Any time</option>
+              <option value="open-7">Open in 7 days</option>
+              <option value="open-30">Open in 30 days</option>
+            </select>
+          </FilterField>
+        </div>
       </form>
-      <p className="mt-6 text-sm text-mute">{results.length} artist{results.length === 1 ? "" : "s"}</p>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-b border-panel pb-4">
+        <p className="font-display text-xs uppercase tracking-[0.18em] text-mist">{results.length} artist{results.length === 1 ? "" : "s"}</p>
+        <div className="flex items-center gap-5">
+          {filtered ? <button type="button" onClick={() => router.replace("/artists")} className="text-sm text-mist hover:text-white">Clear</button> : null}
+          <label className="flex items-center gap-3 text-sm text-mist">
+            <span className="font-display text-[0.68rem] uppercase tracking-[0.18em]">Sort</span>
+            <select value={query.sort} onChange={(event) => update({ sort: event.target.value })} className={`${inkField} w-auto`}>
+              {SORTS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+            </select>
+          </label>
+        </div>
+      </div>
       {results.length ? (
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-x-5 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((artist) => <ArtistCard key={artist.id} artistId={artist.id} />)}
         </div>
       ) : (
-        <div className="mt-6">
+        <div className="mt-8">
           <Empty title="No artists match" body="Clear a filter or try another borough." action={<Button type="button" variant="secondary" onClick={() => router.replace("/artists")}>Clear filters</Button>} />
         </div>
       )}
