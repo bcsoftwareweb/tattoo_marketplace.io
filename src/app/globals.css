@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-ink: #090909;
+  --color-paper: #f5f5f5;
+  --color-panel: #171717;
+  --color-mute: #737373;
+  --color-mist: #e5e5e5;
+  --color-line: #d4d4d4;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space), ui-sans-serif, system-ui, sans-serif;
+  --font-express: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #f5f5f5;
+  color: #090909;
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: #090909;
+  color: #f5f5f5;
+}
+
+:focus-visible {
+  outline: 2px solid #090909;
+  outline-offset: 2px;
+}
+
+.on-ink :focus-visible {
+  outline-color: #f5f5f5;
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 42s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .ticker-track {
+    animation: none;
+  }
+}
