@@ -14,7 +14,7 @@ const PUBLIC_LINKS = [
   ["/artists", "Artists"],
   ["/styles", "Styles"],
   ["/how-it-works", "How it works"],
-  ["/for-artists", "For artists"],
+  ["/about", "About"],
 ];
 
 export function PublicHeader() {
