@@ -53,11 +53,11 @@ export function ArtistProfile({ slug }: { slug: string }) {
 
   return (
     <article>
-      <header className="grid h-[calc(100svh-4rem)] grid-rows-[minmax(0,0.9fr)_minmax(0,1.1fr)] overflow-hidden bg-white lg:grid-cols-2 lg:grid-rows-1">
-        <div className="min-h-0 overflow-hidden">
+      <header className="artist-intro bg-white">
+        <div className="artist-portrait">
           <Photo src={artist.photo} alt={artist.name} className="block h-full w-full object-cover" />
         </div>
-        <div className="flex min-h-0 flex-col justify-center overflow-y-auto px-5 py-6 md:px-10 lg:py-8">
+        <div className="flex flex-col justify-center px-5 py-6 md:px-10 lg:py-8">
           <p className="text-xs uppercase tracking-[0.18em] text-mute">{artist.neighborhood}, {artist.borough}</p>
           <h1 className="mt-2 font-express text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[0.9]">{artist.name}</h1>
           <p className="mt-3 text-sm text-mute">{artist.studioName} · {artist.instagram}</p>

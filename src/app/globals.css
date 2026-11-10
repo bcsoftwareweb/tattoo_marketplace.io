@@ -96,6 +96,37 @@ select:-webkit-autofill {
   animation: ticker 42s linear infinite;
 }
 
+.artist-intro {
+  display: grid;
+  align-items: center;
+  background: #ffffff;
+  color: #090909;
+}
+
+.artist-portrait {
+  height: 16rem;
+  width: min(100%, 18rem);
+  overflow: hidden;
+}
+
+@media (min-width: 40rem) {
+  .artist-portrait {
+    height: 20rem;
+    width: min(100%, 20rem);
+  }
+}
+
+@media (min-width: 64rem) {
+  .artist-intro {
+    grid-template-columns: 22rem minmax(0, 1fr);
+  }
+
+  .artist-portrait {
+    width: 22rem;
+    height: 26rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
