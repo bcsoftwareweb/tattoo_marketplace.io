@@ -1,31 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useDemo } from "@/context/demo-context";
-import { BOROUGHS } from "@/lib/constants";
 import { money } from "@/lib/format";
 import { filterArtists } from "@/lib/filters";
-import { frame, Photo, Rating, SelectInput } from "@/components/ui";
+import { frame, Photo, Rating } from "@/components/ui";
 
 export function HomePage() {
   const { state } = useDemo();
-  const router = useRouter();
-  const [q, setQ] = useState("");
-  const [borough, setBorough] = useState("");
-  const [style, setStyle] = useState("");
   const approved = state.artists.filter((artist) => artist.verificationStatus === "approved");
   const featured = filterArtists(approved, { sort: "relevance" }).filter((artist) => artist.featured).slice(0, 3);
-
-  function search(event: React.FormEvent) {
-    event.preventDefault();
-    const params = new URLSearchParams();
-    if (q.trim()) params.set("q", q.trim());
-    if (borough) params.set("borough", borough);
-    if (style) params.set("style", style);
-    router.push(`/artists?${params.toString()}`);
-  }
 
   return (
     <div>
@@ -38,19 +22,6 @@ export function HomePage() {
             <p className="mt-4 max-w-md text-base leading-7 text-mist">
               A curated marketplace of studios from St. George to Mott Haven. Read the work, request a date, and confirm with a simulated deposit.
             </p>
-            <form onSubmit={search} className="mt-6 grid max-w-xl gap-3" role="search">
-              <label className="sr-only" htmlFor="home-q">Search artists</label>
-              <input id="home-q" value={q} onChange={(event) => setQ(event.target.value)} placeholder="Search artists or studios" className="h-11 border border-detail bg-ink px-3 text-sm text-white placeholder:text-mute" />
-              <SelectInput aria-label="Borough" value={borough} onChange={(event) => setBorough(event.target.value)} className="h-11 border border-detail bg-ink px-3 text-sm text-white">
-                <option value="">All boroughs</option>
-                {BOROUGHS.map((item) => <option key={item}>{item}</option>)}
-              </SelectInput>
-              <SelectInput aria-label="Style" value={style} onChange={(event) => setStyle(event.target.value)} className="h-11 border border-detail bg-ink px-3 text-sm text-white">
-                <option value="">All styles</option>
-                {state.styles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-              </SelectInput>
-              <button type="submit" className="h-11 bg-white px-5 text-sm font-medium text-ink">Search</button>
-            </form>
           </div>
           <div className="h-72 overflow-hidden sm:h-96 lg:h-auto lg:min-h-0">
             <Photo src={state.portfolio[0]?.image} alt="Tattoo work from the Blackline index" className="block h-full w-full object-cover" />
