@@ -86,18 +86,36 @@ export function ArtistProfile({ slug }: { slug: string }) {
         </div>
       </header>
 
-      <section className={`${frame} py-14`}>
-        <h2 className="font-display text-3xl">Studio</h2>
-        <p className="mt-3 text-sm leading-6">{artist.studioAddress}</p>
-        <p className="mt-2 text-sm text-mute">{artist.phone} · {artist.email}</p>
-        <ul className="mt-4 grid gap-2 text-sm md:grid-cols-2">
+      <section className={`${frame} border-b border-panel py-16`}>
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+          <div>
+            <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">Studio</p>
+            <h2 className="mt-3 font-express text-[clamp(2.25rem,4vw,3.75rem)] leading-[0.95]">{artist.studioName}</h2>
+            <p className="mt-4 max-w-md text-sm leading-6 text-mist">{artist.studioAddress}</p>
+          </div>
+          <dl className="grid gap-6 sm:grid-cols-2">
+            <div>
+              <dt className="font-display text-[0.68rem] uppercase tracking-[0.18em] text-mute">Phone</dt>
+              <dd className="mt-2 text-sm">{artist.phone}</dd>
+            </div>
+            <div>
+              <dt className="font-display text-[0.68rem] uppercase tracking-[0.18em] text-mute">Email</dt>
+              <dd className="mt-2 text-sm">{artist.email}</dd>
+            </div>
+          </dl>
+        </div>
+        <ol className="mt-10 grid grid-cols-2 border-t border-panel sm:grid-cols-4 lg:grid-cols-7">
           {artist.workingHours.map((day) => (
-            <li key={day.day} className="flex justify-between border-b border-line py-2">
-              <span>{weekdayName(day.day)}</span>
-              <span className="text-mute">{day.closed ? "Closed" : `${formatTime(day.open)} – ${formatTime(day.close)}`}</span>
+            <li key={day.day} className="border-b border-panel px-4 py-5 lg:border-b-0 lg:border-l lg:first:border-l-0">
+              <p className="font-display text-[0.68rem] uppercase tracking-[0.18em] text-mute">{weekdayName(day.day).slice(0, 3)}</p>
+              {day.closed ? (
+                <p className="mt-3 text-sm text-mute">Closed</p>
+              ) : (
+                <p className="mt-3 text-sm leading-6">{formatTime(day.open)}<span className="block text-mute">{formatTime(day.close)}</span></p>
+              )}
             </li>
           ))}
-        </ul>
+        </ol>
       </section>
 
       <section className="border-y border-line bg-white py-14">
