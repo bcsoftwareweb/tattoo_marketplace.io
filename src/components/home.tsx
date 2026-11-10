@@ -31,17 +31,16 @@ export function HomePage() {
 
   return (
     <div>
-      <section className="on-ink bg-ink text-white">
-        <div className="grid min-h-[calc(100svh-4rem)] lg:grid-cols-2">
-          <div className="flex flex-col justify-end px-5 py-12 md:px-10 lg:px-14">
+      <section className="on-ink grid h-[calc(100svh-4rem)] grid-rows-[minmax(0,1.15fr)_minmax(0,0.85fr)] overflow-hidden bg-ink text-white lg:grid-cols-2 lg:grid-rows-1">
+          <div className="flex min-h-0 flex-col justify-center px-5 py-8 md:px-10 lg:px-14">
             <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">New York City</p>
-            <h1 className="mt-6 max-w-xl font-express text-[clamp(3.5rem,8vw,7.4rem)] leading-[0.86] tracking-[-0.045em]">
+            <h1 className="mt-4 max-w-xl font-express text-[clamp(2.75rem,5vw,5.5rem)] leading-[0.9] tracking-[-0.045em]">
               Tattoo artists, indexed.
             </h1>
-            <p className="mt-6 max-w-md text-base leading-7 text-mist">
+            <p className="mt-4 max-w-md text-base leading-7 text-mist">
               A curated marketplace of studios from St. George to Mott Haven. Read the work, request a date, and confirm with a simulated deposit.
             </p>
-            <form onSubmit={search} className="mt-8 grid gap-3 md:grid-cols-[1.4fr_1fr_1fr_auto]" role="search">
+            <form onSubmit={search} className="mt-6 grid max-w-xl gap-3" role="search">
               <label className="sr-only" htmlFor="home-q">Search artists</label>
               <input id="home-q" value={q} onChange={(event) => setQ(event.target.value)} placeholder="Search artists or studios" className="h-11 border border-detail bg-ink px-3 text-sm text-white placeholder:text-mute" />
               <select aria-label="Borough" value={borough} onChange={(event) => setBorough(event.target.value)} className="h-11 border border-detail bg-ink px-3 text-sm text-white">
@@ -55,8 +54,9 @@ export function HomePage() {
               <button type="submit" className="h-11 bg-white px-5 text-sm font-medium text-ink">Search</button>
             </form>
           </div>
-          <Photo src={state.portfolio[0]?.image} alt="Tattoo work from the Blackline index" className="min-h-[48vh] w-full lg:min-h-full" />
-        </div>
+          <div className="min-h-0 overflow-hidden">
+            <Photo src={state.portfolio[0]?.image} alt="Tattoo work from the Blackline index" className="block h-full w-full object-cover" />
+          </div>
       </section>
 
       <div className="overflow-hidden border-b border-panel py-4">
