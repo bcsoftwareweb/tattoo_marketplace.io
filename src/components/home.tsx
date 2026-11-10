@@ -17,7 +17,6 @@ export function HomePage() {
   const [style, setStyle] = useState("");
   const approved = state.artists.filter((artist) => artist.verificationStatus === "approved");
   const featured = filterArtists(approved, { sort: "relevance" }).filter((artist) => artist.featured).slice(0, 3);
-  const recent = [...approved].sort((a, b) => (a.joinedAt < b.joinedAt ? 1 : -1)).slice(0, 4);
   const portfolio = state.portfolio.filter((item) => approved.some((artist) => artist.id === item.artistId)).slice(0, 6);
 
   function search(event: React.FormEvent) {
@@ -101,22 +100,6 @@ export function HomePage() {
               </Link>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className={`${frame} py-16 md:py-24`}>
-        <h2 className="font-display text-4xl">Recently added</h2>
-        <div className="mt-8 grid gap-4 md:grid-cols-4">
-          {recent.map((artist) => (
-            <Link key={artist.id} href={`/artists/${artist.slug}`} className="border border-line bg-white">
-              <Photo src={artist.photo} alt={artist.name} className="aspect-square w-full" />
-              <div className="p-4">
-                <h3 className="font-display text-xl">{artist.name}</h3>
-                <p className="mt-1 text-sm text-mute">{artist.neighborhood}</p>
-                <p className="mt-3 text-sm">{artist.specialties[0]}</p>
-              </div>
-            </Link>
-          ))}
         </div>
       </section>
 
