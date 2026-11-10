@@ -29,15 +29,15 @@ export function PublicHeader() {
       <a href="#content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-ink focus:px-3 focus:py-2 focus:text-white">
         Skip to content
       </a>
-      <div className={`${frame} flex h-16 items-center justify-between gap-4`}>
-        <Link href="/" className="font-display text-sm tracking-[0.22em]">{brand}</Link>
+      <div className={`${frame} flex h-16 items-center justify-between gap-3`}>
+        <Link href="/" className="shrink-0 font-display text-xs tracking-[0.16em] sm:text-sm sm:tracking-[0.22em]">{brand}</Link>
         <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
           {PUBLIC_LINKS.map(([href, label]) => (
             <Link key={href} href={href} className="text-sm hover:text-mute">{label}</Link>
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Link href={session ? homeFor(session.role) : "/login"} className="inline-flex h-10 items-center bg-white px-4 text-sm text-ink">
+          <Link href={session ? homeFor(session.role) : "/login"} className="inline-flex h-10 items-center bg-white px-3 text-sm text-ink sm:px-4">
             {session ? "Dashboard" : "Sign in"}
           </Link>
           <button type="button" className="h-10 px-3 text-sm md:hidden" aria-expanded={open} aria-controls="mobile-nav" onClick={() => setOpen((value) => !value)}>
@@ -122,7 +122,7 @@ export function DashboardShell({ role, items, children }: { role: Role; items: A
             <SideNav role={role} items={items} pathname={pathname} />
           </div>
         ) : null}
-        <div id="content" className="px-4 py-6 md:px-8 md:py-8">{children}</div>
+        <div id="content" className="min-w-0 px-4 py-6 md:px-8 md:py-8">{children}</div>
       </div>
     </div>
   );
@@ -167,7 +167,7 @@ function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
             Alerts{unread ? ` ${unread}` : ""}
           </button>
           {notesOpen ? (
-            <div className="absolute right-0 z-30 mt-2 w-80 border border-line bg-white p-3 shadow-none">
+            <div className="absolute right-0 z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] border border-line bg-white p-3 shadow-none">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium">Notifications</p>
                 <Link href={`/${role}/notifications`} className="text-xs text-mute" onClick={() => setNotesOpen(false)}>View all</Link>
@@ -190,11 +190,11 @@ function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
           ) : null}
         </div>
         <div className="relative">
-          <button type="button" className="h-10 bg-white px-3 text-sm text-ink" aria-expanded={accountOpen} onClick={() => { setAccountOpen((value) => !value); setNotesOpen(false); }}>
+          <button type="button" className="h-10 max-w-[8rem] truncate bg-white px-3 text-sm text-ink sm:max-w-none" aria-expanded={accountOpen} onClick={() => { setAccountOpen((value) => !value); setNotesOpen(false); }}>
             {session.name}
           </button>
           {accountOpen ? (
-            <div className="absolute right-0 z-30 mt-2 w-64 border border-line bg-white p-3">
+            <div className="absolute right-0 z-30 mt-2 w-64 max-w-[calc(100vw-2rem)] border border-line bg-white p-3">
               <p className="text-xs uppercase tracking-[0.16em] text-mute">Switch demo account</p>
               <div className="mt-2 grid gap-1">
                 {DEMO_ACCOUNTS.map((account) => (

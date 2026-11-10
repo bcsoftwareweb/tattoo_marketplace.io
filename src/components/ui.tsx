@@ -268,7 +268,7 @@ export function StatGrid({ items }: { items: Array<{ label: string; value: strin
       {items.map((item) => (
         <div key={item.label} className="-mt-px -ml-px border border-line bg-white px-4 py-5">
           <dt className="text-xs uppercase tracking-[0.16em] text-mute">{item.label}</dt>
-          <dd className="mt-3 font-display text-3xl tracking-tight">{item.value}</dd>
+          <dd className="mt-3 font-display text-2xl tracking-tight sm:text-3xl">{item.value}</dd>
           {item.note ? <p className="mt-2 text-xs leading-5 text-mute">{item.note}</p> : null}
         </div>
       ))}

@@ -29,8 +29,8 @@ export function HomePage() {
 
   return (
     <div>
-      <section className="on-ink grid h-[calc(100svh-4rem)] grid-rows-[minmax(0,1.15fr)_minmax(0,0.85fr)] overflow-hidden bg-ink text-white lg:grid-cols-2 lg:grid-rows-1">
-          <div className="flex min-h-0 flex-col justify-center px-5 py-8 md:px-10 lg:px-14">
+      <section className="on-ink grid bg-ink text-white lg:h-[calc(100svh-4rem)] lg:grid-cols-2 lg:grid-rows-1 lg:overflow-hidden">
+          <div className="flex flex-col justify-center px-5 py-10 md:px-10 lg:min-h-0 lg:px-14 lg:py-8">
             <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">New York City</p>
             <h1 className="mt-4 max-w-xl font-express text-[clamp(2.75rem,5vw,5.5rem)] leading-[0.9] tracking-[-0.045em]">
               Tattoo artists, indexed.
@@ -52,7 +52,7 @@ export function HomePage() {
               <button type="submit" className="h-11 bg-white px-5 text-sm font-medium text-ink">Search</button>
             </form>
           </div>
-          <div className="min-h-0 overflow-hidden">
+          <div className="h-72 overflow-hidden sm:h-96 lg:h-auto lg:min-h-0">
             <Photo src={state.portfolio[0]?.image} alt="Tattoo work from the Blackline index" className="block h-full w-full object-cover" />
           </div>
       </section>
@@ -65,23 +65,23 @@ export function HomePage() {
         </div>
       </div>
 
-      <section className={`${frame} flex h-[calc(100svh-4rem)] flex-col overflow-hidden py-6 md:py-8`}>
+      <section className={`${frame} flex flex-col py-10 lg:h-[calc(100svh-4rem)] lg:overflow-hidden lg:py-8`}>
         <div className="flex shrink-0 items-end justify-between gap-4">
           <h2 className="font-display text-3xl tracking-tight md:text-4xl">Selected artists</h2>
-          <Link href="/artists" className="text-sm">View the index</Link>
+          <Link href="/artists" className="shrink-0 text-sm">View the index</Link>
         </div>
-        <div className="mt-5 grid min-h-0 flex-1 grid-cols-3 gap-4">
+        <div className="mt-5 grid gap-10 sm:grid-cols-2 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:gap-4">
           {featured.map((artist) => (
-            <Link key={artist.id} href={`/artists/${artist.slug}`} className="group flex min-h-0 flex-col">
-              <div className="min-h-0 flex-1 overflow-hidden">
+            <Link key={artist.id} href={`/artists/${artist.slug}`} className="group flex min-w-0 flex-col lg:min-h-0">
+              <div className="aspect-[4/5] overflow-hidden lg:aspect-auto lg:min-h-0 lg:flex-1">
                 <Photo src={artist.photo} alt={artist.name} className="block h-full w-full object-cover" />
               </div>
               <div className="mt-3 flex shrink-0 items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-display text-xl group-hover:text-mute">{artist.name}</h3>
+                <div className="min-w-0">
+                  <h3 className="font-display text-2xl group-hover:text-mute lg:text-xl">{artist.name}</h3>
                   <p className="mt-1 text-sm text-mute">{artist.neighborhood}, {artist.borough}</p>
                 </div>
-                <p className="text-sm">From {money(artist.startingPrice)}</p>
+                <p className="shrink-0 text-sm">From {money(artist.startingPrice)}</p>
               </div>
               <div className="mt-2 shrink-0"><Rating value={artist.rating} count={artist.reviewCount} /></div>
             </Link>

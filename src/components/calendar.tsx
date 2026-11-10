@@ -31,7 +31,7 @@ export function MonthCalendar({
         <h2 className="font-display text-xl">{monthLabel(month)}</h2>
         <button type="button" className="text-sm" onClick={() => onMonth(shiftMonth(month, 1))} disabled={month >= "2027-01"}>Next</button>
       </div>
-      <div className="mt-4 grid grid-cols-7 gap-1 text-center text-xs uppercase tracking-[0.14em] text-mute">
+      <div className="mt-4 grid grid-cols-7 gap-1 text-center text-[10px] uppercase text-mute sm:text-xs sm:tracking-[0.14em]">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => <span key={day}>{day}</span>)}
       </div>
       <div className="mt-2 grid grid-cols-7 gap-1">

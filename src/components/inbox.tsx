@@ -43,7 +43,7 @@ export function Inbox({ role }: { role: "customer" | "artist" }) {
   if (!threads.length) return <Empty title="No conversations" body="Messages appear here after you contact an artist or receive a request." />;
 
   return (
-    <div className="grid min-h-[70vh] border border-line bg-white md:grid-cols-[280px_1fr]">
+    <div className="grid min-h-[70vh] min-w-0 border border-line bg-white md:grid-cols-[280px_minmax(0,1fr)]">
       <aside className="border-b border-line md:border-r md:border-b-0">
         <ul>
           {threads.map((thread) => {

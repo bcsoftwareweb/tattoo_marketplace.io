@@ -100,7 +100,7 @@ export function ArtistProfile({ slug }: { slug: string }) {
             </div>
             <div>
               <dt className="font-display text-[0.68rem] uppercase tracking-[0.18em] text-mute">Email</dt>
-              <dd className="mt-2 text-sm">{artist.email}</dd>
+              <dd className="mt-2 break-all text-sm">{artist.email}</dd>
             </div>
           </dl>
         </div>

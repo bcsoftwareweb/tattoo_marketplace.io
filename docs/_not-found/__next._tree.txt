@@ -1,4 +1,4 @@
-:HL["/tattoo_marketplace.io/_next/static/chunks/1vjo99f00-tmt.css","style"]
+:HL["/tattoo_marketplace.io/_next/static/chunks/1_f8au64k-i-3.css","style"]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":"/_not-found","h":96,"c":"$Q2"}]]
-0:{"b":"0w6BvrjSwQ0zgZi4fbjZU","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"_zCeMTbtofK_7uKqdrNtY","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

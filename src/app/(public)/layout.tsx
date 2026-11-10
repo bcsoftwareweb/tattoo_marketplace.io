@@ -4,7 +4,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <PublicHeader />
-      <div id="content">{children}</div>
+      <div id="content" className="min-w-0">{children}</div>
       <PublicFooter />
     </>
   );

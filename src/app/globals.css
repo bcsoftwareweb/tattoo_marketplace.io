@@ -23,6 +23,7 @@ body {
   background: #090909;
   color: #ffffff;
   font-family: var(--font-sans);
+  overflow-x: clip;
 }
 
 @layer base {
@@ -105,6 +106,7 @@ select:-webkit-autofill {
 }
 
 .artist-copy {
+  min-width: 0;
   padding-top: 1.25rem;
 }
 

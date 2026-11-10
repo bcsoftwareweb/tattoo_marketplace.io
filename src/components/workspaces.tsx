@@ -425,10 +425,10 @@ export function ArtistCalendar() {
           <form className="mt-6 grid gap-2" onSubmit={(event) => { event.preventDefault(); saveHours(hours); }}>
             <h2 className="font-display text-2xl">Working hours</h2>
             {hours.map((day, index) => (
-              <div key={WEEKDAYS[day.day]} className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2 text-sm">
+              <div key={WEEKDAYS[day.day]} className="grid grid-cols-1 gap-2 border-b border-line py-3 text-sm last:border-b-0 sm:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:border-0 sm:py-1">
                 <span>{weekdayName(day.day)}</span>
-                <input aria-label={`${weekdayName(day.day)} opens`} type="time" value={day.open} disabled={day.closed} onChange={(event) => setHours(hours.map((item, itemIndex) => itemIndex === index ? { ...item, open: event.target.value } : item))} />
-                <input aria-label={`${weekdayName(day.day)} closes`} type="time" value={day.close} disabled={day.closed} onChange={(event) => setHours(hours.map((item, itemIndex) => itemIndex === index ? { ...item, close: event.target.value } : item))} />
+                <input aria-label={`${weekdayName(day.day)} opens`} type="time" value={day.open} disabled={day.closed} className="w-full min-w-0" onChange={(event) => setHours(hours.map((item, itemIndex) => itemIndex === index ? { ...item, open: event.target.value } : item))} />
+                <input aria-label={`${weekdayName(day.day)} closes`} type="time" value={day.close} disabled={day.closed} className="w-full min-w-0" onChange={(event) => setHours(hours.map((item, itemIndex) => itemIndex === index ? { ...item, close: event.target.value } : item))} />
                 <label className="flex items-center gap-1"><input type="checkbox" checked={day.closed} onChange={(event) => setHours(hours.map((item, itemIndex) => itemIndex === index ? { ...item, closed: event.target.checked } : item))} /> Closed</label>
               </div>
             ))}
