@@ -55,22 +55,24 @@ export function ArtistProfile({ slug }: { slug: string }) {
 
   return (
     <article>
-      <header className="grid lg:grid-cols-2">
-        <Photo src={artist.photo} alt={artist.name} className="min-h-[420px] w-full" />
-        <div className="flex flex-col justify-end bg-white px-5 py-10 md:px-10">
+      <header className="grid h-[calc(100svh-4rem)] grid-rows-[minmax(0,0.9fr)_minmax(0,1.1fr)] overflow-hidden bg-white lg:grid-cols-2 lg:grid-rows-1">
+        <div className="min-h-0 overflow-hidden">
+          <Photo src={artist.photo} alt={artist.name} className="block h-full w-full object-cover" />
+        </div>
+        <div className="flex min-h-0 flex-col justify-center overflow-y-auto px-5 py-6 md:px-10 lg:py-8">
           <p className="text-xs uppercase tracking-[0.18em] text-mute">{artist.neighborhood}, {artist.borough}</p>
-          <h1 className="mt-3 font-express text-5xl leading-none md:text-7xl">{artist.name}</h1>
-          <p className="mt-4 text-sm text-mute">{artist.studioName} · {artist.instagram}</p>
-          <div className="mt-4"><Rating value={artist.rating} count={artist.reviewCount} /></div>
-          <p className="mt-6 max-w-xl text-sm leading-7">{artist.bio}</p>
-          <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
+          <h1 className="mt-2 font-express text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[0.9]">{artist.name}</h1>
+          <p className="mt-3 text-sm text-mute">{artist.studioName} · {artist.instagram}</p>
+          <div className="mt-3"><Rating value={artist.rating} count={artist.reviewCount} /></div>
+          <p className="mt-4 max-w-xl text-sm leading-6">{artist.bio}</p>
+          <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
             <div><dt className="text-mute">Experience</dt><dd>{artist.yearsExperience} years</dd></div>
             <div><dt className="text-mute">Starting price</dt><dd>{money(artist.startingPrice)}</dd></div>
             <div><dt className="text-mute">Styles</dt><dd>{styles.join(", ")}</dd></div>
             <div><dt className="text-mute">Specialties</dt><dd>{artist.specialties.join(", ")}</dd></div>
           </dl>
-          {!listed ? <p className="mt-6 border border-line px-3 py-3 text-sm">This profile is {verificationLabel(artist.verificationStatus).toLowerCase()} and is hidden from public search. {artist.verificationNote}</p> : null}
-          <div className="mt-8 flex flex-wrap gap-3">
+          {!listed ? <p className="mt-4 border border-line px-3 py-3 text-sm">This profile is {verificationLabel(artist.verificationStatus).toLowerCase()} and is hidden from public search. {artist.verificationNote}</p> : null}
+          <div className="mt-5 flex flex-wrap gap-3">
             <Button type="button" onClick={book} disabled={!listed}>Request appointment</Button>
             <Button type="button" variant="secondary" onClick={message} disabled={!listed}>Message artist</Button>
             <Button type="button" variant="ghost" onClick={() => {
