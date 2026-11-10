@@ -69,7 +69,7 @@ export function PublicFooter() {
         </div>
         <FooterColumn title="Marketplace" links={[["/artists", "Find artists"], ["/styles", "Styles"], ["/how-it-works", "How it works"]]} />
         <FooterColumn title="Studios" links={[["/for-artists", "For artists"], ["/login", "Demo sign in"]]} />
-        <FooterColumn title="About" links={[["/about", "About the demo"], ["/legal/privacy", "Privacy"], ["/legal/terms", "Terms"]]} />
+        <FooterColumn title="About" links={[["/about", "About"], ["/legal/privacy", "Privacy"], ["/legal/terms", "Terms"]]} />
       </div>
       <div className={`${frame} border-t border-panel py-5 text-xs text-mist`}>Simulated bookings and payments. No real money, messages, or accounts.</div>
     </footer>
