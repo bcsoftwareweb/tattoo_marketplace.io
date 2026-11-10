@@ -7,7 +7,7 @@ import { useDemo } from "@/context/demo-context";
 import { BOROUGHS } from "@/lib/constants";
 import { money } from "@/lib/format";
 import { filterArtists } from "@/lib/filters";
-import { frame, Photo, Rating } from "@/components/ui";
+import { frame, Photo, Rating, SelectInput } from "@/components/ui";
 
 export function HomePage() {
   const { state } = useDemo();
@@ -41,14 +41,14 @@ export function HomePage() {
             <form onSubmit={search} className="mt-6 grid max-w-xl gap-3" role="search">
               <label className="sr-only" htmlFor="home-q">Search artists</label>
               <input id="home-q" value={q} onChange={(event) => setQ(event.target.value)} placeholder="Search artists or studios" className="h-11 border border-detail bg-ink px-3 text-sm text-white placeholder:text-mute" />
-              <select aria-label="Borough" value={borough} onChange={(event) => setBorough(event.target.value)} className="h-11 border border-detail bg-ink px-3 text-sm text-white">
+              <SelectInput aria-label="Borough" value={borough} onChange={(event) => setBorough(event.target.value)} className="h-11 border border-detail bg-ink px-3 text-sm text-white">
                 <option value="">All boroughs</option>
                 {BOROUGHS.map((item) => <option key={item}>{item}</option>)}
-              </select>
-              <select aria-label="Style" value={style} onChange={(event) => setStyle(event.target.value)} className="h-11 border border-detail bg-ink px-3 text-sm text-white">
+              </SelectInput>
+              <SelectInput aria-label="Style" value={style} onChange={(event) => setStyle(event.target.value)} className="h-11 border border-detail bg-ink px-3 text-sm text-white">
                 <option value="">All styles</option>
                 {state.styles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-              </select>
+              </SelectInput>
               <button type="submit" className="h-11 bg-white px-5 text-sm font-medium text-ink">Search</button>
             </form>
           </div>

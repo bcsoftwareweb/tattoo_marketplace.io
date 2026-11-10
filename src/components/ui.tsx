@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useState } from "react";
+import { Children, isValidElement, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/format";
 import type { BookingStatus, Role } from "@/lib/types";
 import { statusLabel } from "@/lib/status";
@@ -71,8 +72,141 @@ export function Area(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return <textarea {...props} className={cn("min-h-28 w-full border border-line bg-white px-3 py-3 text-sm outline-none focus:border-ink", props.className)} />;
 }
 
-export function SelectInput(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={cn(control, props.className)} />;
+function optionLabel(node: React.ReactNode): string {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(optionLabel).join("");
+  if (isValidElement<{ children?: React.ReactNode }>(node)) return optionLabel(node.props.children);
+  return "";
+}
+
+function readOptions(children: React.ReactNode) {
+  const options: Array<{ value: string; label: string }> = [];
+  Children.forEach(children, (child) => {
+    if (!isValidElement<{ value?: string | number; children?: React.ReactNode }>(child) || child.type !== "option") return;
+    const label = optionLabel(child.props.children);
+    options.push({ value: child.props.value !== undefined ? String(child.props.value) : label, label });
+  });
+  return options;
+}
+
+export function SelectInput({
+  value,
+  onChange,
+  children,
+  className,
+  id,
+  required,
+  disabled,
+  "aria-label": ariaLabel,
+}: {
+  value?: string | number | readonly string[];
+  onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  children?: React.ReactNode;
+  className?: string;
+  id?: string;
+  required?: boolean;
+  disabled?: boolean;
+  "aria-label"?: string;
+}) {
+  const options = readOptions(children);
+  const current = value == null ? "" : String(value);
+  const selected = options.find((option) => option.value === current);
+  const [open, setOpen] = useState(false);
+  const [box, setBox] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
+  const listId = useId();
+  const dark = className?.includes("bg-ink") ?? false;
+
+  useEffect(() => {
+    if (!open) return;
+    function place() {
+      const rect = rootRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const width = Math.max(rect.width, 180);
+      const left = Math.min(rect.left, Math.max(8, window.innerWidth - width - 8));
+      const spaceBelow = window.innerHeight - rect.bottom - 12;
+      setBox({
+        top: rect.bottom + 4,
+        left,
+        width: Math.max(rect.width, Math.min(width, window.innerWidth - left - 8)),
+        maxHeight: Math.min(320, Math.max(spaceBelow, 96)),
+      });
+    }
+    function onPointer(event: MouseEvent) {
+      const target = event.target as Node;
+      if (rootRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    place();
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open]);
+
+  function choose(next: string) {
+    setOpen(false);
+    onChange?.({ target: { value: next } } as React.ChangeEvent<HTMLSelectElement>);
+  }
+
+  const menu = open && box ? (
+    <ul
+      ref={menuRef}
+      id={listId}
+      role="listbox"
+      style={{ top: box.top, left: box.left, width: box.width, maxHeight: box.maxHeight }}
+      className={cn("fixed z-[80] overflow-y-auto border py-1", dark ? "border-detail bg-ink text-white" : "border-line bg-white text-ink")}
+    >
+      {options.map((option, index) => {
+        const active = option.value === current;
+        return (
+          <li key={`${index}-${option.value}`}>
+            <button
+              type="button"
+              role="option"
+              aria-selected={active}
+              onClick={() => choose(option.value)}
+              className={cn("block w-full px-3 py-2 text-left text-sm", active ? (dark ? "bg-white text-ink" : "bg-ink text-white") : dark ? "hover:bg-panel" : "hover:bg-paper")}
+            >
+              {option.label}
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  ) : null;
+
+  return (
+    <div ref={rootRef} className={cn("relative", className?.includes("w-auto") ? "w-auto" : "w-full")}>
+      <button
+        type="button"
+        id={id}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listId}
+        onClick={() => setOpen((currentOpen) => !currentOpen)}
+        className={cn("inline-flex h-11 items-center justify-between gap-3 text-left text-sm outline-none", className?.includes("w-auto") ? "w-auto" : "w-full", className ?? `${control}`)}
+      >
+        <span className="truncate">{selected?.label ?? ""}</span>
+        <span aria-hidden="true" className="h-0 w-0 shrink-0 border-x-4 border-t-[5px] border-x-transparent border-t-current" />
+      </button>
+      {menu && typeof document !== "undefined" ? createPortal(menu, document.body) : null}
+      {required ? <input tabIndex={-1} aria-hidden="true" className="sr-only" value={current} required onChange={() => undefined} /> : null}
+    </div>
+  );
 }
 
 export function Rating({ value, count }: { value: number; count?: number }) {

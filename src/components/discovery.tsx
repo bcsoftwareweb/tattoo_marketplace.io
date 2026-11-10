@@ -7,7 +7,7 @@ import { useDemo } from "@/context/demo-context";
 import { BOROUGHS, PRICE_FILTERS, SORTS } from "@/lib/constants";
 import { money } from "@/lib/format";
 import { filterArtists, type ArtistQuery, type ArtistSort, type AvailabilityFilter, type PriceFilter } from "@/lib/filters";
-import { Button, Empty, frame, Photo, Rating } from "@/components/ui";
+import { Button, Empty, frame, Photo, Rating, SelectInput } from "@/components/ui";
 
 const inkField = "h-11 w-full border border-detail bg-ink px-3 text-sm text-white outline-none";
 
@@ -92,40 +92,40 @@ export function Discovery() {
         </label>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <FilterField label="Style">
-            <select value={query.style} onChange={(event) => update({ style: event.target.value })} className={inkField}>
+            <SelectInput value={query.style} onChange={(event) => update({ style: event.target.value })} className={inkField}>
               <option value="">Any style</option>
               {state.styles.map((style) => <option key={style.id} value={style.id}>{style.name}</option>)}
-            </select>
+            </SelectInput>
           </FilterField>
           <FilterField label="Borough">
-            <select value={query.borough} onChange={(event) => update({ borough: event.target.value, neighborhood: "" })} className={inkField}>
+            <SelectInput value={query.borough} onChange={(event) => update({ borough: event.target.value, neighborhood: "" })} className={inkField}>
               <option value="">Any borough</option>
               {BOROUGHS.map((borough) => <option key={borough}>{borough}</option>)}
-            </select>
+            </SelectInput>
           </FilterField>
           <FilterField label="Neighborhood">
-            <select value={query.neighborhood} onChange={(event) => update({ neighborhood: event.target.value })} className={inkField}>
+            <SelectInput value={query.neighborhood} onChange={(event) => update({ neighborhood: event.target.value })} className={inkField}>
               <option value="">Any neighborhood</option>
               {neighborhoods.map((item) => <option key={item}>{item}</option>)}
-            </select>
+            </SelectInput>
           </FilterField>
           <FilterField label="Specialty">
-            <select value={query.specialty} onChange={(event) => update({ specialty: event.target.value })} className={inkField}>
+            <SelectInput value={query.specialty} onChange={(event) => update({ specialty: event.target.value })} className={inkField}>
               <option value="">Any specialty</option>
               {specialties.map((item) => <option key={item}>{item}</option>)}
-            </select>
+            </SelectInput>
           </FilterField>
           <FilterField label="Price">
-            <select value={query.price} onChange={(event) => update({ price: event.target.value })} className={inkField}>
+            <SelectInput value={query.price} onChange={(event) => update({ price: event.target.value })} className={inkField}>
               {PRICE_FILTERS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-            </select>
+            </SelectInput>
           </FilterField>
           <FilterField label="Availability">
-            <select value={query.availability} onChange={(event) => update({ availability: event.target.value })} className={inkField}>
+            <SelectInput value={query.availability} onChange={(event) => update({ availability: event.target.value })} className={inkField}>
               <option value="any">Any time</option>
               <option value="open-7">Open in 7 days</option>
               <option value="open-30">Open in 30 days</option>
-            </select>
+            </SelectInput>
           </FilterField>
         </div>
       </form>
@@ -135,9 +135,9 @@ export function Discovery() {
           {filtered ? <button type="button" onClick={() => router.replace("/artists")} className="text-sm text-mist hover:text-white">Clear</button> : null}
           <label className="flex items-center gap-3 text-sm text-mist">
             <span className="font-display text-[0.68rem] uppercase tracking-[0.18em]">Sort</span>
-            <select value={query.sort} onChange={(event) => update({ sort: event.target.value })} className={`${inkField} w-auto`}>
+            <SelectInput value={query.sort} onChange={(event) => update({ sort: event.target.value })} className="h-11 w-auto border border-detail bg-ink px-3 text-sm text-white outline-none">
               {SORTS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-            </select>
+            </SelectInput>
           </label>
         </div>
       </div>
