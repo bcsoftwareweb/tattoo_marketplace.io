@@ -548,7 +548,8 @@ export function saveStyle(state: DemoState, input: TattooStyle, actor: Actor): R
   if (state.styles.some((style) => style.id !== id && (style.slug === slug || style.name.toLowerCase() === name.toLowerCase()))) {
     return fail(state, "A style with that name already exists.");
   }
-  const style: TattooStyle = { id, name, slug, description: input.description.trim(), image: input.image || state.styles[0]?.image || "" };
+  const about = input.about?.trim();
+  const style: TattooStyle = { id, name, slug, description: input.description.trim(), image: input.image || state.styles[0]?.image || "", ...(about ? { about } : {}) };
   const exists = state.styles.some((item) => item.id === id);
   return { state: { ...state, styles: exists ? state.styles.map((item) => (item.id === id ? style : item)) : [...state.styles, style] }, id };
 }

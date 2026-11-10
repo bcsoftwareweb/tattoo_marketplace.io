@@ -37,6 +37,7 @@ export interface TattooStyle {
   name: string;
   slug: string;
   description: string;
+  about?: string;
   image: string;
 }
 

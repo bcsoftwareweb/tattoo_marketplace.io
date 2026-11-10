@@ -7,6 +7,7 @@ import { useDemo } from "@/context/demo-context";
 import { BOROUGHS, PRICE_FILTERS, SORTS } from "@/lib/constants";
 import { money } from "@/lib/format";
 import { filterArtists, type ArtistQuery, type ArtistSort, type AvailabilityFilter, type PriceFilter } from "@/lib/filters";
+import { createSeed } from "@/lib/seed";
 import { Button, Empty, frame, Photo, Rating, SelectInput } from "@/components/ui";
 
 const inkField = "h-11 w-full border border-detail bg-ink px-3 text-sm text-white outline-none";
@@ -145,16 +146,13 @@ export function Discovery() {
 
 export function StylesPage() {
   const { state } = useDemo();
-  const params = useSearchParams();
-  const selected = state.styles.find((style) => style.id === params.get("style")) ?? null;
-  const artists = filterArtists(state.artists, { style: selected?.id });
   return (
     <div className={`${frame} py-12`}>
       <h1 className="font-express text-5xl leading-none md:text-7xl">Styles</h1>
-      <p className="mt-4 max-w-2xl text-sm leading-6 text-mute">Twelve ways the city actually gets tattooed. Choose one to see who is approved for it.</p>
+      <p className="mt-4 max-w-2xl text-sm leading-6 text-mute">Twelve ways the city actually gets tattooed. Open one to read the style and the artists approved for it.</p>
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {state.styles.map((style) => (
-          <Link key={style.id} href={`/styles?style=${style.id}`} className={selected?.id === style.id ? "border border-ink" : "border border-line"}>
+          <Link key={style.id} href={`/styles/${style.slug}`} className="border border-line">
             <Photo src={style.image} alt="" className="aspect-[4/3] w-full" />
             <div className="bg-white p-4">
               <h2 className="font-display text-2xl">{style.name}</h2>
@@ -163,15 +161,50 @@ export function StylesPage() {
           </Link>
         ))}
       </div>
-      {selected ? (
-        <section className="mt-14">
-          <h2 className="font-display text-3xl">{selected.name} artists</h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    </div>
+  );
+}
+
+export function StyleDetail({ slug }: { slug: string }) {
+  const { state } = useDemo();
+  const style = state.styles.find((item) => item.slug === slug);
+  if (!style) {
+    return (
+      <div className={`${frame} py-20`}>
+        <h1 className="font-display text-4xl">Style not found</h1>
+        <p className="mt-3 text-sm text-mute">That style is not in the demo index.</p>
+        <Link href="/styles" className="mt-6 inline-block text-sm">All styles</Link>
+      </div>
+    );
+  }
+  const artists = filterArtists(state.artists, { style: style.id });
+  const about = style.about ?? createSeed().styles.find((item) => item.slug === style.slug)?.about ?? style.description;
+  return (
+    <article>
+      <header className={`${frame} py-12 md:py-16`}>
+        <Link href="/styles" className="text-sm text-mist">All styles</Link>
+        <div className="mt-8 grid items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+          <div>
+            <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">Style</p>
+            <h1 className="mt-3 font-express text-[clamp(3rem,6vw,5.5rem)] leading-[0.9]">{style.name}</h1>
+            <p className="mt-6 max-w-xl text-sm leading-7 text-mist">{about}</p>
+          </div>
+          <Photo src={style.image} alt={style.name} className="aspect-[4/3] w-full" />
+        </div>
+      </header>
+      <section className={`${frame} border-t border-panel py-14`}>
+        <h2 className="font-display text-3xl">Artists</h2>
+        <p className="mt-3 text-sm text-mute">
+          {artists.length
+            ? `${artists.length} approved ${artists.length === 1 ? "artist works" : "artists work"} in ${style.name}.`
+            : `No approved artist works in ${style.name} right now.`}
+        </p>
+        {artists.length ? (
+          <div className="mt-8 grid gap-x-5 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {artists.map((artist) => <ArtistCard key={artist.id} artistId={artist.id} />)}
           </div>
-          {!artists.length ? <p className="mt-4 text-sm text-mute">No approved artist lists this style right now.</p> : null}
-        </section>
-      ) : null}
-    </div>
+        ) : null}
+      </section>
+    </article>
   );
 }

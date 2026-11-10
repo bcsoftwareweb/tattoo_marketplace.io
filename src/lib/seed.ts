@@ -522,25 +522,26 @@ function portfolioFor(artist: Artist, offset: number): PortfolioItem[] {
 }
 
 function buildStyles(): TattooStyle[] {
-  const rows: Array<[string, string, string]> = [
-    ["fine-line", "Fine line", "Single needle work, florals, and small ornamental drawings."],
-    ["blackwork", "Blackwork", "Solid black, ornamental, and graphic coverage."],
-    ["traditional", "Traditional", "American traditional: heavy line, limited palette, readable shapes."],
-    ["japanese", "Japanese", "Sleeves, backs, and compositions built over several sessions."],
-    ["realism", "Realism", "Portrait and pet work from photographs that can actually be tattooed."],
-    ["geometric", "Geometric", "Bands, panels, and measured repeating structures."],
-    ["ornamental", "Ornamental", "Jewelry-like line, lace, and repeating motifs."],
-    ["illustrative", "Illustrative", "Drawn imagery with print-like contrast."],
-    ["lettering", "Lettering", "Script and banners composed to heal cleanly."],
-    ["black-gray", "Black & gray", "Soft shading, memorial work, and cover-ups."],
-    ["micro-realism", "Micro realism", "Very small realism and botanicals."],
-    ["watercolor", "Watercolor", "Color with soft edges. Fewer artists take it."],
+  const rows: Array<[string, string, string, string]> = [
+    ["fine-line", "Fine line", "Single needle work, florals, and small ornamental drawings.", "Fine line is tattooed with a single needle or a very small grouping. The drawing stays thin, so scale and placement decide whether it reads: a stem that follows the arm holds up better than a stamp. It heals lighter than it looks on day one, which is why these artists draw for the body rather than pull a design off a flash sheet."],
+    ["blackwork", "Blackwork", "Solid black, ornamental, and graphic coverage.", "Blackwork uses solid black, bold negative space, and repeating ornament. Coverage can be a band, a panel, or a large field. The piece is planned so the black stays even and the skin left open still reads as part of the drawing."],
+    ["traditional", "Traditional", "American traditional: heavy line, limited palette, readable shapes.", "American traditional is built from heavy outlines, a small set of colors, and shapes that stay readable across a room. Roses, daggers, swallows, and banners come from the flash wall, then get scaled to the placement."],
+    ["japanese", "Japanese", "Sleeves, backs, and compositions built over several sessions.", "Japanese tattooing is composed as a sleeve, a back, or a panel that has to hold together over several sessions. Background, wind, and flowers are drawn around the subject so the piece grows instead of stacking unrelated pictures."],
+    ["realism", "Realism", "Portrait and pet work from photographs that can actually be tattooed.", "Realism is portrait and pet work taken from photographs that can survive skin. These artists talk about size, contrast, and what a face will look like healed before they agree to tattoo it."],
+    ["geometric", "Geometric", "Bands, panels, and measured repeating structures.", "Geometric work is measured. Bands, panels, and repeating structures are drawn to the limb so the pattern meets itself and the spacing stays even."],
+    ["ornamental", "Ornamental", "Jewelry-like line, lace, and repeating motifs.", "Ornamental tattooing treats line like jewelry: lace, chains, leaves, and repeating motifs scaled to a wrist, an ankle, or a sternum. Most of it is black, and the drawing is made for that exact placement."],
+    ["illustrative", "Illustrative", "Drawn imagery with print-like contrast.", "Illustrative tattoos look drawn. Contrast is closer to a print than to a photograph, with animals, objects, and scenes that do not pretend to be a photo."],
+    ["lettering", "Lettering", "Script and banners composed to heal cleanly.", "Lettering is script, serif, and banners composed so the words stay readable after they heal. Spacing, baseline, and where the text bends on the body are decided before the stencil goes on."],
+    ["black-gray", "Black & gray", "Soft shading, memorial work, and cover-ups.", "Black and gray uses soft shading instead of color. It covers memorial portraits, animals, and cover-ups where a limited palette has to sit over older work."],
+    ["micro-realism", "Micro realism", "Very small realism and botanicals.", "Micro realism is very small realism and botanicals. The limit is what a needle can still read at that size, so these artists will turn down a portrait that needs to be larger."],
+    ["watercolor", "Watercolor", "Color with soft edges. Fewer artists take it.", "Watercolor uses color with soft edges and less outline. Fewer artists on the index take it, because the color has to be placed where it can heal without a hard border holding it in."],
   ];
-  return rows.map(([id, name, description], index) => ({
+  return rows.map(([id, name, description, about], index) => ({
     id,
     name,
     slug: id,
     description,
+    about,
     image: workAt(index, 1200),
   }));
 }
@@ -1310,4 +1311,8 @@ export function createSeed(): DemoState {
 
 export function artistParams() {
   return createSeed().artists.map((artist) => ({ slug: artist.slug }));
+}
+
+export function styleParams() {
+  return createSeed().styles.map((style) => ({ slug: style.slug }));
 }
