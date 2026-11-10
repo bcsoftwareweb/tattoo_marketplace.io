@@ -38,7 +38,7 @@ export function PublicHeader() {
         </nav>
         <div className="flex items-center gap-2">
           <Link href={session ? homeFor(session.role) : "/login"} className="inline-flex h-10 items-center bg-white px-3 text-sm text-ink sm:px-4">
-            {session ? "Dashboard" : "Sign in"}
+            {session ? "Dashboard" : "Sign In/Sign Up"}
           </Link>
           <button type="button" className="h-10 px-3 text-sm md:hidden" aria-expanded={open} aria-controls="mobile-nav" onClick={() => setOpen((value) => !value)}>
             {open ? "Close" : "Menu"}
@@ -68,7 +68,7 @@ export function PublicFooter() {
           <p className="mt-4 max-w-xs text-sm leading-6 text-mist">{state.settings.tagline} This prototype stores everything in your browser.</p>
         </div>
         <FooterColumn title="Marketplace" links={[["/artists", "Find artists"], ["/styles", "Styles"], ["/how-it-works", "How it works"]]} />
-        <FooterColumn title="Studios" links={[["/for-artists", "For artists"], ["/login", "Demo sign in"]]} />
+        <FooterColumn title="Studios" links={[["/login", "Sign In/Sign Up"]]} />
         <FooterColumn title="About" links={[["/about", "About"], ["/legal/privacy", "Privacy"], ["/legal/terms", "Terms"]]} />
       </div>
       <div className={`${frame} border-t border-panel py-5 text-xs text-mist`}>Simulated bookings and payments. No real money, messages, or accounts.</div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const metadata = { title: "For artists" };
+export const metadata = { title: "Studios" };
 
 export default function Page() {
   return (

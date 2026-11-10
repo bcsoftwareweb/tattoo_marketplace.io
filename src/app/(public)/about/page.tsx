@@ -70,7 +70,6 @@ export default function Page() {
             <p className="mt-4 max-w-md text-sm leading-7 text-mist">
               Profile, portfolio, services, calendar, requests, and messages stay together. A platform fee comes off the artist side of a confirmed sitting. The client pays the quote they accepted.
             </p>
-            <Link href="/for-artists" className="mt-6 inline-flex h-11 items-center border border-detail px-4 text-sm text-white">For artists</Link>
           </div>
         </div>
       </section>
