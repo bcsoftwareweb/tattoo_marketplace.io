@@ -99,8 +99,13 @@ select:-webkit-autofill {
 .artist-intro {
   display: grid;
   align-items: center;
-  background: #ffffff;
+  padding-top: 1.25rem;
+  padding-bottom: 1.5rem;
   color: #090909;
+}
+
+.artist-copy {
+  padding-top: 1.25rem;
 }
 
 .artist-portrait {
@@ -116,9 +121,23 @@ select:-webkit-autofill {
   }
 }
 
+@media (min-width: 48rem) {
+  .artist-intro {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
 @media (min-width: 64rem) {
   .artist-intro {
     grid-template-columns: 22rem minmax(0, 1fr);
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  .artist-copy {
+    padding-top: 0;
+    padding-left: 2.5rem;
   }
 
   .artist-portrait {

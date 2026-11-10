@@ -53,11 +53,12 @@ export function ArtistProfile({ slug }: { slug: string }) {
 
   return (
     <article>
-      <header className="artist-intro bg-white">
-        <div className="artist-portrait">
-          <Photo src={artist.photo} alt={artist.name} className="block h-full w-full object-cover" />
-        </div>
-        <div className="flex flex-col justify-center px-5 py-6 md:px-10 lg:py-8">
+      <header className="bg-white">
+        <div className={`${frame} artist-intro`}>
+          <div className="artist-portrait">
+            <Photo src={artist.photo} alt={artist.name} className="block h-full w-full object-cover" />
+          </div>
+          <div className="artist-copy flex flex-col justify-center">
           <p className="text-xs uppercase tracking-[0.18em] text-mute">{artist.neighborhood}, {artist.borough}</p>
           <h1 className="mt-2 font-express text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[0.9]">{artist.name}</h1>
           <p className="mt-3 text-sm text-mute">{artist.studioName} · {artist.instagram}</p>
@@ -80,6 +81,7 @@ export function ArtistProfile({ slug }: { slug: string }) {
               }
               favorite(artist.id);
             }}>{saved ? "Saved" : "Save"}</Button>
+          </div>
           </div>
         </div>
       </header>
