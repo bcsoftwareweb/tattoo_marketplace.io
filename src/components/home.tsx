@@ -117,16 +117,6 @@ export function HomePage() {
           </article>
         ))}
       </section>
-
-      <section className="on-ink bg-ink text-white">
-        <div className={`${frame} grid gap-8 py-20 md:grid-cols-[1.4fr_auto] md:items-end`}>
-          <div>
-            <h2 className="max-w-xl font-express text-5xl leading-[0.9] md:text-7xl">Bring a chair to the index.</h2>
-            <p className="mt-6 max-w-lg text-sm leading-6 text-mist">Artists manage profile, portfolio, pricing, calendar, and requests from one demo dashboard.</p>
-          </div>
-          <Link href="/for-artists" className="inline-flex h-12 items-center bg-white px-5 text-sm font-medium text-ink">For artists</Link>
-        </div>
-      </section>
     </div>
   );
 }
