@@ -183,11 +183,11 @@ export function StyleDetail({ slug }: { slug: string }) {
     <article>
       <header className={`${frame} pt-8 pb-12 md:pt-10`}>
         <Link href="/styles" className="text-sm text-mist">All styles</Link>
-        <div className="mt-6 grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>
+        <div className="mt-6 grid items-stretch gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="flex flex-col">
             <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">Style</p>
             <h1 className="mt-3 font-express text-[clamp(3rem,6vw,5.5rem)] leading-[0.9]">{style.name}</h1>
-            <p className="mt-6 max-w-xl text-sm leading-7 text-mist">{about}</p>
+            <p className="mt-6 text-3xl text-mist">{about}</p>
           </div>
           <Photo src={style.image} alt={style.name} className="aspect-[4/3] w-full" />
         </div>
