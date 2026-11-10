@@ -17,6 +17,18 @@ const PUBLIC_LINKS = [
   ["/how-it-works", "How it works"],
 ];
 
+function MenuIcon({ open }: { open: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" className="block">
+      {open ? (
+        <path d="M5 5 L17 17 M17 5 L5 17" stroke="currentColor" strokeWidth="1.5" />
+      ) : (
+        <path d="M3 6 H19 M3 11 H19 M3 16 H19" stroke="currentColor" strokeWidth="1.5" />
+      )}
+    </svg>
+  );
+}
+
 export function PublicHeader() {
   const { session, state } = useDemo();
   const pathname = usePathname();
@@ -37,21 +49,31 @@ export function PublicHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Link href={session ? homeFor(session.role) : "/login"} className="inline-flex h-10 items-center bg-white px-3 text-sm text-ink sm:px-4">
+          <Link href={session ? homeFor(session.role) : "/login"} className="hidden h-10 items-center bg-white px-4 text-sm text-ink md:inline-flex">
             {session ? "Dashboard" : "Sign In/Sign Up"}
           </Link>
-          <button type="button" className="h-10 px-3 text-sm md:hidden" aria-expanded={open} aria-controls="mobile-nav" onClick={() => setOpen((value) => !value)}>
-            {open ? "Close" : "Menu"}
+          <button
+            type="button"
+            className="grid h-10 w-10 place-items-center md:hidden"
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            aria-label={open ? "Close menu" : "Open menu"}
+            onClick={() => setOpen((value) => !value)}
+          >
+            <MenuIcon open={open} />
           </button>
         </div>
       </div>
       {open ? (
         <nav id="mobile-nav" className="border-t border-panel px-5 py-4 md:hidden" aria-label="Mobile">
-          <ul className="grid gap-3">
+          <ul className="grid gap-1">
             {PUBLIC_LINKS.map(([href, label]) => (
-              <li key={href}><Link href={href} className="block py-1 text-lg">{label}</Link></li>
+              <li key={href}><Link href={href} className="block py-2 text-lg">{label}</Link></li>
             ))}
           </ul>
+          <Link href={session ? homeFor(session.role) : "/login"} className="mt-4 flex h-11 items-center justify-center bg-white text-sm text-ink">
+            {session ? "Dashboard" : "Sign In/Sign Up"}
+          </Link>
         </nav>
       ) : null}
     </header>
