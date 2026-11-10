@@ -17,7 +17,6 @@ export function HomePage() {
   const [style, setStyle] = useState("");
   const approved = state.artists.filter((artist) => artist.verificationStatus === "approved");
   const featured = filterArtists(approved, { sort: "relevance" }).filter((artist) => artist.featured).slice(0, 3);
-  const portfolio = state.portfolio.filter((item) => approved.some((artist) => artist.id === item.artistId)).slice(0, 6);
 
   function search(event: React.FormEvent) {
     event.preventDefault();
@@ -102,17 +101,6 @@ export function HomePage() {
               </Link>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section>
-        <div className="grid md:grid-cols-3">
-          {portfolio.map((item) => (
-            <figure key={item.id} className="relative">
-              <Photo src={item.image} alt={item.title} className="aspect-[4/5] w-full" />
-              <figcaption className="absolute inset-x-0 bottom-0 bg-ink/75 px-4 py-3 text-sm text-white">{item.title}</figcaption>
-            </figure>
-          ))}
         </div>
       </section>
 
