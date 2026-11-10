@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDemo } from "@/context/demo-context";
-import { DEMO_TODAY } from "@/lib/constants";
-import { formatDate, formatDuration, formatTime, money, weekdayIndex, weekdayName } from "@/lib/format";
+import { formatDate, formatDuration, formatTime, money, weekdayName } from "@/lib/format";
 import { portfolioFor, reviewsFor, servicesFor } from "@/lib/selectors";
 import { verificationLabel } from "@/lib/status";
 import { Button, frame, Photo, Rating } from "@/components/ui";
@@ -21,7 +20,6 @@ export function ArtistProfile({ slug }: { slug: string }) {
   const reviews = reviewsFor(state, artist.id);
   const styles = artist.styleIds.map((id) => state.styles.find((style) => style.id === id)?.name).filter(Boolean);
   const saved = session?.role === "customer" && (state.favorites[session.userId] ?? []).includes(artist.id);
-  const openings = artist.availability.filter((day) => day.date >= DEMO_TODAY && day.status === "open").slice(0, 8);
   const listed = artist.verificationStatus === "approved";
 
   function message() {
@@ -136,42 +134,22 @@ export function ArtistProfile({ slug }: { slug: string }) {
         </div>
       </section>
 
-      <section className={`${frame} grid gap-16 py-16 lg:grid-cols-[1.35fr_0.65fr]`}>
-        <div>
-          <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">Pricing</p>
-          <h2 className="mt-3 font-express text-[clamp(2.25rem,4vw,3.5rem)] leading-[0.95]">Services</h2>
-          <ul className="mt-8 border-t border-panel">
-            {services.map((service) => (
-              <li key={service.id} className="border-b border-panel py-6">
-                <div className="flex items-baseline justify-between gap-6">
-                  <h3 className="font-display text-2xl">{service.name}</h3>
-                  <p className="shrink-0 text-sm">{money(service.minPrice)}–{money(service.maxPrice)}</p>
-                </div>
-                <p className="mt-3 max-w-xl text-sm leading-6 text-mist">{service.description}</p>
-                <p className="mt-3 font-display text-[0.68rem] uppercase tracking-[0.18em] text-mute">{formatDuration(service.durationMinutes)}{service.customDesign ? " · Custom drawing" : ""}</p>
-              </li>
-            ))}
-          </ul>
-          {!services.length ? <p className="mt-4 text-sm text-mute">No services listed yet.</p> : null}
-        </div>
-        <div>
-          <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">Calendar</p>
-          <h2 className="mt-3 font-express text-[clamp(2.25rem,4vw,3.5rem)] leading-[0.95]">Open dates</h2>
-          {openings.length ? (
-            <ol className="mt-8 grid grid-cols-2 border-t border-panel">
-              {openings.map((day) => (
-                <li key={day.date} className="border-b border-panel px-4 py-4 even:border-l">
-                  <p className="font-display text-[0.68rem] uppercase tracking-[0.18em] text-mute">{weekdayName(weekdayIndex(day.date)).slice(0, 3)}</p>
-                  <p className="mt-2 font-display text-3xl tracking-tight">{Number(day.date.slice(8))}</p>
-                  <p className="text-sm text-mist">{formatDate(day.date).split(" ")[0]}</p>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="mt-8 text-sm text-mute">No open dates in the published calendar.</p>
-          )}
-          <p className="mt-4 max-w-sm text-sm leading-6 text-mute">A date is held only after the artist accepts and the simulated deposit is confirmed.</p>
-        </div>
+      <section className={`${frame} py-16`}>
+        <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">Pricing</p>
+        <h2 className="mt-3 font-express text-[clamp(2.25rem,4vw,3.5rem)] leading-[0.95]">Services</h2>
+        <ul className="mt-8 border-t border-panel">
+          {services.map((service) => (
+            <li key={service.id} className="border-b border-panel py-6">
+              <div className="flex items-baseline justify-between gap-6">
+                <h3 className="font-display text-2xl">{service.name}</h3>
+                <p className="shrink-0 text-sm">{money(service.minPrice)}–{money(service.maxPrice)}</p>
+              </div>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-mist">{service.description}</p>
+              <p className="mt-3 font-display text-[0.68rem] uppercase tracking-[0.18em] text-mute">{formatDuration(service.durationMinutes)}{service.customDesign ? " · Custom drawing" : ""}</p>
+            </li>
+          ))}
+        </ul>
+        {!services.length ? <p className="mt-4 text-sm text-mute">No services listed yet.</p> : null}
       </section>
 
       <section className="bg-white py-14">
