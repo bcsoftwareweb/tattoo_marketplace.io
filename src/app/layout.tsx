@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${space.variable} ${syne.variable} h-full`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable} ${space.variable} ${syne.variable} h-full`}>
       <body className="min-h-full antialiased">
         <DemoProvider>{children}</DemoProvider>
       </body>
