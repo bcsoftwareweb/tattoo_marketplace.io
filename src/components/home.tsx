@@ -66,23 +66,25 @@ export function HomePage() {
         </div>
       </div>
 
-      <section className={`${frame} py-16 md:py-24`}>
-        <div className="flex items-end justify-between gap-4">
-          <h2 className="font-display text-4xl tracking-tight md:text-5xl">Selected artists</h2>
+      <section className={`${frame} flex h-[calc(100svh-4rem)] flex-col overflow-hidden py-6 md:py-8`}>
+        <div className="flex shrink-0 items-end justify-between gap-4">
+          <h2 className="font-display text-3xl tracking-tight md:text-4xl">Selected artists</h2>
           <Link href="/artists" className="text-sm">View the index</Link>
         </div>
-        <div className="mt-8 grid gap-4 lg:grid-cols-12">
-          {featured.map((artist, index) => (
-            <Link key={artist.id} href={`/artists/${artist.slug}`} className={index === 0 ? "group lg:col-span-7" : "group lg:col-span-5"}>
-              <Photo src={artist.photo} alt={artist.name} className={index === 0 ? "aspect-[4/5] w-full" : "aspect-[5/4] w-full"} />
-              <div className="mt-4 flex items-start justify-between gap-4">
+        <div className="mt-5 grid min-h-0 flex-1 grid-cols-3 gap-4">
+          {featured.map((artist) => (
+            <Link key={artist.id} href={`/artists/${artist.slug}`} className="group flex min-h-0 flex-col">
+              <div className="min-h-0 flex-1 overflow-hidden">
+                <Photo src={artist.photo} alt={artist.name} className="block h-full w-full object-cover" />
+              </div>
+              <div className="mt-3 flex shrink-0 items-start justify-between gap-3">
                 <div>
-                  <h3 className="font-display text-2xl group-hover:text-mute">{artist.name}</h3>
+                  <h3 className="font-display text-xl group-hover:text-mute">{artist.name}</h3>
                   <p className="mt-1 text-sm text-mute">{artist.neighborhood}, {artist.borough}</p>
                 </div>
                 <p className="text-sm">From {money(artist.startingPrice)}</p>
               </div>
-              <div className="mt-2"><Rating value={artist.rating} count={artist.reviewCount} /></div>
+              <div className="mt-2 shrink-0"><Rating value={artist.rating} count={artist.reviewCount} /></div>
             </Link>
           ))}
         </div>
