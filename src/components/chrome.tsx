@@ -74,10 +74,10 @@ export function PublicHeader() {
       </div>
       <div className={`fixed inset-x-0 top-16 z-30 grid h-[calc(100svh-4rem)] transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:hidden ${open ? "grid-rows-[1fr]" : "pointer-events-none grid-rows-[0fr]"}`}>
         <nav id="mobile-nav" className="flex min-h-0 flex-col overflow-hidden bg-ink" aria-label="Mobile" aria-hidden={!open} inert={!open}>
-          <div className={`flex h-full flex-col border-t border-panel px-5 py-6 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${open ? "opacity-100" : "opacity-0"}`}>
-            <ul className="grid gap-1">
+          <div className={`flex h-full flex-col border-t border-panel px-5 pb-8 pt-12 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${open ? "opacity-100" : "opacity-0"}`}>
+            <ul className="grid gap-3">
               {PUBLIC_LINKS.map(([href, label]) => (
-                <li key={href}><Link href={href} className="block py-2 text-lg">{label}</Link></li>
+                <li key={href}><Link href={href} className="block py-3 text-lg">{label}</Link></li>
               ))}
             </ul>
             <Link href={session ? homeFor(session.role) : "/login"} className="mt-14 flex h-11 items-center justify-center bg-white text-sm text-ink">
