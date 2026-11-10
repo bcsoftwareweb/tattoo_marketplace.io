@@ -152,9 +152,11 @@ export function StylesPage() {
       <p className="mt-4 max-w-2xl text-sm leading-6 text-mute">Twelve ways the city actually gets tattooed. Open one to read the style and the artists approved for it.</p>
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {state.styles.map((style) => (
-          <Link key={style.id} href={`/styles/${style.slug}`} className="border border-line">
-            <Photo src={style.image} alt="" className="aspect-[4/3] w-full" />
-            <div className="bg-white p-4">
+          <Link key={style.id} href={`/styles/${style.slug}`} className="flex h-full flex-col border border-line">
+            <div className="relative aspect-[4/3] w-full overflow-hidden">
+              <Photo src={style.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            </div>
+            <div className="flex flex-1 flex-col bg-white p-4">
               <h2 className="font-display text-2xl">{style.name}</h2>
               <p className="mt-2 text-sm leading-6 text-mute">{style.description}</p>
             </div>

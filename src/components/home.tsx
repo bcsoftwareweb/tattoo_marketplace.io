@@ -94,8 +94,10 @@ export function HomePage() {
           <h2 className="font-display text-4xl">Popular styles</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {state.styles.slice(0, 6).map((item) => (
-              <Link key={item.id} href={`/styles/${item.slug}`} className="group">
-                <Photo src={item.image} alt="" className="aspect-[4/3] w-full" />
+              <Link key={item.id} href={`/styles/${item.slug}`} className="group flex h-full flex-col">
+                <div className="relative aspect-[4/3] w-full overflow-hidden">
+                  <Photo src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                </div>
                 <h3 className="mt-3 font-display text-2xl group-hover:text-mute">{item.name}</h3>
                 <p className="mt-2 text-sm leading-6 text-mute">{item.description}</p>
               </Link>
