@@ -25,8 +25,8 @@ export function PublicHeader() {
   const brand = state.settings.platformName || "BLACKLINE";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur">
-      <a href="#content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-ink focus:px-3 focus:py-2 focus:text-paper">
+    <header className="on-ink sticky top-0 z-40 border-b border-panel bg-ink text-white">
+      <a href="#content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-ink focus:px-3 focus:py-2 focus:text-white">
         Skip to content
       </a>
       <div className={`${frame} flex h-16 items-center justify-between gap-4`}>
@@ -37,7 +37,7 @@ export function PublicHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Link href={session ? homeFor(session.role) : "/login"} className="inline-flex h-10 items-center bg-ink px-4 text-sm text-paper">
+          <Link href={session ? homeFor(session.role) : "/login"} className="inline-flex h-10 items-center bg-white px-4 text-sm text-ink">
             {session ? "Dashboard" : "Sign in"}
           </Link>
           <button type="button" className="h-10 px-3 text-sm md:hidden" aria-expanded={open} aria-controls="mobile-nav" onClick={() => setOpen((value) => !value)}>
@@ -46,7 +46,7 @@ export function PublicHeader() {
         </div>
       </div>
       {open ? (
-        <nav id="mobile-nav" className="border-t border-line px-5 py-4 md:hidden" aria-label="Mobile">
+        <nav id="mobile-nav" className="border-t border-panel px-5 py-4 md:hidden" aria-label="Mobile">
           <ul className="grid gap-3">
             {PUBLIC_LINKS.map(([href, label]) => (
               <li key={href}><Link href={href} className="block py-1 text-lg">{label}</Link></li>
@@ -61,7 +61,7 @@ export function PublicHeader() {
 export function PublicFooter() {
   const { state } = useDemo();
   return (
-    <footer className="mt-20 border-t border-line bg-ink text-paper">
+    <footer className="mt-20 border-t border-line bg-ink text-white">
       <div className={`${frame} grid gap-10 py-14 md:grid-cols-4`}>
         <div>
           <p className="font-display tracking-[0.18em]">{state.settings.platformName}</p>
@@ -98,7 +98,7 @@ export function RequireRole({ role, children }: { role: Role; children: React.Re
     else if (session.role !== role) router.replace(homeFor(session.role));
   }, [ready, session, role, router]);
   if (!ready || !session || session.role !== role) {
-    return <div className="grid min-h-screen place-items-center bg-paper text-sm text-mute">Checking the demo session…</div>;
+    return <div className="grid min-h-screen place-items-center bg-ink text-sm text-mist">Checking the demo session…</div>;
   }
   return children;
 }
@@ -108,14 +108,14 @@ export function DashboardShell({ role, items, children }: { role: Role; items: A
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [pathname]);
   return (
-    <div className="min-h-screen bg-paper md:grid md:grid-cols-[240px_1fr]">
-      <aside className="on-ink hidden bg-ink text-paper md:flex md:min-h-screen md:flex-col">
+    <div className="min-h-screen bg-ink text-white md:grid md:grid-cols-[240px_1fr]">
+      <aside className="on-ink hidden border-r border-panel bg-ink text-white md:flex md:min-h-screen md:flex-col">
         <SideNav role={role} items={items} pathname={pathname} />
       </aside>
       <div className="min-w-0">
         <TopBar role={role} onMenu={() => setOpen(true)} />
         {open ? (
-          <div className="fixed inset-0 z-50 bg-ink text-paper md:hidden">
+          <div className="fixed inset-0 z-50 bg-ink text-white md:hidden">
             <div className="flex justify-end p-4">
               <button type="button" onClick={() => setOpen(false)} className="text-sm">Close</button>
             </div>
@@ -138,7 +138,7 @@ function SideNav({ role, items, pathname }: { role: Role; items: Array<{ href: s
         {items.map((item) => {
           const active = item.href === `/${role}` ? pathname === item.href || pathname === `${item.href}/` : pathname === item.href || pathname.startsWith(`${item.href}`);
           return (
-            <Link key={item.href} href={item.href} className={active ? "bg-paper px-3 py-2 text-sm text-ink" : "px-3 py-2 text-sm text-mist hover:text-paper"}>
+            <Link key={item.href} href={item.href} className={active ? "bg-white px-3 py-2 text-sm text-ink" : "px-3 py-2 text-sm text-mist hover:text-white"}>
               {item.label}
             </Link>
           );
@@ -158,12 +158,12 @@ function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
   const unread = unreadCount(state, session.userId);
 
   return (
-    <div className="flex h-16 items-center justify-between border-b border-line bg-white px-4 md:px-8">
+    <div className="flex h-16 items-center justify-between border-b border-panel bg-ink px-4 text-white md:px-8">
       <button type="button" className="text-sm md:hidden" onClick={onMenu}>Menu</button>
-      <p className="hidden text-sm text-mute md:block">Demo session · {session.email}</p>
+      <p className="hidden text-sm text-mist md:block">Demo session · {session.email}</p>
       <div className="ml-auto flex items-center gap-2">
         <div className="relative">
-          <button type="button" className="h-10 border border-line px-3 text-sm" aria-expanded={notesOpen} onClick={() => { setNotesOpen((value) => !value); setAccountOpen(false); }}>
+          <button type="button" className="h-10 border border-detail px-3 text-sm" aria-expanded={notesOpen} onClick={() => { setNotesOpen((value) => !value); setAccountOpen(false); }}>
             Alerts{unread ? ` ${unread}` : ""}
           </button>
           {notesOpen ? (
@@ -190,7 +190,7 @@ function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
           ) : null}
         </div>
         <div className="relative">
-          <button type="button" className="h-10 bg-ink px-3 text-sm text-paper" aria-expanded={accountOpen} onClick={() => { setAccountOpen((value) => !value); setNotesOpen(false); }}>
+          <button type="button" className="h-10 bg-white px-3 text-sm text-ink" aria-expanded={accountOpen} onClick={() => { setAccountOpen((value) => !value); setNotesOpen(false); }}>
             {session.name}
           </button>
           {accountOpen ? (

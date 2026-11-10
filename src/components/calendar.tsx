@@ -49,9 +49,9 @@ export function MonthCalendar({
               aria-pressed={selected === date}
               className={cn(
                 "h-11 border text-sm",
-                selected === date && "border-ink bg-ink text-paper",
+                selected === date && "border-ink bg-ink text-white",
                 selected !== date && status === "open" && "border-line bg-white",
-                selected !== date && status === "blocked" && "border-line bg-mist text-mute",
+                selected !== date && status === "blocked" && "border-detail bg-detail text-mute",
                 selected !== date && status === "booked" && "border-ink bg-paper",
                 past && "opacity-50",
               )}

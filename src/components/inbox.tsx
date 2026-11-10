@@ -79,7 +79,7 @@ export function Inbox({ role }: { role: "customer" | "artist" }) {
             {active.messages.map((message) => {
               const mine = message.senderId === session.userId;
               return (
-                <li key={message.id} className={mine ? "ml-auto max-w-[80%] bg-ink px-3 py-2 text-sm text-paper" : "max-w-[80%] border border-line px-3 py-2 text-sm"}>
+                <li key={message.id} className={mine ? "ml-auto max-w-[80%] bg-ink px-3 py-2 text-sm text-white" : "max-w-[80%] border border-line px-3 py-2 text-sm"}>
                   <p className="whitespace-pre-wrap">{message.body}</p>
                   {message.attachment ? (
                     <figure className="mt-2">

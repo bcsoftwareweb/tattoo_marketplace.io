@@ -31,7 +31,7 @@ export function HomePage() {
 
   return (
     <div>
-      <section className="on-ink bg-ink text-paper">
+      <section className="on-ink bg-ink text-white">
         <div className="grid min-h-[calc(100svh-4rem)] lg:grid-cols-2">
           <div className="flex flex-col justify-end px-5 py-12 md:px-10 lg:px-14">
             <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">New York City</p>
@@ -43,26 +43,26 @@ export function HomePage() {
             </p>
             <form onSubmit={search} className="mt-8 grid gap-3 md:grid-cols-[1.4fr_1fr_1fr_auto]" role="search">
               <label className="sr-only" htmlFor="home-q">Search artists</label>
-              <input id="home-q" value={q} onChange={(event) => setQ(event.target.value)} placeholder="Search artists or studios" className="h-11 border border-panel bg-ink px-3 text-sm text-paper placeholder:text-mute" />
-              <select aria-label="Borough" value={borough} onChange={(event) => setBorough(event.target.value)} className="h-11 border border-panel bg-ink px-3 text-sm text-paper">
+              <input id="home-q" value={q} onChange={(event) => setQ(event.target.value)} placeholder="Search artists or studios" className="h-11 border border-detail bg-ink px-3 text-sm text-white placeholder:text-mute" />
+              <select aria-label="Borough" value={borough} onChange={(event) => setBorough(event.target.value)} className="h-11 border border-detail bg-ink px-3 text-sm text-white">
                 <option value="">All boroughs</option>
                 {BOROUGHS.map((item) => <option key={item}>{item}</option>)}
               </select>
-              <select aria-label="Style" value={style} onChange={(event) => setStyle(event.target.value)} className="h-11 border border-panel bg-ink px-3 text-sm text-paper">
+              <select aria-label="Style" value={style} onChange={(event) => setStyle(event.target.value)} className="h-11 border border-detail bg-ink px-3 text-sm text-white">
                 <option value="">All styles</option>
                 {state.styles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
               </select>
-              <button type="submit" className="h-11 bg-paper px-5 text-sm font-medium text-ink">Search</button>
+              <button type="submit" className="h-11 bg-white px-5 text-sm font-medium text-ink">Search</button>
             </form>
           </div>
           <Photo src={state.portfolio[0]?.image} alt="Tattoo work from the Blackline index" className="min-h-[48vh] w-full lg:min-h-full" />
         </div>
       </section>
 
-      <div className="overflow-hidden border-b border-line bg-paper py-4">
+      <div className="overflow-hidden border-b border-panel py-4">
         <div className="ticker-track gap-10">
           {[...state.styles, ...state.styles].map((item, index) => (
-            <span key={`${item.id}-${index}`} className="font-display text-sm tracking-[0.18em] text-mute">{item.name}</span>
+            <span key={`${item.id}-${index}`} className="font-display text-sm tracking-[0.18em] text-mist">{item.name}</span>
           ))}
         </div>
       </div>
@@ -89,7 +89,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-line bg-white py-16">
+      <section className="border-y border-panel py-16">
         <div className={frame}>
           <h2 className="font-display text-4xl">Popular styles</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -125,7 +125,7 @@ export function HomePage() {
           {portfolio.map((item) => (
             <figure key={item.id} className="relative">
               <Photo src={item.image} alt={item.title} className="aspect-[4/5] w-full" />
-              <figcaption className="absolute inset-x-0 bottom-0 bg-ink/75 px-4 py-3 text-sm text-paper">{item.title}</figcaption>
+              <figcaption className="absolute inset-x-0 bottom-0 bg-ink/75 px-4 py-3 text-sm text-white">{item.title}</figcaption>
             </figure>
           ))}
         </div>
@@ -145,13 +145,13 @@ export function HomePage() {
         ))}
       </section>
 
-      <section className="on-ink bg-ink text-paper">
+      <section className="on-ink bg-ink text-white">
         <div className={`${frame} grid gap-8 py-20 md:grid-cols-[1.4fr_auto] md:items-end`}>
           <div>
             <h2 className="max-w-xl font-express text-5xl leading-[0.9] md:text-7xl">Bring a chair to the index.</h2>
             <p className="mt-6 max-w-lg text-sm leading-6 text-mist">Artists manage profile, portfolio, pricing, calendar, and requests from one demo dashboard.</p>
           </div>
-          <Link href="/for-artists" className="inline-flex h-12 items-center bg-paper px-5 text-sm font-medium text-ink">For artists</Link>
+          <Link href="/for-artists" className="inline-flex h-12 items-center bg-white px-5 text-sm font-medium text-ink">For artists</Link>
         </div>
       </section>
     </div>

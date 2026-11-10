@@ -9,10 +9,10 @@ import { statusLabel } from "@/lib/status";
 export const frame = "mx-auto w-full max-w-[1440px] px-5 md:px-8";
 
 const buttonStyles = {
-  primary: "bg-ink text-paper hover:bg-panel",
-  secondary: "border border-line bg-paper text-ink hover:border-ink",
-  ghost: "text-ink hover:bg-mist",
-  inverse: "bg-paper text-ink hover:bg-mist",
+  primary: "bg-ink text-white ring-1 ring-white hover:bg-panel",
+  secondary: "border border-line bg-white text-ink hover:border-ink",
+  ghost: "text-current hover:bg-paper hover:text-ink",
+  inverse: "bg-white text-ink hover:bg-mist",
 };
 
 export function Button({
@@ -81,7 +81,7 @@ export function Rating({ value, count }: { value: number; count?: number }) {
       <span className="font-medium">{value.toFixed(1)}</span>
       <span className="flex gap-1" aria-hidden="true">
         {[1, 2, 3, 4, 5].map((mark) => (
-          <span key={mark} className={cn("h-1.5 w-3", mark <= Math.round(value) ? "bg-ink" : "bg-line")} />
+          <span key={mark} className={cn("h-1.5 w-3", mark <= Math.round(value) ? "bg-current" : "bg-detail")} />
         ))}
       </span>
       {count != null ? <span className="text-mute">{count}</span> : null}
@@ -92,7 +92,7 @@ export function Rating({ value, count }: { value: number; count?: number }) {
 export function StatusPill({ status, role }: { status: BookingStatus; role?: Role }) {
   const solid = status === "confirmed" || status === "completed";
   return (
-    <span className={cn("inline-flex h-7 items-center px-2 text-xs tracking-wide", solid ? "bg-ink text-paper" : "border border-line text-ink")}>
+    <span className={cn("inline-flex h-7 items-center px-2 text-xs tracking-wide", solid ? "bg-ink text-white" : "border border-detail bg-paper text-ink")}>
       {statusLabel(status, role)}
     </span>
   );
@@ -173,7 +173,7 @@ export function Modal({ open, title, onClose, children }: { open: boolean; title
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[60] grid place-items-center bg-ink/50 px-4" role="presentation" onClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-label={title} className="max-h-[90vh] w-full max-w-lg overflow-y-auto bg-paper p-6" onClick={(event) => event.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-label={title} className="max-h-[90vh] w-full max-w-lg overflow-y-auto border border-line bg-white p-6" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-start justify-between gap-4">
           <h2 className="font-display text-2xl">{title}</h2>
           <button type="button" onClick={onClose} className="text-sm text-mute">Close</button>

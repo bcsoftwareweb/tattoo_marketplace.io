@@ -3,10 +3,11 @@
 @theme inline {
   --color-ink: #090909;
   --color-paper: #f5f5f5;
-  --color-panel: #171717;
+  --color-panel: #262626;
   --color-mute: #737373;
   --color-mist: #e5e5e5;
-  --color-line: #d4d4d4;
+  --color-line: #e5e5e5;
+  --color-detail: #d4d4d4;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-space), ui-sans-serif, system-ui, sans-serif;
   --font-express: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
@@ -14,26 +15,70 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
+  accent-color: #ffffff;
 }
 
 body {
-  background: #f5f5f5;
-  color: #090909;
+  background: #090909;
+  color: #ffffff;
   font-family: var(--font-sans);
+}
+
+@layer base {
+  a {
+    color: inherit;
+  }
+
+  .bg-white,
+  .bg-paper {
+    color: #090909;
+  }
 }
 
 ::selection {
   background: #090909;
-  color: #f5f5f5;
+  color: #ffffff;
+}
+
+::placeholder {
+  color: #737373;
 }
 
 :focus-visible {
-  outline: 2px solid #090909;
+  outline: 2px solid #ffffff;
   outline-offset: 2px;
 }
 
-.on-ink :focus-visible {
-  outline-color: #f5f5f5;
+.bg-white :focus-visible,
+.bg-paper :focus-visible {
+  outline-color: #090909;
+}
+
+input,
+textarea,
+select,
+button {
+  accent-color: #090909;
+}
+
+input[type="file"]::file-selector-button {
+  margin-right: 0.75rem;
+  border: 0;
+  background: #090909;
+  color: #ffffff;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #090909;
+  caret-color: #090909;
+  box-shadow: 0 0 0 1000px #ffffff inset;
 }
 
 @keyframes ticker {

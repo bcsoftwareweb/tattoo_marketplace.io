@@ -316,7 +316,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
           <button
             key={item.id}
             type="button"
-            className="pointer-events-auto max-w-md bg-ink px-4 py-3 text-left text-sm text-paper"
+            className="pointer-events-auto max-w-md bg-ink px-4 py-3 text-left text-sm text-white"
             onClick={() => setToasts((current) => current.filter((toast) => toast.id !== item.id))}
           >
             {item.text}

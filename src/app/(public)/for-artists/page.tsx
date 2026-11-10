@@ -12,7 +12,7 @@ export default function Page() {
         <p>Verification is reviewed by the administrator account. Pending, rejected, and suspended artists stay out of public search.</p>
         <p>Sign in with artist@demo.com to use Nova Reyes at Atelier North. The password is Demo123! and it is not a real account.</p>
       </div>
-      <Link href="/login" className="mt-8 inline-flex h-11 items-center bg-ink px-4 text-sm text-paper">Open the artist demo</Link>
+      <Link href="/login" className="mt-8 inline-flex h-11 items-center bg-white px-4 text-sm text-ink">Open the artist demo</Link>
     </article>
   );
 }
