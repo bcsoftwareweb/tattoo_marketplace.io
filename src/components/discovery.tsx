@@ -181,9 +181,9 @@ export function StyleDetail({ slug }: { slug: string }) {
   const about = style.about ?? createSeed().styles.find((item) => item.slug === style.slug)?.about ?? style.description;
   return (
     <article>
-      <header className={`${frame} py-12 md:py-16`}>
+      <header className={`${frame} pt-8 pb-12 md:pt-10`}>
         <Link href="/styles" className="text-sm text-mist">All styles</Link>
-        <div className="mt-8 grid items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mt-6 grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
             <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">Style</p>
             <h1 className="mt-3 font-express text-[clamp(3rem,6vw,5.5rem)] leading-[0.9]">{style.name}</h1>
