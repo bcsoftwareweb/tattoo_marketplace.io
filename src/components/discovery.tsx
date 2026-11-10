@@ -49,16 +49,11 @@ export function Discovery() {
     q: params.get("q") ?? "",
     style: params.get("style") ?? "",
     borough: params.get("borough") ?? "",
-    neighborhood: params.get("neighborhood") ?? "",
     specialty: params.get("specialty") ?? "",
     price: (params.get("price") as PriceFilter) || "any",
     availability: (params.get("availability") as AvailabilityFilter) || "any",
     sort: (params.get("sort") as ArtistSort) || "relevance",
   };
-  const neighborhoods = useMemo(
-    () => [...new Set(state.artists.filter((artist) => artist.verificationStatus === "approved" && (!query.borough || artist.borough === query.borough)).map((artist) => artist.neighborhood))].sort(),
-    [state.artists, query.borough],
-  );
   const specialties = useMemo(
     () => [...new Set(state.artists.filter((artist) => artist.verificationStatus === "approved").flatMap((artist) => artist.specialties))].sort(),
     [state.artists],
@@ -74,7 +69,7 @@ export function Discovery() {
     router.replace(`/artists?${search.toString()}`, { scroll: false });
   }
 
-  const filtered = Boolean(query.q || query.style || query.borough || query.neighborhood || query.specialty || query.price !== "any" || query.availability !== "any");
+  const filtered = Boolean(query.q || query.style || query.borough || query.specialty || query.price !== "any" || query.availability !== "any");
 
   return (
     <div className={`${frame} py-10 md:py-16`}>
@@ -83,14 +78,14 @@ export function Discovery() {
           <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">The index</p>
           <h1 className="mt-4 max-w-3xl font-express text-[clamp(2.75rem,5vw,5.5rem)] leading-[0.9] tracking-[-0.045em]">Artists across the city.</h1>
         </div>
-        <p className="max-w-sm text-sm leading-6 text-mist lg:justify-self-end">Approved studios, read by style, neighborhood, and the next open date.</p>
+        <p className="max-w-sm text-sm leading-6 text-mist lg:justify-self-end">Approved studios, read by style, borough, and the next open date.</p>
       </header>
       <form className="mt-8 grid gap-6" onSubmit={(event) => event.preventDefault()}>
         <label className="block">
           <span className="sr-only">Search artists</span>
-          <input value={query.q} onChange={(event) => update({ q: event.target.value })} placeholder="Search name, studio, or neighborhood" className={`${inkField} h-12 px-4`} />
+          <input value={query.q} onChange={(event) => update({ q: event.target.value })} placeholder="Search name or studio" className={`${inkField} h-12 px-4`} />
         </label>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <FilterField label="Style">
             <SelectInput value={query.style} onChange={(event) => update({ style: event.target.value })} className={inkField}>
               <option value="">Any style</option>
@@ -98,15 +93,9 @@ export function Discovery() {
             </SelectInput>
           </FilterField>
           <FilterField label="Borough">
-            <SelectInput value={query.borough} onChange={(event) => update({ borough: event.target.value, neighborhood: "" })} className={inkField}>
+            <SelectInput value={query.borough} onChange={(event) => update({ borough: event.target.value })} className={inkField}>
               <option value="">Any borough</option>
               {BOROUGHS.map((borough) => <option key={borough}>{borough}</option>)}
-            </SelectInput>
-          </FilterField>
-          <FilterField label="Neighborhood">
-            <SelectInput value={query.neighborhood} onChange={(event) => update({ neighborhood: event.target.value })} className={inkField}>
-              <option value="">Any neighborhood</option>
-              {neighborhoods.map((item) => <option key={item}>{item}</option>)}
             </SelectInput>
           </FilterField>
           <FilterField label="Specialty">
