@@ -13,8 +13,8 @@ import { frame } from "@/components/ui";
 const PUBLIC_LINKS = [
   ["/artists", "Artists"],
   ["/styles", "Styles"],
-  ["/how-it-works", "How it works"],
   ["/about", "About"],
+  ["/how-it-works", "How it works"],
 ];
 
 export function PublicHeader() {
