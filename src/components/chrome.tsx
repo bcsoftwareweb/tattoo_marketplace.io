@@ -80,7 +80,7 @@ export function PublicHeader() {
                 <li key={href}><Link href={href} className="block py-2 text-lg">{label}</Link></li>
               ))}
             </ul>
-            <Link href={session ? homeFor(session.role) : "/login"} className="mt-auto flex h-11 items-center justify-center bg-white text-sm text-ink">
+            <Link href={session ? homeFor(session.role) : "/login"} className="mt-6 flex h-11 items-center justify-center bg-white text-sm text-ink">
               {session ? "Dashboard" : "Sign In/Sign Up"}
             </Link>
           </div>
