@@ -60,9 +60,7 @@ export function DiscoveryFeed() {
   const searchOpen = useSearchDock()?.open ?? false;
   const searchRef = useRef<HTMLInputElement>(null);
   const feed = useMemo(() => artworkFeed(state), [state]);
-  const catalogKey = feed.map((item) => item.id).join("\n");
-  const feedRef = useRef(feed);
-  feedRef.current = feed;
+  const catalogRef = useRef("");
   const [mixed, setMixed] = useState<Artwork[] | null>(null);
   const [query, setQuery] = useState("");
   const [styleId, setStyleId] = useState("");
@@ -81,8 +79,11 @@ export function DiscoveryFeed() {
   }, []);
 
   useEffect(() => {
-    setMixed(mixArtwork(feedRef.current));
-  }, [catalogKey]);
+    const catalogKey = feed.map((item) => item.id).join("\n");
+    if (catalogRef.current === catalogKey) return;
+    catalogRef.current = catalogKey;
+    setMixed(mixArtwork(feed));
+  }, [feed]);
 
   useEffect(() => {
     const entry = { query: query.trim(), styleId, borough, placement };
