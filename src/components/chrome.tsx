@@ -14,7 +14,6 @@ const PUBLIC_LINKS = [
   ["/", "Discover"],
   ["/styles", "Explore styles"],
   ["/artists", "Artists"],
-  ["/#discover", "Search"],
 ];
 
 function MenuIcon({ open }: { open: boolean }) {
