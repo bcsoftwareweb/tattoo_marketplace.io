@@ -140,7 +140,7 @@ function ArtworkCard({ item, saved, onSave }: { item: Artwork; saved: boolean; o
           <Photo src={item.image} alt={item.title} className="absolute inset-0 h-full w-full" />
         </Link>
         <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="absolute right-2 top-2 grid h-9 w-9 place-items-center bg-white text-ink">
-          <Heart filled={saved} />
+          <Bookmark filled={saved} />
         </button>
       </div>
       <Link href={`/artwork/?id=${item.id}`} className="mt-3 block truncate text-sm">{item.title}</Link>
@@ -153,14 +153,15 @@ function ArtworkCard({ item, saved, onSave }: { item: Artwork; saved: boolean; o
   );
 }
 
-function Heart({ filled }: { filled: boolean }) {
+function Bookmark({ filled }: { filled: boolean }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
       <path
-        d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 4.6-7 9-7 9z"
+        d="M6.5 3.5h11v17l-5.5-3.4L6.5 20.5z"
         fill={filled ? "currentColor" : "none"}
         stroke="currentColor"
         strokeWidth="1.6"
+        strokeLinejoin="miter"
       />
     </svg>
   );

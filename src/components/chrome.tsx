@@ -65,17 +65,17 @@ export function PublicHeader() {
         Skip to content
       </a>
       <div className={`${frame} flex h-16 items-center justify-between gap-3`}>
-        <Link href="/" onClick={() => openPage("/")} className="shrink-0 font-display text-xs tracking-[0.16em] sm:text-sm sm:tracking-[0.22em]">{brand}</Link>
+        <Link href="/" onClick={() => openPage("/")} className="shrink-0 border-b border-transparent font-display text-xs tracking-[0.16em] hover:border-white sm:text-sm sm:tracking-[0.22em]">{brand}</Link>
         <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
           {PUBLIC_LINKS.map(([href, label]) => (
-            <Link key={href} href={href} onClick={() => openPage(href)} className="text-sm hover:text-mute">{label}</Link>
+            <Link key={href} href={href} onClick={() => openPage(href)} className="border-b border-transparent pb-0.5 text-sm hover:border-white">{label}</Link>
           ))}
         </nav>
         <div className="flex items-center gap-2">
           {session ? (
             <Link href={accountHref} onClick={() => openPage(accountHref)} className="hidden h-10 items-center bg-white px-4 text-sm text-ink md:inline-flex">Dashboard</Link>
           ) : (
-            <Link href="/login" onClick={() => openPage("/login")} className="hidden text-sm text-white md:inline">Sign In/Sign up</Link>
+            <Link href="/login" onClick={() => openPage("/login")} className="hidden border-b border-transparent pb-0.5 text-sm text-white hover:border-white md:inline">Sign In/Sign up</Link>
           )}
           <button
             type="button"
