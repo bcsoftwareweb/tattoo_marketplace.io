@@ -14,7 +14,7 @@ import { Button, frame, Modal, Photo, SelectInput } from "@/components/ui";
 const SAVED_KEY = "blackline.saved-art.v1";
 const SEARCH_KEY = "blackline.searches.v1";
 const NO_ARTISTS: string[] = [];
-const inkField = "h-11 w-full border border-detail bg-ink px-3 text-sm text-white outline-none";
+const inkField = "h-11 w-full border border-detail bg-ink px-3 text-base text-white outline-none md:text-sm";
 
 const ASPECT: Record<Artwork["aspect"], string> = {
   "3/4": "aspect-[3/4]",
