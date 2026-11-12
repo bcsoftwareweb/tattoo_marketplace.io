@@ -232,11 +232,11 @@ export function StatusPill({ status, role }: { status: BookingStatus; role?: Rol
   );
 }
 
-export function Photo({ src, alt, className }: { src?: string; alt: string; className?: string }) {
+export function Photo({ src, alt, className, loading = "lazy" }: { src?: string; alt: string; className?: string; loading?: "lazy" | "eager" }) {
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [src]);
   if (!src || failed) return <div role="img" aria-label={alt} className={cn("bg-panel", className)} />;
-  return <img src={src} alt={alt} className={cn("object-cover", className)} onError={() => setFailed(true)} />;
+  return <img src={src} alt={alt} loading={loading} decoding="async" className={cn("object-cover", className)} onError={() => setFailed(true)} />;
 }
 
 export function Empty({ title, body, action }: { title: string; body: string; action?: React.ReactNode }) {

@@ -29,6 +29,6 @@ export function safeNextPath(value: string | null, role: Role) {
   }
   if (role === "artist" && path.startsWith("/artist")) return value;
   if (role === "admin" && path.startsWith("/admin")) return value;
-  if (path.startsWith("/artists") || path === "/") return value;
+  if (path.startsWith("/artists") || path.startsWith("/artwork") || path === "/") return value;
   return homeFor(role);
 }

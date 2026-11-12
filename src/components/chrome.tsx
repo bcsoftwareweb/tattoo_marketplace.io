@@ -11,10 +11,10 @@ import type { Role } from "@/lib/types";
 import { frame } from "@/components/ui";
 
 const PUBLIC_LINKS = [
+  ["/", "Discover"],
+  ["/styles", "Explore styles"],
   ["/artists", "Artists"],
-  ["/styles", "Styles"],
-  ["/about", "About"],
-  ["/how-it-works", "How it works"],
+  ["/#discover", "Search"],
 ];
 
 function MenuIcon({ open }: { open: boolean }) {
@@ -57,9 +57,14 @@ export function PublicHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Link href={session ? homeFor(session.role) : "/login"} className="hidden h-10 items-center bg-white px-4 text-sm text-ink md:inline-flex">
-            {session ? "Dashboard" : "Sign In/Sign Up"}
-          </Link>
+          {session ? (
+            <Link href={homeFor(session.role)} className="hidden h-10 items-center bg-white px-4 text-sm text-ink md:inline-flex">Dashboard</Link>
+          ) : (
+            <>
+              <Link href="/login" className="hidden text-sm text-white md:inline">Sign in</Link>
+              <Link href="/login" className="hidden h-10 items-center bg-white px-4 text-sm text-ink md:inline-flex">Join</Link>
+            </>
+          )}
           <button
             type="button"
             className="grid h-10 w-10 place-items-center md:hidden"
@@ -80,9 +85,14 @@ export function PublicHeader() {
                 <li key={href}><Link href={href} className="block py-3 text-lg">{label}</Link></li>
               ))}
             </ul>
-            <Link href={session ? homeFor(session.role) : "/login"} className="mt-14 flex h-11 items-center justify-center bg-white text-sm text-ink">
-              {session ? "Dashboard" : "Sign In/Sign Up"}
-            </Link>
+            {session ? (
+              <Link href={homeFor(session.role)} className="mt-14 flex h-11 items-center justify-center bg-white text-sm text-ink">Dashboard</Link>
+            ) : (
+              <div className="mt-14 grid gap-3">
+                <Link href="/login" className="text-lg">Sign in</Link>
+                <Link href="/login" className="flex h-11 items-center justify-center bg-white text-sm text-ink">Join</Link>
+              </div>
+            )}
           </div>
         </nav>
       </div>
