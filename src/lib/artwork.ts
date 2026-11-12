@@ -74,6 +74,40 @@ function toArtwork(piece: PortfolioItem, state: DemoState): Artwork | null {
   };
 }
 
+function shuffle<T>(items: readonly T[], random: () => number) {
+  const next = [...items];
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(random() * (index + 1));
+    const current = next[index]!;
+    next[index] = next[swap]!;
+    next[swap] = current;
+  }
+  return next;
+}
+
+/** A fresh homepage order. Artists are dealt in rotation so the first screen is not one studio. */
+export function mixArtwork(feed: readonly Artwork[], random: () => number = Math.random) {
+  const groups = new Map<string, Artwork[]>();
+  for (const item of feed) {
+    const pile = groups.get(item.artistId);
+    if (pile) pile.push(item);
+    else groups.set(item.artistId, [item]);
+  }
+  const piles = shuffle([...groups.values()], random).map((pile) => shuffle(pile, random));
+  const mixed: Artwork[] = [];
+  let pending = true;
+  while (pending) {
+    pending = false;
+    for (const pile of piles) {
+      const next = pile.shift();
+      if (!next) continue;
+      mixed.push(next);
+      if (pile.length) pending = true;
+    }
+  }
+  return mixed;
+}
+
 export function artworkFeed(state: DemoState) {
   const seen = new Set<string>();
   const feed: Artwork[] = [];

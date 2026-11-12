@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useDemo } from "@/context/demo-context";
-import { artworkFeed, type Artwork } from "@/lib/artwork";
+import { artworkFeed, mixArtwork, type Artwork } from "@/lib/artwork";
 import { BOROUGHS, PLACEMENTS } from "@/lib/constants";
 import { money } from "@/lib/format";
 import { recommendArtists, recommendSketches, type Recommendation, type SearchTaste } from "@/lib/recommend";
@@ -60,6 +60,10 @@ export function DiscoveryFeed() {
   const searchOpen = useSearchDock()?.open ?? false;
   const searchRef = useRef<HTMLInputElement>(null);
   const feed = useMemo(() => artworkFeed(state), [state]);
+  const catalogKey = feed.map((item) => item.id).join("\n");
+  const feedRef = useRef(feed);
+  feedRef.current = feed;
+  const [mixed, setMixed] = useState<Artwork[] | null>(null);
   const [query, setQuery] = useState("");
   const [styleId, setStyleId] = useState("");
   const [borough, setBorough] = useState("");
@@ -77,6 +81,10 @@ export function DiscoveryFeed() {
   }, []);
 
   useEffect(() => {
+    setMixed(mixArtwork(feedRef.current));
+  }, [catalogKey]);
+
+  useEffect(() => {
     const entry = { query: query.trim(), styleId, borough, placement };
     if (!entry.query && !entry.styleId && !entry.borough && !entry.placement) return;
     if (entry.query.length === 1) return;
@@ -92,7 +100,7 @@ export function DiscoveryFeed() {
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return feed.filter((item) => {
+    return (mixed ?? []).filter((item) => {
       if (styleId && item.styleId !== styleId) return false;
       if (borough && item.borough !== borough) return false;
       if (placement && item.placement !== placement) return false;
@@ -100,7 +108,7 @@ export function DiscoveryFeed() {
       const haystack = [item.title, item.description, item.artistName, item.styleName, item.category, item.neighborhood, item.placement, ...item.tags].join(" ").toLowerCase();
       return haystack.includes(needle);
     });
-  }, [feed, query, styleId, borough, placement]);
+  }, [mixed, query, styleId, borough, placement]);
 
   useEffect(() => setShown(18), [query, styleId, borough, placement]);
 
@@ -178,15 +186,15 @@ export function DiscoveryFeed() {
       ) : null}
 
       <section className={`${frame} pb-20`} aria-label="Artwork">
-        {visible.length ? (
+        {mixed && visible.length ? (
           <div className="artwork-masonry">
             {visible.map((item) => (
               <ArtworkCard key={item.id} item={item} saved={session?.role === "customer" && saved.includes(item.id)} onSave={() => save(item)} />
             ))}
           </div>
-        ) : (
+        ) : mixed ? (
           <p className="py-16 text-sm text-mist">Nothing in the gallery matches that search.</p>
-        )}
+        ) : null}
         <div ref={sentinel} className="h-8" />
         {shown < filtered.length ? <p className="text-center text-xs uppercase tracking-[0.18em] text-mute">Loading more work</p> : null}
       </section>
