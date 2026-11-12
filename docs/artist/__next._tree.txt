@@ -4,4 +4,4 @@
 :HL["/tattoo_marketplace.io/_next/static/media/2b81eeca71e9850c-s.p.3vm0tq4e-zz_5.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":"artist","h":96,"c":"$Q2"}]]
-0:{"b":"soKOXeiZwtgbuDlkUowr1","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"7VxyDzTpwUFdwtuDnNqc8","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

@@ -16,6 +16,12 @@ const PUBLIC_LINKS = [
   ["/artists", "Artists"],
 ];
 
+function isCurrentPage(pathname: string, href: string) {
+  const current = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  const target = href.length > 1 && href.endsWith("/") ? href.slice(0, -1) : href;
+  return current === target;
+}
+
 function MenuIcon({ open }: { open: boolean }) {
   return (
     <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" className="block">
@@ -42,6 +48,16 @@ export function PublicHeader() {
     };
   }, [open]);
   const brand = state.settings.platformName || "BLACKLINE";
+  const accountHref = session ? homeFor(session.role) : "/login";
+  const openPage = (href: string) => {
+    setOpen(false);
+    if (!isCurrentPage(pathname, href)) return;
+    const root = document.documentElement;
+    const previous = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, 0);
+    root.style.scrollBehavior = previous;
+  };
 
   return (
     <header className="on-ink sticky top-0 z-40 border-b border-panel bg-ink text-white">
@@ -49,17 +65,17 @@ export function PublicHeader() {
         Skip to content
       </a>
       <div className={`${frame} flex h-16 items-center justify-between gap-3`}>
-        <Link href="/" className="shrink-0 font-display text-xs tracking-[0.16em] sm:text-sm sm:tracking-[0.22em]">{brand}</Link>
+        <Link href="/" onClick={() => openPage("/")} className="shrink-0 font-display text-xs tracking-[0.16em] sm:text-sm sm:tracking-[0.22em]">{brand}</Link>
         <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
           {PUBLIC_LINKS.map(([href, label]) => (
-            <Link key={href} href={href} className="text-sm hover:text-mute">{label}</Link>
+            <Link key={href} href={href} onClick={() => openPage(href)} className="text-sm hover:text-mute">{label}</Link>
           ))}
         </nav>
         <div className="flex items-center gap-2">
           {session ? (
-            <Link href={homeFor(session.role)} className="hidden h-10 items-center bg-white px-4 text-sm text-ink md:inline-flex">Dashboard</Link>
+            <Link href={accountHref} onClick={() => openPage(accountHref)} className="hidden h-10 items-center bg-white px-4 text-sm text-ink md:inline-flex">Dashboard</Link>
           ) : (
-            <Link href="/login" className="hidden text-sm text-white md:inline">Sign In/Sign up</Link>
+            <Link href="/login" onClick={() => openPage("/login")} className="hidden text-sm text-white md:inline">Sign In/Sign up</Link>
           )}
           <button
             type="button"
@@ -78,13 +94,13 @@ export function PublicHeader() {
           <div className={`flex h-full flex-col border-t border-panel px-5 pb-8 pt-12 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${open ? "opacity-100" : "opacity-0"}`}>
             <ul className="grid gap-3">
               {PUBLIC_LINKS.map(([href, label]) => (
-                <li key={href}><Link href={href} className="block py-3 text-lg">{label}</Link></li>
+                <li key={href}><Link href={href} onClick={() => openPage(href)} className="block py-3 text-lg">{label}</Link></li>
               ))}
             </ul>
             {session ? (
-              <Link href={homeFor(session.role)} className="mt-14 text-lg">Dashboard</Link>
+              <Link href={accountHref} onClick={() => openPage(accountHref)} className="mt-14 text-lg">Dashboard</Link>
             ) : (
-              <Link href="/login" className="mt-14 text-lg">Sign In/Sign up</Link>
+              <Link href="/login" onClick={() => openPage("/login")} className="mt-14 text-lg">Sign In/Sign up</Link>
             )}
           </div>
         </nav>
