@@ -5,10 +5,15 @@ import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useDemo } from "@/context/demo-context";
 import { artworkFeed, type Artwork } from "@/lib/artwork";
 import { BOROUGHS, PLACEMENTS } from "@/lib/constants";
+import { money } from "@/lib/format";
+import { recommendArtists, recommendSketches, type Recommendation, type SearchTaste } from "@/lib/recommend";
+import type { Artist } from "@/lib/types";
 import { useSearchDock } from "@/components/mobile-dock";
 import { Button, frame, Modal, Photo, SelectInput } from "@/components/ui";
 
 const SAVED_KEY = "blackline.saved-art.v1";
+const SEARCH_KEY = "blackline.searches.v1";
+const NO_ARTISTS: string[] = [];
 const inkField = "h-11 w-full border border-detail bg-ink px-3 text-sm text-white outline-none";
 
 const ASPECT: Record<Artwork["aspect"], string> = {
@@ -30,6 +35,26 @@ function loadSaved() {
   }
 }
 
+function loadSearches(): SearchTaste[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(SEARCH_KEY) ?? "[]") as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.flatMap((item) => {
+      if (!item || typeof item !== "object") return [];
+      const row = item as Partial<SearchTaste>;
+      if (typeof row.query !== "string" || typeof row.styleId !== "string" || typeof row.borough !== "string" || typeof row.placement !== "string") return [];
+      return [{ query: row.query, styleId: row.styleId, borough: row.borough, placement: row.placement }];
+    }).slice(0, 8);
+  } catch {
+    return [];
+  }
+}
+
+function sameTaste(a: SearchTaste, b: SearchTaste) {
+  return a.query === b.query && a.styleId === b.styleId && a.borough === b.borough && a.placement === b.placement;
+}
+
 export function DiscoveryFeed() {
   const { state, session } = useDemo();
   const searchOpen = useSearchDock()?.open ?? false;
@@ -41,10 +66,29 @@ export function DiscoveryFeed() {
   const [placement, setPlacement] = useState("");
   const [shown, setShown] = useState(18);
   const [saved, setSaved] = useState<string[]>([]);
+  const [history, setHistory] = useState<SearchTaste[]>([]);
   const [prompt, setPrompt] = useState("");
   const sentinel = useRef<HTMLDivElement>(null);
+  const savedArtistIds = session?.role === "customer" ? state.favorites[session.userId] ?? NO_ARTISTS : NO_ARTISTS;
 
-  useEffect(() => setSaved(loadSaved()), []);
+  useEffect(() => {
+    setSaved(loadSaved());
+    setHistory(loadSearches());
+  }, []);
+
+  useEffect(() => {
+    const entry = { query: query.trim(), styleId, borough, placement };
+    if (!entry.query && !entry.styleId && !entry.borough && !entry.placement) return;
+    if (entry.query.length === 1) return;
+    const handle = window.setTimeout(() => {
+      setHistory((current) => {
+        const next = [entry, ...current.filter((item) => !sameTaste(item, entry))].slice(0, 8);
+        window.localStorage.setItem(SEARCH_KEY, JSON.stringify(next));
+        return next;
+      });
+    }, entry.query ? 500 : 0);
+    return () => window.clearTimeout(handle);
+  }, [query, styleId, borough, placement]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -80,6 +124,21 @@ export function DiscoveryFeed() {
     return () => observer.disconnect();
   }, [filtered.length]);
 
+  const taste = useMemo(() => {
+    const current = { query: query.trim(), styleId, borough, placement };
+    const active = Boolean(current.query || current.styleId || current.borough || current.placement);
+    return active ? [current, ...history.filter((item) => !sameTaste(item, current))] : history;
+  }, [query, styleId, borough, placement, history]);
+
+  const sketches = useMemo(
+    () => recommendSketches(feed, { savedIds: saved, savedArtistIds, searches: taste }),
+    [feed, saved, savedArtistIds, taste],
+  );
+  const artists = useMemo(
+    () => recommendArtists(state.artists, state.styles, feed, { savedIds: saved, savedArtistIds, searches: taste }),
+    [state.artists, state.styles, feed, saved, savedArtistIds, taste],
+  );
+
   const visible = filtered.slice(0, shown);
 
   function save(item: Artwork) {
@@ -110,6 +169,11 @@ export function DiscoveryFeed() {
           <div className="mt-4 grid gap-3">
             <SearchFields query={query} setQuery={setQuery} styleId={styleId} setStyleId={setStyleId} borough={borough} setBorough={setBorough} placement={placement} setPlacement={setPlacement} styles={state.styles} inputRef={searchRef} />
           </div>
+          <SearchIdeas
+            sketches={sketches}
+            artists={artists}
+            styleName={(id) => state.styles.find((style) => style.id === id)?.name ?? ""}
+          />
         </form>
       ) : null}
 
@@ -180,6 +244,67 @@ function SearchFields({
         {PLACEMENTS.map((item) => <option key={item}>{item}</option>)}
       </SelectInput>
     </>
+  );
+}
+
+function SearchIdeas({
+  sketches,
+  artists,
+  styleName,
+}: {
+  sketches: Recommendation<Artwork>;
+  artists: Recommendation<Artist>;
+  styleName: (id: string) => string;
+}) {
+  return (
+    <div className="mt-8 grid gap-8 pb-6">
+      <section aria-label="Tattoo sketches">
+        <h2 className="text-xs uppercase tracking-[0.18em] text-mist">Tattoo sketches</h2>
+        <p className="mt-1 text-xs text-mute">{sketches.personalized ? "From your saves and searches" : "Popular on Blackline"}</p>
+        {sketches.items.length ? (
+          <ul className="mt-3 grid grid-cols-2 gap-3">
+            {sketches.items.map((item) => (
+              <li key={item.id}>
+                <Link href={`/artwork/?id=${item.id}`} className="block">
+                  <span className="block aspect-[3/4] overflow-hidden">
+                    <Photo src={item.image} alt={item.title} className="h-full w-full" />
+                  </span>
+                  <span className="mt-2 block truncate text-sm">{item.title}</span>
+                  <span className="block truncate text-xs text-mute">{item.artistName}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 text-sm text-mute">No sketches match that yet.</p>
+        )}
+      </section>
+      <section aria-label="Tattoo artists">
+        <h2 className="text-xs uppercase tracking-[0.18em] text-mist">Tattoo artists</h2>
+        <p className="mt-1 text-xs text-mute">{artists.personalized ? "From your saves and searches" : "Popular on Blackline"}</p>
+        {artists.items.length ? (
+          <ul className="mt-3 grid gap-3">
+            {artists.items.map((artist) => {
+              const styles = artist.styleIds.map(styleName).filter(Boolean).slice(0, 2);
+              return (
+                <li key={artist.id}>
+                  <Link href={`/artists/${artist.slug}`} className="flex items-center gap-3">
+                    <Photo src={artist.photo} alt="" className="h-16 w-14 shrink-0" />
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm">{artist.name}</span>
+                      <span className="block truncate text-xs text-mute">{artist.neighborhood} · From {money(artist.startingPrice)}</span>
+                      {styles.length ? <span className="block truncate text-xs text-mist">{styles.join(" · ")}</span> : null}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="mt-3 text-sm text-mute">No artists match that yet.</p>
+        )}
+      </section>
+    </div>
   );
 }
 
