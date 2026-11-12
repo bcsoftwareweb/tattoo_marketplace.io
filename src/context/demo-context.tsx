@@ -18,6 +18,7 @@ import {
   saveCategory,
   saveStyle,
   sendMessage,
+  submitArtistApplication,
   setCustomerStatus,
   setReportStatus,
   setReviewStatus,
@@ -31,6 +32,7 @@ import {
   updateService,
   updateSettings,
   updateWorkingHours,
+  type ArtistApplication,
   type ArtistPatch,
   type BookingDraft,
 } from "@/lib/mutations";
@@ -83,6 +85,7 @@ interface DemoContextValue {
   editCategory: (input: Category) => string | null;
   removeCategory: (id: string) => string | null;
   savePlatform: (patch: Partial<PlatformSettings>) => string | null;
+  submitApplication: (input: ArtistApplication) => { id?: string; error?: string };
 }
 
 const DemoContext = createContext<DemoContextValue | null>(null);
@@ -341,6 +344,12 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         const who = actor();
         if (!who) return "Sign in again.";
         return commit(updateSettings(state, patch, who), "Settings saved.");
+      },
+      submitApplication: (input) => {
+        const result = submitArtistApplication(state, input, now());
+        if (result.error) return { error: result.error };
+        setState(result.state);
+        return { id: result.id };
       },
     };
   }, [ready, session, state, toasts]);

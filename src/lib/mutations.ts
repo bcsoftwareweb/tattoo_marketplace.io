@@ -1,7 +1,7 @@
 import { transitionBooking, type BookingAction } from "@/lib/booking";
-import { BOROUGHS, DEMO_TODAY, TIME_SLOTS } from "@/lib/constants";
+import { ADMIN_ID, BOROUGHS, DEMO_TODAY, TIME_SLOTS } from "@/lib/constants";
 import { deriveState } from "@/lib/derive";
-import { uid, weekdayIndex } from "@/lib/format";
+import { addDays, uid, weekdayIndex } from "@/lib/format";
 import { bookingPath, messagePath } from "@/lib/permissions";
 import type {
   Actor,
@@ -537,6 +537,163 @@ export function toggleFeatured(state: DemoState, artistId: string, actor: Actor)
 
 function slugify(value: string) {
   return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export interface ArtistApplication {
+  name: string;
+  email: string;
+  phone: string;
+  instagram: string;
+  photo: string;
+  borough: string;
+  neighborhood: string;
+  studioName: string;
+  studioAddress: string;
+  yearsExperience: number;
+  startingPrice: number;
+  styleIds: string[];
+  specialties: string[];
+  bio: string;
+  licenseNumber: string;
+  studioPermit: string;
+  bloodbornePathogenDate: string;
+  licenseExpiresOn: string;
+  notes: string;
+}
+
+function applicationCalendar(closed: number[]) {
+  return Array.from({ length: 120 }, (_, index) => {
+    const date = addDays(DEMO_TODAY, index);
+    const closedDay = closed.includes(weekdayIndex(date));
+    return { date, status: closedDay ? ("blocked" as const) : ("open" as const) };
+  });
+}
+
+export function submitArtistApplication(state: DemoState, input: ArtistApplication, now: string): Result {
+  const name = input.name.trim();
+  const email = input.email.trim().toLowerCase();
+  const phone = input.phone.trim();
+  const neighborhood = input.neighborhood.trim();
+  const studioName = input.studioName.trim();
+  const studioAddress = input.studioAddress.trim();
+  const bio = input.bio.trim();
+  const licenseNumber = input.licenseNumber.trim();
+  const studioPermit = input.studioPermit.trim();
+  const notes = input.notes.trim();
+  const years = Math.round(input.yearsExperience);
+  const startingPrice = Math.round(input.startingPrice);
+  const styleIds = [...new Set(input.styleIds)];
+  const specialties = input.specialties.map((item) => item.trim()).filter(Boolean);
+
+  if (name.length < 2) return fail(state, "Enter your name.");
+  if (!EMAIL_PATTERN.test(email)) return fail(state, "Enter a valid email address.");
+  if (state.artists.some((artist) => artist.email.toLowerCase() === email)) return fail(state, "An application already uses that email.");
+  if (phone.replace(/\D/g, "").length < 10) return fail(state, "Enter a phone number.");
+  if (!BOROUGHS.includes(input.borough as (typeof BOROUGHS)[number])) return fail(state, "Choose a New York borough.");
+  if (neighborhood.length < 2) return fail(state, "Enter your neighborhood.");
+  if (studioName.length < 2) return fail(state, "Enter the studio name.");
+  if (studioAddress.length < 8) return fail(state, "Enter the studio address.");
+  if (!Number.isFinite(years) || years < 0 || years > 60) return fail(state, "Enter years of experience between 0 and 60.");
+  if (!Number.isFinite(startingPrice) || startingPrice <= 0) return fail(state, "Enter a starting price greater than zero.");
+  if (!styleIds.length || styleIds.some((id) => !state.styles.some((style) => style.id === id))) {
+    return fail(state, "Choose at least one style you tattoo.");
+  }
+  if (!specialties.length || specialties.length > 6) return fail(state, "List between one and six specialties.");
+  if (bio.length < 40) return fail(state, "Describe your work in at least a sentence or two.");
+  if (licenseNumber.length < 4) return fail(state, "Enter your tattoo license number.");
+  if (studioPermit.length < 2) return fail(state, "Enter the studio permit.");
+  if (!DATE_PATTERN.test(input.bloodbornePathogenDate) || input.bloodbornePathogenDate > DEMO_TODAY) {
+    return fail(state, "Enter a bloodborne pathogen training date that has already passed.");
+  }
+  if (!DATE_PATTERN.test(input.licenseExpiresOn) || input.licenseExpiresOn < DEMO_TODAY) {
+    return fail(state, "Enter a license expiration that is still current.");
+  }
+  if (input.photo && !input.photo.startsWith("data:image/") && !input.photo.startsWith("https://")) {
+    return fail(state, "Use a portrait image.");
+  }
+
+  const baseSlug = slugify(name);
+  if (!baseSlug) return fail(state, "Enter your name.");
+  let slug = baseSlug;
+  let suffix = 2;
+  while (state.artists.some((artist) => artist.slug === slug)) {
+    slug = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+
+  const id = uid("artist");
+  const closed = [0, 1];
+  const instagram = input.instagram.trim();
+  const handle = instagram ? (instagram.startsWith("@") ? instagram : `@${instagram}`) : "";
+  const artist: Artist = {
+    id,
+    slug,
+    name,
+    email,
+    phone,
+    photo: input.photo,
+    bio,
+    borough: input.borough,
+    neighborhood,
+    studioName,
+    studioAddress,
+    yearsExperience: years,
+    styleIds,
+    specialties,
+    startingPrice,
+    rating: 0,
+    reviewCount: 0,
+    featured: false,
+    verificationStatus: "pending",
+    verificationNote: "Application submitted. License and studio permit are waiting on review.",
+    license: {
+      licenseNumber,
+      licenseType: "NYC Tattoo Artist License",
+      issuedBy: "New York City Department of Health",
+      expiresOn: input.licenseExpiresOn,
+      bloodbornePathogenDate: input.bloodbornePathogenDate,
+      studioPermit,
+      notes: notes || "Submitted from the public artist application.",
+    },
+    workingHours: [0, 1, 2, 3, 4, 5, 6].map((day) => ({
+      day,
+      closed: closed.includes(day),
+      open: "11:00",
+      close: "19:00",
+    })),
+    availability: applicationCalendar(closed),
+    joinedAt: now.slice(0, 10),
+    instagram: handle,
+  };
+
+  return {
+    id,
+    state: deriveState({
+      ...state,
+      artists: [...state.artists, artist],
+      notifications: [
+        {
+          id: uid("nt"),
+          userId: ADMIN_ID,
+          role: "admin",
+          title: "Artist application waiting",
+          body: `${name} applied from ${neighborhood}. The profile stays hidden until you approve it.`,
+          href: `/admin/artists/detail?id=${id}`,
+          read: false,
+          createdAt: now,
+          kind: "verification",
+        },
+        ...state.notifications,
+      ],
+      activity: [
+        { id: uid("act"), userId: ADMIN_ID, role: "admin", text: `${name} submitted an artist application.`, createdAt: now },
+        ...state.activity,
+      ],
+    }),
+  };
 }
 
 export function saveStyle(state: DemoState, input: TattooStyle, actor: Actor): Result {
