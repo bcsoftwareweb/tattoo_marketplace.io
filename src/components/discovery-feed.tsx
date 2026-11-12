@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useDemo } from "@/context/demo-context";
 import { artworkFeed, type Artwork } from "@/lib/artwork";
 import { BOROUGHS, PLACEMENTS } from "@/lib/constants";
+import { useSearchDock } from "@/components/mobile-dock";
 import { Button, frame, Modal, Photo, SelectInput } from "@/components/ui";
 
 const SAVED_KEY = "blackline.saved-art.v1";
@@ -31,6 +32,8 @@ function loadSaved() {
 
 export function DiscoveryFeed() {
   const { state, session } = useDemo();
+  const searchOpen = useSearchDock()?.open ?? false;
+  const searchRef = useRef<HTMLInputElement>(null);
   const feed = useMemo(() => artworkFeed(state), [state]);
   const [query, setQuery] = useState("");
   const [styleId, setStyleId] = useState("");
@@ -56,6 +59,11 @@ export function DiscoveryFeed() {
   }, [feed, query, styleId, borough, placement]);
 
   useEffect(() => setShown(18), [query, styleId, borough, placement]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    searchRef.current?.focus();
+  }, [searchOpen]);
 
   useEffect(() => {
     const node = sentinel.current;
@@ -87,25 +95,18 @@ export function DiscoveryFeed() {
         <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">Blackline</p>
         <h1 className="mt-3 font-express text-[clamp(2.6rem,5vw,4.5rem)] leading-[0.9] tracking-[-0.045em]">Discover the art. Find the artist.</h1>
         <p className="mt-3 max-w-xl text-base leading-7 text-mist">Explore tattoos, sketches, and original work from independent tattoo artists.</p>
-        <form className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4" onSubmit={(event) => event.preventDefault()}>
-          <label className="block md:col-span-2 xl:col-span-1">
-            <span className="sr-only">Search artwork</span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Subject, artist, or style" className={inkField} />
-          </label>
-          <SelectInput value={styleId} onChange={(event) => setStyleId(event.target.value)} className={inkField} aria-label="Style">
-            <option value="">Any style</option>
-            {state.styles.map((style) => <option key={style.id} value={style.id}>{style.name}</option>)}
-          </SelectInput>
-          <SelectInput value={borough} onChange={(event) => setBorough(event.target.value)} className={inkField} aria-label="Location">
-            <option value="">Any borough</option>
-            {BOROUGHS.map((item) => <option key={item}>{item}</option>)}
-          </SelectInput>
-          <SelectInput value={placement} onChange={(event) => setPlacement(event.target.value)} className={inkField} aria-label="Body placement">
-            <option value="">Any placement</option>
-            {PLACEMENTS.map((item) => <option key={item}>{item}</option>)}
-          </SelectInput>
+        <form className="mt-6 hidden gap-3 md:grid md:grid-cols-2 xl:grid-cols-4" onSubmit={(event) => event.preventDefault()}>
+          <SearchFields query={query} setQuery={setQuery} styleId={styleId} setStyleId={setStyleId} borough={borough} setBorough={setBorough} placement={placement} setPlacement={setPlacement} styles={state.styles} />
         </form>
       </section>
+      {searchOpen ? (
+        <form id="mobile-search" className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-40 border-t border-panel bg-ink px-5 py-4 md:hidden" onSubmit={(event) => event.preventDefault()}>
+          <p className="text-xs uppercase tracking-[0.18em] text-mist">Search</p>
+          <div className="mt-3 grid max-h-[min(24rem,calc(100svh-9rem))] gap-3 overflow-y-auto">
+            <SearchFields query={query} setQuery={setQuery} styleId={styleId} setStyleId={setStyleId} borough={borough} setBorough={setBorough} placement={placement} setPlacement={setPlacement} styles={state.styles} inputRef={searchRef} />
+          </div>
+        </form>
+      ) : null}
 
       <section className={`${frame} pb-20`} aria-label="Artwork">
         {visible.length ? (
@@ -129,6 +130,51 @@ export function DiscoveryFeed() {
         </div>
       </Modal>
     </div>
+  );
+}
+
+function SearchFields({
+  query,
+  setQuery,
+  styleId,
+  setStyleId,
+  borough,
+  setBorough,
+  placement,
+  setPlacement,
+  styles,
+  inputRef,
+}: {
+  query: string;
+  setQuery: (value: string) => void;
+  styleId: string;
+  setStyleId: (value: string) => void;
+  borough: string;
+  setBorough: (value: string) => void;
+  placement: string;
+  setPlacement: (value: string) => void;
+  styles: Array<{ id: string; name: string }>;
+  inputRef?: RefObject<HTMLInputElement | null>;
+}) {
+  return (
+    <>
+      <label className="block md:col-span-2 xl:col-span-1">
+        <span className="sr-only">Search artwork</span>
+        <input ref={inputRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Subject, artist, or style" className={inkField} />
+      </label>
+      <SelectInput value={styleId} onChange={(event) => setStyleId(event.target.value)} className={inkField} aria-label="Style">
+        <option value="">Any style</option>
+        {styles.map((style) => <option key={style.id} value={style.id}>{style.name}</option>)}
+      </SelectInput>
+      <SelectInput value={borough} onChange={(event) => setBorough(event.target.value)} className={inkField} aria-label="Location">
+        <option value="">Any borough</option>
+        {BOROUGHS.map((item) => <option key={item}>{item}</option>)}
+      </SelectInput>
+      <SelectInput value={placement} onChange={(event) => setPlacement(event.target.value)} className={inkField} aria-label="Body placement">
+        <option value="">Any placement</option>
+        {PLACEMENTS.map((item) => <option key={item}>{item}</option>)}
+      </SelectInput>
+    </>
   );
 }
 

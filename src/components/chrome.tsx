@@ -60,7 +60,7 @@ export function PublicHeader() {
   };
 
   return (
-    <header className="on-ink sticky top-0 z-40 border-b border-panel bg-ink text-white">
+    <header className="on-ink sticky top-0 z-[60] border-b border-panel bg-ink text-white">
       <a href="#content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-ink focus:px-3 focus:py-2 focus:text-white">
         Skip to content
       </a>
@@ -89,7 +89,7 @@ export function PublicHeader() {
           </button>
         </div>
       </div>
-      <div className={`fixed inset-x-0 top-16 z-30 grid h-[calc(100svh-4rem)] transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:hidden ${open ? "grid-rows-[1fr]" : "pointer-events-none grid-rows-[0fr]"}`}>
+      <div className={`fixed inset-x-0 top-16 z-50 grid h-[calc(100svh-4rem)] transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:hidden ${open ? "grid-rows-[1fr]" : "pointer-events-none grid-rows-[0fr]"}`}>
         <nav id="mobile-nav" className="flex min-h-0 flex-col overflow-hidden bg-ink" aria-label="Mobile" aria-hidden={!open} inert={!open}>
           <div className={`flex h-full flex-col border-t border-panel px-5 pb-8 pt-12 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${open ? "opacity-100" : "opacity-0"}`}>
             <ul className="grid gap-3">
@@ -112,7 +112,7 @@ export function PublicHeader() {
 export function PublicFooter() {
   const { state } = useDemo();
   return (
-    <footer className="mt-20 border-t border-line bg-ink text-white">
+    <footer className="mt-20 border-t border-line bg-ink text-white max-md:pb-20">
       <div className={`${frame} grid gap-10 py-14 md:grid-cols-4`}>
         <div>
           <p className="font-display tracking-[0.18em]">{state.settings.platformName}</p>
