@@ -23,6 +23,16 @@ export function LoginForm() {
     router.push(safeNextPath(params.get("next"), role));
   }
 
+  function signInAs(accountEmail: string) {
+    setNotice("");
+    const result = login(accountEmail, DEMO_PASSWORD);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    finish(result.session.role);
+  }
+
   function submit(event: React.FormEvent) {
     event.preventDefault();
     setNotice("");
@@ -55,6 +65,23 @@ export function LoginForm() {
             {signingUp ? "Save work, message artists, and request appointments." : "Sign in to continue."}
           </p>
           {session ? <p className="mt-4 text-center text-sm">You are already signed in as {session.name}.</p> : null}
+          {signingUp ? null : (
+            <div className="mt-8 grid gap-2">
+              <p className="text-xs uppercase tracking-[0.16em] text-mute">Demo sign in</p>
+              {DEMO_ACCOUNTS.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  className="border border-line px-3 py-3 text-left text-sm hover:border-ink"
+                  onClick={() => signInAs(account.email)}
+                >
+                  <span className="block font-medium">{account.blurb}</span>
+                  <span className="text-mute">{account.email}</span>
+                  <span className="block text-mute">{account.password}</span>
+                </button>
+              ))}
+            </div>
+          )}
           <div className="mt-8 grid gap-4">
             {signingUp ? (
               <Field label="Name">
@@ -110,28 +137,6 @@ export function LoginForm() {
             </button>
           </p>
         </form>
-        {signingUp ? null : (
-          <div className="mt-8">
-            <p className="text-xs uppercase tracking-[0.16em] text-mist">Sample accounts</p>
-            <div className="mt-3 grid gap-2">
-              {DEMO_ACCOUNTS.map((account) => (
-                <button
-                  key={account.email}
-                  type="button"
-                  className="text-left text-sm text-mist hover:text-white"
-                  onClick={() => {
-                    setEmail(account.email);
-                    setPassword(DEMO_PASSWORD);
-                    setError("");
-                    setNotice("");
-                  }}
-                >
-                  {account.blurb}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
