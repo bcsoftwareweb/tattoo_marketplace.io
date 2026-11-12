@@ -63,6 +63,11 @@ export function DiscoveryFeed() {
   useEffect(() => {
     if (!searchOpen) return;
     searchRef.current?.focus();
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
   }, [searchOpen]);
 
   useEffect(() => {
@@ -100,9 +105,9 @@ export function DiscoveryFeed() {
         </form>
       </section>
       {searchOpen ? (
-        <form id="mobile-search" className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-40 border-t border-panel bg-ink px-5 py-4 md:hidden" onSubmit={(event) => event.preventDefault()}>
+        <form id="mobile-search" className="fixed inset-x-0 top-16 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-40 overflow-y-auto border-t border-panel bg-ink px-5 py-6 md:hidden" onSubmit={(event) => event.preventDefault()}>
           <p className="text-xs uppercase tracking-[0.18em] text-mist">Search</p>
-          <div className="mt-3 grid max-h-[min(24rem,calc(100svh-9rem))] gap-3 overflow-y-auto">
+          <div className="mt-4 grid gap-3">
             <SearchFields query={query} setQuery={setQuery} styleId={styleId} setStyleId={setStyleId} borough={borough} setBorough={setBorough} placement={placement} setPlacement={setPlacement} styles={state.styles} inputRef={searchRef} />
           </div>
         </form>
