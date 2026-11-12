@@ -59,10 +59,7 @@ export function PublicHeader() {
           {session ? (
             <Link href={homeFor(session.role)} className="hidden h-10 items-center bg-white px-4 text-sm text-ink md:inline-flex">Dashboard</Link>
           ) : (
-            <>
-              <Link href="/login" className="hidden text-sm text-white md:inline">Sign in</Link>
-              <Link href="/login" className="hidden h-10 items-center bg-white px-4 text-sm text-ink md:inline-flex">Join</Link>
-            </>
+            <Link href="/login" className="hidden text-sm text-white md:inline">Sign In/Sign up</Link>
           )}
           <button
             type="button"
@@ -85,12 +82,9 @@ export function PublicHeader() {
               ))}
             </ul>
             {session ? (
-              <Link href={homeFor(session.role)} className="mt-14 flex h-11 items-center justify-center bg-white text-sm text-ink">Dashboard</Link>
+              <Link href={homeFor(session.role)} className="mt-14 text-lg">Dashboard</Link>
             ) : (
-              <div className="mt-14 grid gap-3">
-                <Link href="/login" className="text-lg">Sign in</Link>
-                <Link href="/login" className="flex h-11 items-center justify-center bg-white text-sm text-ink">Join</Link>
-              </div>
+              <Link href="/login" className="mt-14 text-lg">Sign In/Sign up</Link>
             )}
           </div>
         </nav>

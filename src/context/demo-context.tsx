@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { accountBlock, accountForRole, authenticate } from "@/lib/auth";
+import { DEMO_ACCOUNTS, accountBlock, accountForRole, authenticate } from "@/lib/auth";
 import type { BookingAction } from "@/lib/booking";
 import {
   addPortfolio,
@@ -35,7 +35,7 @@ import {
   type BookingDraft,
 } from "@/lib/mutations";
 import { createSeed } from "@/lib/seed";
-import { loadSession, loadState, saveSession, saveState } from "@/lib/storage";
+import { loadLocalAccounts, loadSession, loadState, saveLocalAccounts, saveSession, saveState } from "@/lib/storage";
 import type { Actor, Category, Customer, DemoState, PlatformSettings, PortfolioItem, Role, Service, Session, TattooStyle } from "@/lib/types";
 import { uid } from "@/lib/format";
 
@@ -50,6 +50,7 @@ interface DemoContextValue {
   ready: boolean;
   toasts: Toast[];
   login: (email: string, password: string) => { ok: true; session: Session } | { ok: false; error: string };
+  register: (name: string, email: string, password: string) => { ok: true; session: Session } | { ok: false; error: string };
   logout: () => void;
   switchTo: (role: Role) => { ok: true; session: Session } | { ok: false; error: string };
   resetDemo: () => void;
@@ -143,11 +144,46 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       dismissToast: (id) => setToasts((current) => current.filter((item) => item.id !== id)),
       login: (email, password) => {
         const result = authenticate(email, password);
-        if (!result.ok) return result;
-        const block = accountBlock(state, result.session);
+        if (result.ok) {
+          const block = accountBlock(state, result.session);
+          if (block) return { ok: false, error: block };
+          setSession(result.session);
+          return result;
+        }
+        const local = loadLocalAccounts().find((account) => account.email === email.trim().toLowerCase());
+        if (!local || local.password !== password) return result;
+        const session = { role: "customer" as const, userId: local.userId, email: local.email, name: local.name };
+        const block = accountBlock(state, session);
         if (block) return { ok: false, error: block };
-        setSession(result.session);
-        return result;
+        setSession(session);
+        return { ok: true, session };
+      },
+      register: (name, email, password) => {
+        const trimmed = name.trim();
+        const normalized = email.trim().toLowerCase();
+        if (!trimmed) return { ok: false, error: "Enter your name." };
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) return { ok: false, error: "Enter a valid email address." };
+        if (password.length < 8) return { ok: false, error: "Use at least 8 characters." };
+        if (DEMO_ACCOUNTS.some((account) => account.email === normalized) || state.customers.some((customer) => customer.email.toLowerCase() === normalized)) {
+          return { ok: false, error: "An account already uses that email." };
+        }
+        const customer: Customer = {
+          id: uid("customer"),
+          name: trimmed,
+          email: normalized,
+          phone: "",
+          borough: "",
+          neighborhood: "",
+          photo: "",
+          bio: "",
+          status: "active",
+          joinedAt: new Date().toISOString().slice(0, 10),
+        };
+        setState({ ...state, customers: [...state.customers, customer] });
+        saveLocalAccounts([...loadLocalAccounts(), { email: normalized, password, userId: customer.id, name: trimmed }]);
+        const session = { role: "customer" as const, userId: customer.id, email: normalized, name: trimmed };
+        setSession(session);
+        return { ok: true, session };
       },
       logout: () => setSession(null),
       switchTo: (role) => {
@@ -162,6 +198,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       resetDemo: () => {
         const fresh = createSeed();
         setState(fresh);
+        saveLocalAccounts([]);
         toast("Demo data reset to the original sample.");
       },
       updateArtist: (patch) => {
