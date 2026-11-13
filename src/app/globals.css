@@ -128,6 +128,108 @@ select:-webkit-autofill {
   box-shadow: 0 0 0 1000px #ffffff inset;
 }
 
+/* Dashboards use a softer, lower-contrast palette than the public site.
+   These rules sit outside any layer so they win over Tailwind utilities,
+   which means each hover and focus state has to be restated here.
+   The body also gets the class so portalled dropdown menus match. */
+.dashboard {
+  --d-canvas: #151515;
+  --d-chrome: #101010;
+  --d-surface: #1c1c1c;
+  --d-raised: #252525;
+  --d-border: #313131;
+  --d-border-strong: #3d3d3d;
+  --d-text: #e2e2e2;
+  --d-soft: #9a9a9a;
+  --d-accent: #d9d9d9;
+}
+
+.dashboard .bg-ink {
+  background-color: var(--d-chrome);
+}
+
+body.dashboard,
+.dashboard.bg-ink {
+  background-color: var(--d-canvas);
+  color: var(--d-text);
+}
+
+.dashboard .bg-white,
+.dashboard .bg-paper {
+  background-color: var(--d-surface);
+  color: var(--d-text);
+}
+
+.dashboard .bg-panel,
+.dashboard .hover\:bg-paper:hover,
+.dashboard .hover\:bg-panel:hover,
+.dashboard .hover\:bg-mist:hover {
+  background-color: var(--d-raised);
+}
+
+.dashboard .bg-detail {
+  background-color: var(--d-border-strong);
+}
+
+.dashboard .text-white,
+.dashboard .text-ink,
+.dashboard .hover\:text-ink:hover {
+  color: var(--d-text);
+}
+
+.dashboard .hover\:text-white:hover,
+.dashboard .focus\:text-white:focus {
+  color: #f2f2f2;
+}
+
+.dashboard .text-mist {
+  color: #bdbdbd;
+}
+
+.dashboard .text-mute,
+.dashboard ::placeholder {
+  color: var(--d-soft);
+}
+
+.dashboard .border-line,
+.dashboard .border-panel {
+  border-color: var(--d-border);
+}
+
+.dashboard .border-detail {
+  border-color: var(--d-border-strong);
+}
+
+.dashboard .border-ink,
+.dashboard .hover\:border-ink:hover,
+.dashboard .focus\:border-ink:focus,
+.dashboard .hover\:border-white:hover {
+  border-color: var(--d-soft);
+}
+
+.dashboard .bg-ink.ring-white {
+  background-color: var(--d-accent);
+  color: var(--d-canvas);
+  --tw-ring-color: transparent;
+}
+
+.dashboard .bg-ink.ring-white:hover {
+  background-color: #ececec;
+}
+
+.dashboard :focus-visible,
+.dashboard .bg-white :focus-visible,
+.dashboard .bg-paper :focus-visible {
+  outline-color: var(--d-accent);
+}
+
+.dashboard input:-webkit-autofill,
+.dashboard textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--d-text);
+  caret-color: var(--d-text);
+  box-shadow: 0 0 0 1000px var(--d-surface) inset;
+}
+
 @keyframes ticker {
   from {
     transform: translateX(0);

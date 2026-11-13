@@ -159,8 +159,12 @@ export function DashboardShell({ role, items, children }: { role: Role; items: A
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    document.body.classList.add("dashboard");
+    return () => document.body.classList.remove("dashboard");
+  }, []);
   return (
-    <div className="min-h-screen bg-ink text-white md:grid md:grid-cols-[240px_1fr]">
+    <div className="dashboard min-h-screen bg-ink text-white md:grid md:grid-cols-[240px_1fr]">
       <aside className="on-ink hidden border-r border-panel bg-ink text-white md:flex md:min-h-screen md:flex-col">
         <SideNav role={role} items={items} pathname={pathname} />
       </aside>
