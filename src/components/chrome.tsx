@@ -22,6 +22,15 @@ function isCurrentPage(pathname: string, href: string) {
   return current === target;
 }
 
+function BellIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" className="block" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9.5a6 6 0 0 1 12 0c0 4.5 1.75 6.5 2.5 7.5h-17c.75-1 2.5-3 2.5-7.5Z" />
+      <path d="M10 20a2 2 0 0 0 4 0" />
+    </svg>
+  );
+}
+
 function MenuIcon({ open }: { open: boolean }) {
   return (
     <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" className="block">
@@ -273,8 +282,19 @@ function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
       )}
       <div className="ml-auto flex items-center gap-2">
         <div className="relative">
-          <button type="button" className="h-10 border border-detail px-3 text-sm" aria-expanded={notesOpen} onClick={() => { setNotesOpen((value) => !value); setAccountOpen(false); }}>
-            Alerts{unread ? ` ${unread}` : ""}
+          <button
+            type="button"
+            className="relative grid h-10 w-10 place-items-center"
+            aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
+            aria-expanded={notesOpen}
+            onClick={() => { setNotesOpen((value) => !value); setAccountOpen(false); }}
+          >
+            <BellIcon />
+            {unread ? (
+              <span className="absolute top-1 right-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-[#d9d9d9] px-1 text-[11px] leading-none font-semibold text-[#151515]">
+                {unread > 9 ? "9+" : unread}
+              </span>
+            ) : null}
           </button>
           {notesOpen ? (
             <div className="absolute right-0 z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] border border-line bg-white p-3 shadow-none">
