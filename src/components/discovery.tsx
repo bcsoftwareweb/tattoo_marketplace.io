@@ -150,7 +150,7 @@ export function StylesPage() {
     <div className={`${frame} py-12`}>
       <h1 className="font-express text-5xl leading-none md:text-7xl">Styles</h1>
       <p className="mt-4 max-w-2xl text-sm leading-6 text-mute">Twelve ways the city actually gets tattooed. Open one to read the style and the artists approved for it.</p>
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
         {state.styles.map((style) => (
           <Link key={style.id} href={`/styles/${style.slug}`} className="flex h-full flex-col border border-line">
             <div className="relative aspect-[4/3] w-full overflow-hidden">
