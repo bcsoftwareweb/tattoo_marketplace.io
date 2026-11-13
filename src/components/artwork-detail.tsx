@@ -106,7 +106,7 @@ export function ArtworkDetail() {
       {related.length ? (
         <section className="mt-16 border-t border-panel pt-10">
           <h2 className="font-display text-2xl">More like this</h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {related.map((item) => (
               <Link key={item.id} href={`/artwork/?id=${item.id}`}>
                 <Photo src={item.image} alt={item.title} className="aspect-[3/4] w-full" />
