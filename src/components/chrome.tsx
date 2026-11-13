@@ -275,12 +275,13 @@ function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
 
   return (
     <div className="flex h-16 items-center justify-between gap-3 border-b border-panel bg-ink px-4 text-white md:px-8">
-      {role === "customer" ? (
-        <p className="min-w-0 truncate font-display text-lg md:text-xl">Hello, {session.name.split(" ")[0]}.</p>
-      ) : (
-        <p className="hidden text-sm text-mist md:block">Signed in · {session.email}</p>
-      )}
-      <div className="ml-auto flex items-center gap-2">
+      <Link href="/" className="shrink-0 font-display text-xs tracking-[0.16em] md:hidden">{state.settings.platformName}</Link>
+      <div className="ml-auto flex min-w-0 items-center gap-2">
+        {role === "customer" ? (
+          <p className="min-w-0 truncate pr-1 font-display text-base md:pr-2 md:text-lg">Hello, {session.name.split(" ")[0]}.</p>
+        ) : (
+          <p className="hidden pr-2 text-sm text-mist md:block">Signed in · {session.email}</p>
+        )}
         <div className="relative">
           <button
             type="button"
