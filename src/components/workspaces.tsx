@@ -122,7 +122,7 @@ export function CustomerBookings() {
     <div className="grid gap-6">
       <PageHeader eyebrow="Customer" title="My bookings" description="Open a booking to accept a proposal, pay the deposit, or cancel." />
       <Tabs tabs={[{ id: "upcoming", label: "Upcoming" }, { id: "pending", label: "Pending" }, { id: "completed", label: "Completed" }, { id: "closed", label: "Closed" }]} value={tab} onChange={setTab} />
-      <BookingCards bookings={groups[tab] ?? []} role="customer" empty="Nothing in this tab." />
+      <BookingCards key={tab} bookings={groups[tab] ?? []} role="customer" empty="Nothing in this tab." pageSize={3} />
     </div>
   );
 }
@@ -130,6 +130,7 @@ export function CustomerBookings() {
 export function CustomerFavorites() {
   const customer = useSignedCustomer();
   const { state, favorite } = useDemo();
+  const [shown, setShown] = useState(3);
   if (!customer) return null;
   const ids = state.favorites[customer.id] ?? [];
   const artists = ids.map((id) => state.artists.find((artist) => artist.id === id)).filter(Boolean);
@@ -137,8 +138,9 @@ export function CustomerFavorites() {
     <div className="grid gap-6">
       <PageHeader eyebrow="Customer" title="Saved artists" />
       {artists.length ? (
+        <>
         <ul className="grid gap-3">
-          {artists.map((artist) => artist ? (
+          {artists.slice(0, shown).map((artist) => artist ? (
             <li key={artist.id} className="flex items-center justify-between gap-3 border border-line bg-white p-3">
               <Link href={`/artists/${artist.slug}`} className="flex items-center gap-3">
                 <Photo src={artist.photo} alt="" className="h-16 w-14" />
@@ -148,6 +150,12 @@ export function CustomerFavorites() {
             </li>
           ) : null)}
         </ul>
+        {shown < artists.length ? (
+          <div>
+            <Button type="button" variant="secondary" onClick={() => setShown((count) => count + 3)}>See More</Button>
+          </div>
+        ) : null}
+        </>
       ) : <Empty title="No saved artists" body="Save an artist from their profile." action={<Button href="/artists">Browse artists</Button>} />}
     </div>
   );

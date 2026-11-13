@@ -12,12 +12,15 @@ import { bookingPath } from "@/lib/permissions";
 import type { Booking, Role } from "@/lib/types";
 import { Button, Empty, Field, PageHeader, Photo, SelectInput, StatusPill, TextInput, Area } from "@/components/ui";
 
-export function BookingCards({ bookings, role, empty }: { bookings: Booking[]; role: Role; empty: string }) {
+export function BookingCards({ bookings, role, empty, pageSize }: { bookings: Booking[]; role: Role; empty: string; pageSize?: number }) {
   const { state } = useDemo();
+  const [shown, setShown] = useState(pageSize ?? bookings.length);
   if (!bookings.length) return <Empty title="Nothing here" body={empty} />;
+  const visible = pageSize ? bookings.slice(0, shown) : bookings;
   return (
+    <div className="grid gap-6">
     <ul className="border border-line bg-white">
-      {bookings.map((booking) => {
+      {visible.map((booking) => {
         const artist = state.artists.find((item) => item.id === booking.artistId);
         const customer = state.customers.find((item) => item.id === booking.customerId);
         const who = role === "customer" ? artist?.name : role === "artist" ? customer?.name : `${customer?.name} · ${artist?.name}`;
@@ -35,6 +38,12 @@ export function BookingCards({ bookings, role, empty }: { bookings: Booking[]; r
         );
       })}
     </ul>
+    {pageSize && shown < bookings.length ? (
+      <div>
+        <Button type="button" variant="secondary" onClick={() => setShown((count) => count + pageSize)}>See More</Button>
+      </div>
+    ) : null}
+    </div>
   );
 }
 

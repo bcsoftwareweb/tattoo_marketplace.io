@@ -368,6 +368,312 @@ const ARTISTS: ArtistInput[] = [
   },
 ];
 
+type ListedArtist = Pick<
+  ArtistInput,
+  "slug" | "name" | "phone" | "photo" | "bio" | "borough" | "neighborhood" | "studioName" | "studioAddress" | "yearsExperience" | "styleIds" | "specialties" | "startingPrice" | "closed" | "joinedAt" | "instagram"
+> & { licenseNumber: string };
+
+function listed({ licenseNumber, ...artist }: ListedArtist): ArtistInput {
+  return {
+    ...artist,
+    id: artist.slug,
+    email: `${artist.slug.replace("-", ".")}@blackline.demo`,
+    featured: false,
+    verificationStatus: "approved",
+    verificationNote: "License and studio permit matched. Approved for public booking.",
+    license: license(licenseNumber, "License and studio permit verified."),
+    booked: [],
+  };
+}
+
+const MORE_ARTISTS: ArtistInput[] = [
+  listed({
+    slug: "tess-callahan",
+    name: "Tess Callahan",
+    phone: "718-555-0131",
+    photo: portraits.tess,
+    bio: "Tess Callahan tattoos micro botanicals and small pet portraits from a front room on Fifth Avenue. Most pieces fit inside a palm and are drawn from the client's own photos.",
+    borough: "Brooklyn",
+    neighborhood: "Park Slope",
+    studioName: "Fifth Avenue Ink",
+    studioAddress: "512 5th Avenue, Brooklyn, NY 11215",
+    yearsExperience: 6,
+    styleIds: ["fine-line", "micro-realism"],
+    specialties: ["Micro botanicals", "Small pet portraits"],
+    startingPrice: 200,
+    closed: [0, 1],
+    joinedAt: "2025-03-04",
+    instagram: "@tess.fifthave",
+    licenseNumber: "NYC-TAT-71204",
+  }),
+  listed({
+    slug: "marco-ruiz",
+    name: "Marco Ruiz",
+    phone: "718-555-0144",
+    photo: portraits.marco,
+    bio: "Marco Ruiz letters script and black and gray roses in Jackson Heights. He grew up drawing on Roosevelt Avenue and still keeps a walk-in morning on Saturdays.",
+    borough: "Queens",
+    neighborhood: "Jackson Heights",
+    studioName: "Roosevelt Line",
+    studioAddress: "82-10 Roosevelt Avenue, Queens, NY 11372",
+    yearsExperience: 8,
+    styleIds: ["lettering", "black-gray"],
+    specialties: ["Script names", "Black and gray roses"],
+    startingPrice: 180,
+    closed: [1, 2],
+    joinedAt: "2025-01-22",
+    instagram: "@marco.rooseveltline",
+    licenseNumber: "NYC-TAT-71318",
+  }),
+  listed({
+    slug: "alana-torres",
+    name: "Alana Torres",
+    phone: "347-555-0152",
+    photo: portraits.alana,
+    bio: "Alana Torres paints watercolor florals and illustrative birds off the Grand Concourse. She keeps a thin outline under the color so the piece still reads after it heals.",
+    borough: "Bronx",
+    neighborhood: "Fordham",
+    studioName: "Concourse Color",
+    studioAddress: "2530 Grand Concourse, Bronx, NY 10458",
+    yearsExperience: 7,
+    styleIds: ["watercolor", "illustrative"],
+    specialties: ["Watercolor florals", "Illustrative birds"],
+    startingPrice: 190,
+    closed: [0, 1],
+    joinedAt: "2025-06-10",
+    instagram: "@alana.concourse",
+    licenseNumber: "NYC-TAT-71422",
+  }),
+  listed({
+    slug: "finn-doyle",
+    name: "Finn Doyle",
+    phone: "718-555-0163",
+    photo: portraits.finn,
+    bio: "Finn Doyle runs a flash wall in Greenpoint: swallows, panthers, daggers, and whatever he painted that week. Walk-ins pick from the wall and are usually out within the hour.",
+    borough: "Brooklyn",
+    neighborhood: "Greenpoint",
+    studioName: "Manhattan Avenue Flash",
+    studioAddress: "721 Manhattan Avenue, Brooklyn, NY 11222",
+    yearsExperience: 5,
+    styleIds: ["traditional"],
+    specialties: ["Traditional flash", "Bold color"],
+    startingPrice: 150,
+    closed: [1, 2],
+    joinedAt: "2025-08-19",
+    instagram: "@finn.flashwall",
+    licenseNumber: "NYC-TAT-71536",
+  }),
+  listed({
+    slug: "omar-haddad",
+    name: "Omar Haddad",
+    phone: "212-555-0175",
+    photo: portraits.omar,
+    bio: "Omar Haddad tattoos portrait realism and cover-ups in Hell's Kitchen. He asks for the sharpest photo you have and will say when an old piece needs laser first.",
+    borough: "Manhattan",
+    neighborhood: "Hell's Kitchen",
+    studioName: "Ninth Avenue Studio",
+    studioAddress: "604 9th Avenue, New York, NY 10036",
+    yearsExperience: 12,
+    styleIds: ["realism", "black-gray"],
+    specialties: ["Portrait realism", "Cover-ups"],
+    startingPrice: 300,
+    closed: [0, 1],
+    joinedAt: "2024-11-02",
+    instagram: "@omar.ninthave",
+    licenseNumber: "NYC-TAT-71640",
+  }),
+  listed({
+    slug: "viktor-lind",
+    name: "Viktor Lind",
+    phone: "347-555-0186",
+    photo: portraits.viktor,
+    bio: "Viktor Lind does heavy blackwork and blackout sleeves in Bushwick. Sessions are long and planned in stages so the skin gets time between passes.",
+    borough: "Brooklyn",
+    neighborhood: "Bushwick",
+    studioName: "Knickerbocker Black",
+    studioAddress: "302 Knickerbocker Avenue, Brooklyn, NY 11237",
+    yearsExperience: 14,
+    styleIds: ["blackwork", "geometric"],
+    specialties: ["Heavy blackwork", "Blackout sleeves"],
+    startingPrice: 250,
+    closed: [0, 6],
+    joinedAt: "2024-09-14",
+    instagram: "@viktor.knickerbocker",
+    licenseNumber: "NYC-TAT-71752",
+  }),
+  listed({
+    slug: "elena-marsh",
+    name: "Elena Marsh",
+    phone: "212-555-0193",
+    photo: portraits.elena,
+    bio: "Elena Marsh tattoos delicate script and ornamental rings on Bleecker Street. She stencils twice, once seated and once standing, before a line goes in.",
+    borough: "Manhattan",
+    neighborhood: "West Village",
+    studioName: "Bleecker Fine Line",
+    studioAddress: "354 Bleecker Street, New York, NY 10014",
+    yearsExperience: 6,
+    styleIds: ["fine-line", "ornamental"],
+    specialties: ["Delicate script", "Ornamental rings"],
+    startingPrice: 220,
+    closed: [0, 1],
+    joinedAt: "2025-02-27",
+    instagram: "@elena.bleecker",
+    licenseNumber: "NYC-TAT-71866",
+  }),
+  listed({
+    slug: "noor-aziz",
+    name: "Noor Aziz",
+    phone: "718-555-0207",
+    photo: portraits.noor,
+    bio: "Noor Aziz works in micro realism and single-needle shading in Astoria. She will turn a portrait down if it needs more room than the placement allows.",
+    borough: "Queens",
+    neighborhood: "Astoria",
+    studioName: "Steinway Studio",
+    studioAddress: "31-14 Steinway Street, Queens, NY 11103",
+    yearsExperience: 5,
+    styleIds: ["micro-realism", "fine-line"],
+    specialties: ["Tiny portraits", "Single-needle shading"],
+    startingPrice: 210,
+    closed: [1, 2],
+    joinedAt: "2025-07-08",
+    instagram: "@noor.steinway",
+    licenseNumber: "NYC-TAT-71970",
+  }),
+  listed({
+    slug: "ivy-sinclair",
+    name: "Ivy Sinclair",
+    phone: "718-555-0219",
+    photo: portraits.ivy,
+    bio: "Ivy Sinclair draws botanical illustration and moon pieces near the Stapleton ferry. Most clients come over from Manhattan for a single afternoon sitting.",
+    borough: "Staten Island",
+    neighborhood: "Stapleton",
+    studioName: "Bay Street Tattoo",
+    studioAddress: "256 Bay Street, Staten Island, NY 10301",
+    yearsExperience: 4,
+    styleIds: ["illustrative", "fine-line"],
+    specialties: ["Botanical illustration", "Moon and star pieces"],
+    startingPrice: 160,
+    closed: [0, 1],
+    joinedAt: "2025-10-01",
+    instagram: "@ivy.baystreet",
+    licenseNumber: "NYC-TAT-72084",
+  }),
+  listed({
+    slug: "hana-kim",
+    name: "Hana Kim",
+    phone: "212-555-0228",
+    photo: portraits.hana,
+    bio: "Hana Kim plans Japanese panels and black and gray koi from a third-floor room in Koreatown. Large work is booked as a series, with the composition drawn on the body first.",
+    borough: "Manhattan",
+    neighborhood: "Koreatown",
+    studioName: "32nd Street Atelier",
+    studioAddress: "2 W 32nd Street, New York, NY 10001",
+    yearsExperience: 9,
+    styleIds: ["japanese", "black-gray"],
+    specialties: ["Japanese panels", "Black and gray koi"],
+    startingPrice: 280,
+    closed: [0, 1],
+    joinedAt: "2024-12-12",
+    instagram: "@hana.32nd",
+    licenseNumber: "NYC-TAT-72198",
+  }),
+  listed({
+    slug: "diego-ramos",
+    name: "Diego Ramos",
+    phone: "212-555-0236",
+    photo: portraits.diego,
+    bio: "Diego Ramos letters script sleeves and traditional roses in Washington Heights. He draws every name by hand so no two pieces share a font.",
+    borough: "Manhattan",
+    neighborhood: "Washington Heights",
+    studioName: "Heights Ink",
+    studioAddress: "4140 Broadway, New York, NY 10033",
+    yearsExperience: 10,
+    styleIds: ["lettering", "traditional"],
+    specialties: ["Script sleeves", "Traditional roses"],
+    startingPrice: 170,
+    closed: [1, 2],
+    joinedAt: "2025-04-15",
+    instagram: "@diego.heights",
+    licenseNumber: "NYC-TAT-72302",
+  }),
+  listed({
+    slug: "mei-lin",
+    name: "Mei Lin",
+    phone: "212-555-0247",
+    photo: portraits.mei,
+    bio: "Mei Lin builds mandalas and sacred geometry on Mott Street. Every pattern is measured to the limb so the repeats meet cleanly on the far side.",
+    borough: "Manhattan",
+    neighborhood: "Chinatown",
+    studioName: "Mott Street Studio",
+    studioAddress: "68 Mott Street, New York, NY 10013",
+    yearsExperience: 8,
+    styleIds: ["geometric", "ornamental"],
+    specialties: ["Mandala work", "Sacred geometry"],
+    startingPrice: 230,
+    closed: [0, 1],
+    joinedAt: "2025-05-20",
+    instagram: "@mei.mottstreet",
+    licenseNumber: "NYC-TAT-72416",
+  }),
+  listed({
+    slug: "rosie-gallagher",
+    name: "Rosie Gallagher",
+    phone: "718-555-0258",
+    photo: portraits.rosie,
+    bio: "Rosie Gallagher paints pin-up flash and neo-traditional animals in Red Hook. Her wall changes every month, and the old sheets go up for walk-ins.",
+    borough: "Brooklyn",
+    neighborhood: "Red Hook",
+    studioName: "Van Brunt Tattoo",
+    studioAddress: "381 Van Brunt Street, Brooklyn, NY 11231",
+    yearsExperience: 7,
+    styleIds: ["traditional", "illustrative"],
+    specialties: ["Pin-up flash", "Neo-traditional animals"],
+    startingPrice: 180,
+    closed: [1, 2],
+    joinedAt: "2025-09-03",
+    instagram: "@rosie.vanbrunt",
+    licenseNumber: "NYC-TAT-72520",
+  }),
+  listed({
+    slug: "kofi-mensah",
+    name: "Kofi Mensah",
+    phone: "347-555-0264",
+    photo: portraits.kofi,
+    bio: "Kofi Mensah tattoos black and gray realism in Crown Heights, with years of practice on deeper skin tones. He adjusts contrast and spacing so portraits stay readable as they heal.",
+    borough: "Brooklyn",
+    neighborhood: "Crown Heights",
+    studioName: "Franklin Avenue Studio",
+    studioAddress: "765 Franklin Avenue, Brooklyn, NY 11238",
+    yearsExperience: 9,
+    styleIds: ["black-gray", "realism"],
+    specialties: ["Portraits on deeper skin tones", "Black and gray realism"],
+    startingPrice: 260,
+    closed: [0, 1],
+    joinedAt: "2025-01-09",
+    instagram: "@kofi.franklinave",
+    licenseNumber: "NYC-TAT-72634",
+  }),
+  listed({
+    slug: "adrian-vale",
+    name: "Adrian Vale",
+    phone: "718-555-0273",
+    photo: portraits.adrian,
+    bio: "Adrian Vale draws dark illustrative and etching-style blackwork in Ridgewood. Pieces look like old engravings, with fine cross-hatching instead of soft shading.",
+    borough: "Queens",
+    neighborhood: "Ridgewood",
+    studioName: "Myrtle Avenue Ink",
+    studioAddress: "56-12 Myrtle Avenue, Queens, NY 11385",
+    yearsExperience: 11,
+    styleIds: ["blackwork", "illustrative"],
+    specialties: ["Dark illustrative", "Etching-style blackwork"],
+    startingPrice: 240,
+    closed: [0, 6],
+    joinedAt: "2024-10-21",
+    instagram: "@adrian.myrtle",
+    licenseNumber: "NYC-TAT-72748",
+  }),
+];
+
 function toArtist(input: ArtistInput): Artist {
   return {
     id: input.id,
@@ -506,6 +812,81 @@ const PIECES: Record<string, Array<[string, string, string]>> = {
   "ellis-ward": [
     ["Watercolor poppy", "Color study submitted with the rejected application.", "Floral"],
     ["Illustrative koi", "Color koi, not Japanese traditional.", "Fauna"],
+  ],
+  "tess-callahan": [
+    ["Lavender sprig", "Micro botanical on the inner wrist, about an inch tall.", "Floral"],
+    ["Terrier portrait", "A small pet portrait from the owner's phone photo.", "Portrait"],
+    ["Wildflower trio", "Three stems on the ankle, single needle.", "Floral"],
+  ],
+  "marco-ruiz": [
+    ["Mother's name", "Script across the forearm, drawn by hand.", "Script"],
+    ["Black and gray rose", "Soft shading, upper arm, one sitting.", "Floral"],
+    ["Banner date", "A date in a ribbon on the chest.", "Script"],
+  ],
+  "alana-torres": [
+    ["Watercolor peony", "Color wash with a thin outline underneath.", "Floral"],
+    ["Hummingbird", "Illustrative bird on the shoulder blade.", "Fauna"],
+    ["Iris study", "Soft color on the forearm, healed three months.", "Floral"],
+  ],
+  "finn-doyle": [
+    ["Panther head", "Flash from the wall, one hour, bold color.", "Traditional flash"],
+    ["Swallow pair", "Matching swallows on the collarbones.", "Traditional flash"],
+    ["Dagger and rose", "Classic flash on the calf.", "Traditional flash"],
+  ],
+  "omar-haddad": [
+    ["Grandfather portrait", "Realism from a 1960s photograph, two sessions.", "Portrait"],
+    ["Script cover-up", "Old name covered with black and gray flowers.", "Cover-up"],
+    ["Lion, forearm", "Black and gray realism, one long sitting.", "Fauna"],
+  ],
+  "viktor-lind": [
+    ["Blackout sleeve", "Full sleeve in solid black, done in three passes.", "Blackwork"],
+    ["Geometric chest plate", "Measured panels across the chest.", "Geometric"],
+    ["Negative space band", "Wide band with a pattern left in skin.", "Blackwork"],
+  ],
+  "elena-marsh": [
+    ["Finger rings", "Thin ornamental bands on two fingers.", "Ornament"],
+    ["Collarbone script", "A single line of delicate script.", "Script"],
+    ["Ear vine", "Fine vine tracing behind the ear.", "Floral"],
+  ],
+  "noor-aziz": [
+    ["Tiny eye", "A micro realism eye, under an inch.", "Portrait"],
+    ["Bee, inner arm", "Single-needle shading, very small.", "Fauna"],
+    ["Pressed flower", "Micro realism bloom on the wrist.", "Floral"],
+  ],
+  "ivy-sinclair": [
+    ["Moon phases", "Seven phases down the spine.", "Blackwork"],
+    ["Fern frond", "Botanical illustration on the ribs.", "Floral"],
+    ["Star cluster", "Small illustrative stars on the ankle.", "Ornament"],
+  ],
+  "hana-kim": [
+    ["Koi half sleeve", "Black and gray koi with wind bars.", "Japanese"],
+    ["Chrysanthemum panel", "Panel on the thigh, planned as a series.", "Japanese"],
+    ["Wave study", "Background waves for a later back piece.", "Japanese"],
+  ],
+  "diego-ramos": [
+    ["Script sleeve", "Family names wrapped around the forearm.", "Script"],
+    ["Traditional rose", "Bold rose and leaves on the hand.", "Traditional flash"],
+    ["Neck lettering", "Single word, hand drawn.", "Script"],
+  ],
+  "mei-lin": [
+    ["Elbow mandala", "Centered on the joint so it moves cleanly.", "Geometric"],
+    ["Sacred geometry spine", "Measured pattern down the back.", "Geometric"],
+    ["Ornamental cuff", "Repeating motif around the wrist.", "Ornament"],
+  ],
+  "rosie-gallagher": [
+    ["Pin-up, calf", "Classic pin-up from the monthly flash sheet.", "Traditional flash"],
+    ["Neo-traditional fox", "Bold animal with soft color.", "Fauna"],
+    ["Cherry pair", "Small flash piece, walk-in.", "Traditional flash"],
+  ],
+  "kofi-mensah": [
+    ["Father portrait", "Black and gray realism with added contrast for healing.", "Portrait"],
+    ["Hands in prayer", "Realism on the forearm, one sitting.", "Portrait"],
+    ["Owl, shoulder", "Soft black and gray feathers.", "Fauna"],
+  ],
+  "adrian-vale": [
+    ["Engraved raven", "Etching-style cross-hatching on the forearm.", "Fauna"],
+    ["Anatomical heart", "Dark illustrative piece on the chest.", "Blackwork"],
+    ["Skull and moth", "Old engraving look on the thigh.", "Blackwork"],
   ],
 };
 
@@ -678,6 +1059,104 @@ function settled(bookingId: string, customerId: string, artistId: string, quote:
     createdAt: at,
     note: "Remaining balance settled at the appointment.",
   };
+}
+
+interface MayaRequest {
+  artistId: string;
+  service: "small" | "custom" | null;
+  serviceName: string;
+  idea: string;
+  placement: string;
+  size: string;
+  date: string;
+  time: string;
+  budget: number;
+  quote: number | null;
+  status: "pending" | "confirmed" | "completed" | "cancelled" | "declined";
+  createdAt: string;
+  note?: string;
+}
+
+const MORE_MAYA_REQUESTS: MayaRequest[] = [
+  { artistId: "tess-callahan", service: "small", serviceName: "Small piece", idea: "A micro lavender sprig on the inner wrist, about an inch tall.", placement: "Wrist", size: "Tiny (under 2 in)", date: "2026-11-21", time: "14:00", budget: 260, quote: 260, status: "confirmed", createdAt: "2026-10-28T15:00:00Z" },
+  { artistId: "elena-marsh", service: "small", serviceName: "Small piece", idea: "Two thin ornamental rings on my index and middle fingers.", placement: "Hand", size: "Tiny (under 2 in)", date: "2026-11-25", time: "15:30", budget: 240, quote: 240, status: "confirmed", createdAt: "2026-10-30T13:00:00Z" },
+  { artistId: "hana-kim", service: "custom", serviceName: "Custom session", idea: "First session of a black and gray koi half sleeve on the right arm.", placement: "Upper arm", size: "Full sleeve or back", date: "2026-12-05", time: "11:00", budget: 900, quote: 900, status: "confirmed", createdAt: "2026-11-02T16:00:00Z" },
+  { artistId: "ivy-sinclair", service: "small", serviceName: "Small piece", idea: "Moon phases running down the back of my neck.", placement: "Neck", size: "Small (2–4 in)", date: "2026-12-12", time: "12:30", budget: 220, quote: 220, status: "confirmed", createdAt: "2026-11-04T14:00:00Z" },
+  { artistId: "omar-haddad", service: "custom", serviceName: "Custom session", idea: "Black and gray portrait of my grandfather from a 1960s photograph, on the forearm.", placement: "Forearm", size: "Medium (4–7 in)", date: "2026-12-08", time: "12:30", budget: 700, quote: null, status: "pending", createdAt: "2026-11-09T11:00:00Z" },
+  { artistId: "alana-torres", service: "small", serviceName: "Small piece", idea: "A watercolor iris on the shoulder blade with a thin outline.", placement: "Shoulder", size: "Small (2–4 in)", date: "2026-12-15", time: "15:30", budget: 300, quote: null, status: "pending", createdAt: "2026-11-09T17:30:00Z" },
+  { artistId: "marco-ruiz", service: "small", serviceName: "Small piece", idea: "My mother's name in script across the forearm.", placement: "Forearm", size: "Small (2–4 in)", date: "2026-08-15", time: "14:00", budget: 220, quote: 220, status: "completed", createdAt: "2026-07-30T15:00:00Z" },
+  { artistId: "noor-aziz", service: "small", serviceName: "Small piece", idea: "A tiny bee on the inner arm with single-needle shading.", placement: "Upper arm", size: "Tiny (under 2 in)", date: "2026-09-05", time: "12:30", budget: 240, quote: 240, status: "completed", createdAt: "2026-08-20T13:00:00Z" },
+  { artistId: "finn-doyle", service: "small", serviceName: "Small piece", idea: "A swallow off the flash wall, on the collarbone.", placement: "Collarbone", size: "Small (2–4 in)", date: "2026-09-26", time: "17:00", budget: 180, quote: 180, status: "completed", createdAt: "2026-09-15T18:00:00Z" },
+  { artistId: "mei-lin", service: "small", serviceName: "Small piece", idea: "A mandala centered on the elbow so it moves cleanly.", placement: "Forearm", size: "Medium (4–7 in)", date: "2026-10-24", time: "11:00", budget: 400, quote: 400, status: "completed", createdAt: "2026-10-08T12:00:00Z" },
+  { artistId: "viktor-lind", service: "custom", serviceName: "Custom session", idea: "A blackout band over a tattoo I got last month.", placement: "Forearm", size: "Medium (4–7 in)", date: "2026-11-14", time: "14:00", budget: 500, quote: null, status: "declined", createdAt: "2026-10-26T15:00:00Z", note: "The tattoo underneath needs to fully heal before I can black it out." },
+  { artistId: "diego-ramos", service: "small", serviceName: "Small piece", idea: "One word in hand-drawn script on the side of my hand.", placement: "Hand", size: "Tiny (under 2 in)", date: "2026-12-01", time: "15:30", budget: 170, quote: null, status: "cancelled", createdAt: "2026-11-01T12:00:00Z", note: "Cancelled by the customer before the artist responded." },
+  { artistId: "rosie-gallagher", service: "small", serviceName: "Small piece", idea: "A pair of cherries from the flash sheet, on the ankle.", placement: "Ankle", size: "Small (2–4 in)", date: "2026-11-28", time: "12:30", budget: 180, quote: null, status: "cancelled", createdAt: "2026-11-05T10:00:00Z", note: "Cancelled by the customer before the artist responded." },
+];
+
+function later(at: string, days: number) {
+  return new Date(Date.parse(at) + days * 86400000).toISOString().replace(".000Z", "Z");
+}
+
+function mayaRequestId(request: MayaRequest) {
+  return `bk-maya-${request.artistId.split("-")[0]}`;
+}
+
+function mayaDeposit(request: MayaRequest) {
+  return request.quote === null ? null : Math.round(request.quote * 0.3);
+}
+
+function mayaRequestBooking(request: MayaRequest): Booking {
+  const accepted = later(request.createdAt, 1);
+  const deposited = later(request.createdAt, 2);
+  const finished = `${request.date}T21:00:00Z`;
+  const submitted = event(request.createdAt, "pending", "Request submitted.", "customer");
+  const history =
+    request.status === "pending"
+      ? [submitted]
+      : request.status === "cancelled"
+        ? [submitted, event(accepted, "cancelled", request.note ?? "Cancelled by the customer.", "customer")]
+        : request.status === "declined"
+          ? [submitted, event(accepted, "declined", request.note ?? "Declined by the artist.", "artist")]
+          : [
+              submitted,
+              event(accepted, "awaiting_deposit", "Accepted at the requested time.", "artist"),
+              event(deposited, "confirmed", "Deposit recorded.", "customer"),
+              ...(request.status === "completed" ? [event(finished, "completed" as const, "Marked complete.", "artist" as const)] : []),
+            ];
+  return {
+    id: mayaRequestId(request),
+    customerId: "maya-chen",
+    artistId: request.artistId,
+    serviceId: request.service ? `svc-${request.artistId}-${request.service}` : null,
+    serviceName: request.serviceName,
+    idea: request.idea,
+    placement: request.placement,
+    size: request.size,
+    references: [],
+    requestedDate: request.date,
+    requestedTime: request.time,
+    appointmentDate: request.date,
+    appointmentTime: request.time,
+    proposedDate: null,
+    proposedTime: null,
+    quote: request.quote,
+    deposit: mayaDeposit(request),
+    customerBudget: request.budget,
+    artistNote: request.status === "declined" ? request.note ?? "" : request.quote === null ? "" : "Accepted at the requested time.",
+    status: request.status,
+    createdAt: request.createdAt,
+    updatedAt: history[history.length - 1].at,
+    history,
+  };
+}
+
+function mayaRequestPayments(request: MayaRequest): Transaction[] {
+  const deposit = mayaDeposit(request);
+  if (request.quote === null || deposit === null || (request.status !== "confirmed" && request.status !== "completed")) return [];
+  const id = mayaRequestId(request);
+  const rows = [paid(id, "maya-chen", request.artistId, request.quote, deposit, later(request.createdAt, 2), "Deposit paid at checkout.")];
+  if (request.status === "completed") rows.push(settled(id, "maya-chen", request.artistId, request.quote, deposit, `${request.date}T21:00:00Z`));
+  return rows;
 }
 
 function buildBookings(): Booking[] {
@@ -1078,6 +1557,7 @@ function buildBookings(): Booking[] {
         event("2026-10-23T14:00:00Z", "declined", "The old stick-and-poke needs fading before I can cover it cleanly.", "artist"),
       ],
     }),
+    ...MORE_MAYA_REQUESTS.map(mayaRequestBooking),
   ];
 }
 
@@ -1092,6 +1572,7 @@ function buildTransactions(bookings: Booking[]): Transaction[] {
     settled("bk-lila-nova", "lila-nguyen", "nova-reyes", 300, 90, "2026-09-14T20:00:00Z"),
     paid("bk-jordan-leo", "jordan-ellis", "leo-marino", 220, 66, "2026-10-09T12:00:00Z", "Deposit paid at checkout."),
     paid("bk-owen-priya", "owen-brooks", "priya-shah", 260, 78, "2026-10-11T18:00:00Z", "Deposit paid at checkout."),
+    ...MORE_MAYA_REQUESTS.flatMap(mayaRequestPayments),
   ];
   const priya = find("bk-owen-priya");
   const deposit = rows.find((row) => row.id === "tx-bk-owen-priya-deposit")!;
@@ -1205,6 +1686,21 @@ function buildReviews(): Review[] {
     ["rev-river-1", "river-alvarez", "owen-brooks", undefined, 5, "Cover-up advice was honest", "Told me what could be covered and what needed laser. I respected the no.", "published", "2026-07-14T12:00:00Z"],
     ["rev-river-2", "river-alvarez", "samira-patel", undefined, 4, "Soft black and gray", "Moth healed softly. Appointment ran long, and he said so up front.", "published", "2026-03-22T12:00:00Z"],
     ["rev-drew-1", "drew-hale", "chris-delgado", undefined, 2, "Missed the appointment window", "Reported separately. Keeping this flagged for review.", "flagged", "2026-10-02T12:00:00Z"],
+    ["rev-tess-1", "tess-callahan", "lila-nguyen", undefined, 5, "My dog, the size of a stamp", "Tess got the ears exactly right at a tiny scale.", "published", "2026-09-12T12:00:00Z"],
+    ["rev-marco-1", "marco-ruiz", "jordan-ellis", undefined, 5, "Script that reads", "Every letter was drawn for my arm. No font file.", "published", "2026-08-30T12:00:00Z"],
+    ["rev-alana-1", "alana-torres", "samira-patel", undefined, 5, "Color stayed soft", "The peony healed without a hard edge, just as she said.", "published", "2026-10-04T12:00:00Z"],
+    ["rev-finn-1", "finn-doyle", "owen-brooks", undefined, 4, "Fast walk-in", "Picked a panther off the wall and was out in an hour.", "published", "2026-07-21T12:00:00Z"],
+    ["rev-omar-1", "omar-haddad", "maya-chen", undefined, 5, "Patient with the photo", "He asked for a better scan before starting. Worth it.", "published", "2026-06-18T12:00:00Z"],
+    ["rev-viktor-1", "viktor-lind", "owen-brooks", undefined, 5, "Even black", "Three passes and the sleeve is solid with no patches.", "published", "2026-05-27T12:00:00Z"],
+    ["rev-elena-1", "elena-marsh", "samira-patel", undefined, 5, "Rings sit straight", "She checked the stencil twice. The lines are perfectly even.", "published", "2026-09-19T12:00:00Z"],
+    ["rev-noor-1", "noor-aziz", "lila-nguyen", undefined, 4, "Small and sharp", "The bee is tiny but you can see every wing vein.", "published", "2026-10-11T12:00:00Z"],
+    ["rev-ivy-1", "ivy-sinclair", "maya-chen", undefined, 5, "Worth the ferry", "The fern on my ribs looks like a botanical print.", "published", "2026-08-08T12:00:00Z"],
+    ["rev-hana-1", "hana-kim", "jordan-ellis", undefined, 5, "Planned like a real sleeve", "Hana drew the whole composition before the first session.", "published", "2026-07-02T12:00:00Z"],
+    ["rev-diego-1", "diego-ramos", "owen-brooks", undefined, 4, "Great lettering", "Hand-drawn names that look like they belong together.", "published", "2026-06-25T12:00:00Z"],
+    ["rev-mei-1", "mei-lin", "samira-patel", undefined, 5, "The pattern meets itself", "The mandala lines up all the way around my elbow.", "published", "2026-09-27T12:00:00Z"],
+    ["rev-rosie-1", "rosie-gallagher", "lila-nguyen", undefined, 5, "Fun flash day", "Grabbed cherries off the wall. Clean, bold, quick.", "published", "2026-10-16T12:00:00Z"],
+    ["rev-kofi-1", "kofi-mensah", "jordan-ellis", undefined, 5, "Portrait reads on my skin", "Kofi knew exactly how much contrast my skin needed.", "published", "2026-08-21T12:00:00Z"],
+    ["rev-adrian-1", "adrian-vale", "maya-chen", undefined, 5, "Looks like an engraving", "The raven has fine cross-hatching that healed crisp.", "published", "2026-07-30T12:00:00Z"],
   ];
   return rows.map(([id, artistId, customerId, bookingId, rating, title, body, status, createdAt]) => ({
     id,
@@ -1241,7 +1737,7 @@ function alignCalendar(artists: Artist[], bookings: Booking[]) {
 
 function buildState(): DemoState {
   const bookings = buildBookings();
-  const artists = alignCalendar(ARTISTS.map(toArtist), bookings);
+  const artists = alignCalendar([...ARTISTS, ...MORE_ARTISTS].map(toArtist), bookings);
   const services = artists.flatMap(servicesFor);
   const portfolio = artists.flatMap((artist, index) => portfolioFor(artist, index * 2));
   const transactions = buildTransactions(bookings);
@@ -1296,7 +1792,12 @@ function buildState(): DemoState {
       city: "New York",
     },
     favorites: {
-      "maya-chen": ["nova-reyes", "julian-cho", "cass-nguyen"],
+      "maya-chen": [
+        "nova-reyes",
+        "julian-cho",
+        "cass-nguyen",
+        ...MORE_ARTISTS.map((artist) => artist.id),
+      ],
     },
   };
   return deriveState(base);
