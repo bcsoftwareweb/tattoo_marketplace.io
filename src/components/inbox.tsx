@@ -1,12 +1,35 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useDemo } from "@/context/demo-context";
 import { readImageFile } from "@/lib/files";
 import { formatDateTime } from "@/lib/format";
 import { conversationsFor } from "@/lib/selectors";
-import { Button, Empty, Photo } from "@/components/ui";
+import { Empty, Photo } from "@/components/ui";
+
+function shortDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function BackIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 5l-7 7 7 7" />
+    </svg>
+  );
+}
+
+function AttachIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3.5" y="5" width="17" height="14" rx="2" />
+      <circle cx="9" cy="10" r="1.6" />
+      <path d="M20.5 16l-5-5-8 8" />
+    </svg>
+  );
+}
 
 export function Inbox({ role }: { role: "customer" | "artist" }) {
   const { state, session, postMessage, toast } = useDemo();
@@ -18,7 +41,19 @@ export function Inbox({ role }: { role: "customer" | "artist" }) {
   if (!session) return null;
   const threads = conversationsFor(state, role, session.userId);
   const requested = params.get("thread");
-  const active = threads.find((thread) => thread.id === requested) ?? threads[0];
+  const open = threads.find((thread) => thread.id === requested);
+  const active = open ?? threads[0];
+  if (!threads.length) return <Empty title="No conversations" body="Messages appear here after you contact an artist or receive a request." />;
+
+  const base = role === "customer" ? "/customer/messages" : "/artist/messages";
+  const person = (thread: (typeof threads)[number]) => {
+    if (role === "customer") {
+      const artist = state.artists.find((item) => item.id === thread.artistId);
+      return { name: artist?.name ?? "Conversation", photo: artist?.photo, detail: artist?.studioName ?? "", href: artist ? `/artists/${artist.slug}` : null };
+    }
+    const customer = state.customers.find((item) => item.id === thread.customerId);
+    return { name: customer?.name ?? "Conversation", photo: customer?.photo, detail: customer ? `${customer.neighborhood}, ${customer.borough}` : "", href: null };
+  };
 
   async function onFile(file: File | undefined) {
     if (!file) return;
@@ -40,75 +75,105 @@ export function Inbox({ role }: { role: "customer" | "artist" }) {
     setError("");
   }
 
-  if (!threads.length) return <Empty title="No conversations" body="Messages appear here after you contact an artist or receive a request." />;
+  const other = active ? person(active) : null;
 
   return (
-    <div className="grid min-h-[70vh] min-w-0 border border-line bg-white md:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="border-b border-line md:border-r md:border-b-0">
-        <ul>
+    <div className="grid h-[calc(100svh-7rem)] min-w-0 grid-rows-[minmax(0,1fr)] overflow-hidden border border-line bg-white md:h-[calc(100svh-8rem)] lg:grid-cols-[320px_minmax(0,1fr)]">
+      <aside className={`min-h-0 flex-col lg:flex lg:border-r lg:border-line ${open ? "hidden" : "flex"}`}>
+        <h1 className="border-b border-line px-4 py-4 font-display text-2xl">Messages</h1>
+        <ul className="min-h-0 flex-1 overflow-y-auto">
           {threads.map((thread) => {
-            const otherId = role === "customer" ? thread.artistId : thread.customerId;
-            const other = role === "customer"
-              ? state.artists.find((artist) => artist.id === otherId)
-              : state.customers.find((customer) => customer.id === otherId);
+            const who = person(thread);
             const last = thread.messages[thread.messages.length - 1];
             const selected = active?.id === thread.id;
             return (
               <li key={thread.id}>
                 <button
                   type="button"
-                  onClick={() => router.replace(role === "customer" ? `/customer/messages?thread=${thread.id}` : `/artist/messages?thread=${thread.id}`)}
-                  className={`block w-full border-b border-line px-4 py-3 text-left ${selected ? "bg-paper" : "bg-white"}`}
+                  onClick={() => router.push(`${base}?thread=${thread.id}`)}
+                  className={`flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left hover:bg-paper ${selected ? "lg:bg-paper" : ""}`}
                 >
-                  <span className="block text-sm font-medium">{other?.name ?? "Conversation"}</span>
-                  <span className="mt-1 line-clamp-2 block text-xs text-mute">{last?.body || "No messages yet"}</span>
+                  <Photo src={who.photo} alt="" className="h-12 w-12 shrink-0 rounded-full" />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-baseline justify-between gap-2">
+                      <span className="truncate text-sm font-medium">{who.name}</span>
+                      {last ? <span className="shrink-0 text-xs text-mute">{shortDate(last.createdAt)}</span> : null}
+                    </span>
+                    <span className="mt-0.5 block truncate text-sm text-mute">{last?.body || (last?.attachment ? "Photo" : "No messages yet")}</span>
+                  </span>
                 </button>
               </li>
             );
           })}
         </ul>
       </aside>
-      {active ? (
-        <section className="flex min-h-[60vh] flex-col">
-          <header className="border-b border-line px-4 py-3 text-sm">
-            {role === "customer"
-              ? state.artists.find((artist) => artist.id === active.artistId)?.studioName
-              : state.customers.find((customer) => customer.id === active.customerId)?.neighborhood}
+
+      {active && other ? (
+        <section className={`min-h-0 min-w-0 flex-col lg:flex ${open ? "flex" : "hidden"}`}>
+          <header className="flex items-center gap-3 border-b border-line px-2 py-2.5 lg:px-4">
+            <button type="button" aria-label="Back to messages" className="grid h-10 w-10 shrink-0 place-items-center lg:hidden" onClick={() => router.push(base)}>
+              <BackIcon />
+            </button>
+            <Photo src={other.photo} alt="" className="h-10 w-10 shrink-0 rounded-full" />
+            <div className="min-w-0">
+              {other.href ? (
+                <Link href={other.href} className="block truncate text-sm font-medium">{other.name}</Link>
+              ) : (
+                <p className="truncate text-sm font-medium">{other.name}</p>
+              )}
+              {other.detail ? <p className="truncate text-xs text-mute">{other.detail}</p> : null}
+            </div>
           </header>
-          <ol className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
-            {active.messages.map((message) => {
+
+          <ol className="flex min-h-0 flex-1 flex-col-reverse gap-2 overflow-y-auto px-3 py-4 lg:px-5">
+            {[...active.messages].reverse().map((message) => {
               const mine = message.senderId === session.userId;
               return (
-                <li key={message.id} className={mine ? "ml-auto max-w-[80%] bg-ink px-3 py-2 text-sm text-white" : "max-w-[80%] border border-line px-3 py-2 text-sm"}>
-                  <p className="whitespace-pre-wrap">{message.body}</p>
-                  {message.attachment ? (
-                    <figure className="mt-2">
-                      <Photo src={message.attachment.url} alt={message.attachment.name} className="max-h-48 w-full" />
-                      <figcaption className="mt-1 text-xs opacity-70">{message.attachment.name}</figcaption>
-                    </figure>
-                  ) : null}
-                  <p className="mt-2 text-[11px] opacity-70">{formatDateTime(message.createdAt)}</p>
+                <li key={message.id} className={`flex max-w-[80%] flex-col ${mine ? "ml-auto items-end" : "items-start"}`}>
+                  <div className={`rounded-2xl px-3.5 py-2 text-sm leading-6 ${mine ? "rounded-br-md bg-[#d9d9d9] text-[#151515]" : "rounded-bl-md bg-[#2a2a2a] text-[#e2e2e2]"}`}>
+                    {message.body ? <p className="whitespace-pre-wrap">{message.body}</p> : null}
+                    {message.attachment ? (
+                      <Photo src={message.attachment.url} alt={message.attachment.name} className={`max-h-56 w-full rounded-xl ${message.body ? "mt-2" : ""}`} />
+                    ) : null}
+                  </div>
+                  <p className="mt-1 px-1 text-[11px] text-mute">{formatDateTime(message.createdAt)}</p>
                 </li>
               );
             })}
           </ol>
-          <form className="border-t border-line p-4" onSubmit={send}>
+
+          <form className="border-t border-line px-3 py-3" onSubmit={send}>
             {attachment ? (
-              <div className="mb-3 flex items-center gap-3">
-                <Photo src={attachment.url} alt={attachment.name} className="h-16 w-16" />
-                <button type="button" className="text-sm text-mute" onClick={() => setAttachment(null)}>Remove image</button>
+              <div className="mb-2 flex items-center gap-3">
+                <Photo src={attachment.url} alt={attachment.name} className="h-14 w-14 rounded-lg" />
+                <button type="button" className="text-sm text-mute" onClick={() => setAttachment(null)}>Remove photo</button>
               </div>
             ) : null}
-            <label className="block text-sm">
-              <span className="sr-only">Message</span>
-              <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={3} className="w-full border border-line px-3 py-2" placeholder="Write a message" />
-            </label>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <label className="text-sm">
-                <span className="cursor-pointer border border-line px-3 py-2">Attach image</span>
+            <div className="flex items-end gap-2">
+              <label className="grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full border border-line" title="Attach a photo">
+                <span className="sr-only">Attach a photo</span>
+                <AttachIcon />
                 <input type="file" accept="image/*" className="sr-only" onChange={(event) => void onFile(event.target.files?.[0])} />
               </label>
-              <Button type="submit">Send</Button>
+              <label className="min-w-0 flex-1">
+                <span className="sr-only">Message</span>
+                <textarea
+                  value={body}
+                  onChange={(event) => setBody(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      event.currentTarget.form?.requestSubmit();
+                    }
+                  }}
+                  rows={1}
+                  className="block max-h-32 min-h-11 w-full resize-none rounded-3xl border border-line bg-white px-4 py-2.5 text-base outline-none md:text-sm"
+                  placeholder="Message"
+                />
+              </label>
+              <button type="submit" className="h-11 shrink-0 rounded-full bg-[#d9d9d9] px-4 text-sm font-medium text-[#151515] disabled:opacity-40" disabled={!body.trim() && !attachment}>
+                Send
+              </button>
             </div>
             {error ? <p role="alert" className="mt-2 text-sm">{error}</p> : null}
           </form>
