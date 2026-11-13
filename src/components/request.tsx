@@ -35,7 +35,7 @@ export function RequestForm({ slug }: { slug: string }) {
     return (
       <div className={`${frame} max-w-2xl py-16`}>
         <h1 className="font-display text-4xl">Sign in to request {artist.name}</h1>
-        <p className="mt-4 text-sm leading-6 text-mute">Appointment requests use the customer demo. The artist and administrator accounts cannot book a chair.</p>
+        <p className="mt-4 text-sm leading-6 text-mute">Appointment requests are made from a customer account. Artist and administrator accounts cannot book a chair.</p>
         <div className="mt-6"><Button href={`/login?next=${encodeURIComponent(`/artists/${artist.slug}/request`)}`}>Customer sign in</Button></div>
       </div>
     );

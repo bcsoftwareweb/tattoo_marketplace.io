@@ -323,7 +323,7 @@ const ARTISTS: ArtistInput[] = [
     email: "drew.hale@blackline.demo",
     phone: "347-555-0177",
     photo: portraits.drew,
-    bio: "Drew Hale lettered and tattooed traditional out of Greenpoint. The account is suspended in this demo while a customer report is reviewed.",
+    bio: "Drew Hale lettered and tattooed traditional out of Greenpoint. The account is suspended while a customer report is reviewed.",
     borough: "Brooklyn",
     neighborhood: "Greenpoint",
     studioName: "Franklin Lettering",
@@ -335,7 +335,7 @@ const ARTISTS: ArtistInput[] = [
     featured: false,
     verificationStatus: "suspended",
     verificationNote: "Suspended after a customer report. Public booking is paused.",
-    license: license("NYC-TAT-39002", "License is valid, but the public profile is suspended in this demo."),
+    license: license("NYC-TAT-39002", "License is valid, but the public profile is suspended."),
     closed: [0],
     booked: [],
     joinedAt: "2024-06-18",
@@ -634,7 +634,7 @@ const CUSTOMERS: Customer[] = [
     borough: "Bronx",
     neighborhood: "Riverdale",
     photo: portraits.chris,
-    bio: "Account suspended in this demo after repeated missed appointment fees.",
+    bio: "Account suspended after repeated missed appointment fees.",
     status: "suspended",
     joinedAt: "2025-02-08",
   },
@@ -676,7 +676,7 @@ function settled(bookingId: string, customerId: string, artistId: string, quote:
     commission: split.commission,
     artistNet: split.artistNet,
     createdAt: at,
-    note: "Simulated remaining balance settled at the appointment.",
+    note: "Remaining balance settled at the appointment.",
   };
 }
 
@@ -708,7 +708,7 @@ function buildBookings(): Booking[] {
       history: [
         event("2026-11-01T15:00:00Z", "pending", "Request submitted.", "customer"),
         event("2026-11-01T19:20:00Z", "awaiting_deposit", "Accepted at the requested time.", "artist"),
-        event("2026-11-02T18:10:00Z", "confirmed", "Simulated deposit recorded.", "customer"),
+        event("2026-11-02T18:10:00Z", "confirmed", "Deposit recorded.", "customer"),
       ],
     }),
     makeBooking({
@@ -790,7 +790,7 @@ function buildBookings(): Booking[] {
       history: [
         event("2026-09-20T15:00:00Z", "pending", "Request submitted.", "customer"),
         event("2026-09-21T12:00:00Z", "awaiting_deposit", "Accepted at the requested time.", "artist"),
-        event("2026-09-21T18:00:00Z", "confirmed", "Simulated deposit recorded.", "customer"),
+        event("2026-09-21T18:00:00Z", "confirmed", "Deposit recorded.", "customer"),
         event("2026-10-02T21:00:00Z", "completed", "Marked complete.", "artist"),
       ],
     }),
@@ -929,7 +929,7 @@ function buildBookings(): Booking[] {
       history: [
         event("2026-11-03T17:00:00Z", "pending", "Request submitted.", "customer"),
         event("2026-11-04T13:00:00Z", "awaiting_deposit", "Accepted at the requested time.", "artist"),
-        event("2026-11-04T20:00:00Z", "confirmed", "Simulated deposit recorded.", "customer"),
+        event("2026-11-04T20:00:00Z", "confirmed", "Deposit recorded.", "customer"),
       ],
     }),
     makeBooking({
@@ -958,7 +958,7 @@ function buildBookings(): Booking[] {
       history: [
         event("2026-09-01T15:00:00Z", "pending", "Request submitted.", "customer"),
         event("2026-09-02T12:00:00Z", "awaiting_deposit", "Accepted at the requested time.", "artist"),
-        event("2026-09-02T19:00:00Z", "confirmed", "Simulated deposit recorded.", "customer"),
+        event("2026-09-02T19:00:00Z", "confirmed", "Deposit recorded.", "customer"),
         event("2026-09-14T20:00:00Z", "completed", "Marked complete.", "artist"),
       ],
     }),
@@ -996,7 +996,7 @@ function buildBookings(): Booking[] {
       artistId: "leo-marino",
       serviceId: "svc-leo-marino-small",
       serviceName: "Small piece",
-      idea: "Traditional dagger on the calf. I am disputing the healed color in this demo.",
+      idea: "Traditional dagger on the calf. I am disputing the healed color.",
       placement: "Calf",
       size: "Small (2–4 in)",
       references: [],
@@ -1016,7 +1016,7 @@ function buildBookings(): Booking[] {
       history: [
         event("2026-10-08T15:00:00Z", "pending", "Request submitted.", "customer"),
         event("2026-10-08T18:00:00Z", "awaiting_deposit", "Accepted at the requested time.", "artist"),
-        event("2026-10-09T12:00:00Z", "confirmed", "Simulated deposit recorded.", "customer"),
+        event("2026-10-09T12:00:00Z", "confirmed", "Deposit recorded.", "customer"),
         event("2026-11-01T12:00:00Z", "disputed", "Color healed patchy and I want the deposit reviewed.", "customer"),
       ],
     }),
@@ -1026,7 +1026,7 @@ function buildBookings(): Booking[] {
       artistId: "priya-shah",
       serviceId: "svc-priya-shah-small",
       serviceName: "Small piece",
-      idea: "A fine line wrist lace. Refunded in the demo after the studio closed that week.",
+      idea: "A fine line wrist lace. Refunded after the studio closed that week.",
       placement: "Wrist",
       size: "Tiny (under 2 in)",
       references: [],
@@ -1046,8 +1046,8 @@ function buildBookings(): Booking[] {
       history: [
         event("2026-10-10T15:00:00Z", "pending", "Request submitted.", "customer"),
         event("2026-10-11T12:00:00Z", "awaiting_deposit", "Accepted at the requested time.", "artist"),
-        event("2026-10-11T18:00:00Z", "confirmed", "Simulated deposit recorded.", "customer"),
-        event("2026-10-18T16:00:00Z", "refunded", "Simulated refund after the studio week was cancelled.", "admin"),
+        event("2026-10-11T18:00:00Z", "confirmed", "Deposit recorded.", "customer"),
+        event("2026-10-18T16:00:00Z", "refunded", "Refunded after the studio week was cancelled.", "admin"),
       ],
     }),
     makeBooking({
@@ -1084,14 +1084,14 @@ function buildBookings(): Booking[] {
 function buildTransactions(bookings: Booking[]): Transaction[] {
   const find = (id: string) => bookings.find((booking) => booking.id === id)!;
   const rows: Transaction[] = [
-    paid("bk-maya-nova", "maya-chen", "nova-reyes", 420, 126, "2026-11-02T18:10:00Z", "Simulated deposit. No money was transferred."),
-    paid("bk-maya-sage", "maya-chen", "sage-okonkwo", 480, 144, "2026-09-21T18:00:00Z", "Simulated deposit. No money was transferred."),
+    paid("bk-maya-nova", "maya-chen", "nova-reyes", 420, 126, "2026-11-02T18:10:00Z", "Deposit paid at checkout."),
+    paid("bk-maya-sage", "maya-chen", "sage-okonkwo", 480, 144, "2026-09-21T18:00:00Z", "Deposit paid at checkout."),
     settled("bk-maya-sage", "maya-chen", "sage-okonkwo", 480, 144, "2026-10-02T21:00:00Z"),
-    paid("bk-owen-nova", "owen-brooks", "nova-reyes", 640, 192, "2026-11-04T20:00:00Z", "Simulated deposit. No money was transferred."),
-    paid("bk-lila-nova", "lila-nguyen", "nova-reyes", 300, 90, "2026-09-02T19:00:00Z", "Simulated deposit. No money was transferred."),
+    paid("bk-owen-nova", "owen-brooks", "nova-reyes", 640, 192, "2026-11-04T20:00:00Z", "Deposit paid at checkout."),
+    paid("bk-lila-nova", "lila-nguyen", "nova-reyes", 300, 90, "2026-09-02T19:00:00Z", "Deposit paid at checkout."),
     settled("bk-lila-nova", "lila-nguyen", "nova-reyes", 300, 90, "2026-09-14T20:00:00Z"),
-    paid("bk-jordan-leo", "jordan-ellis", "leo-marino", 220, 66, "2026-10-09T12:00:00Z", "Simulated deposit. No money was transferred."),
-    paid("bk-owen-priya", "owen-brooks", "priya-shah", 260, 78, "2026-10-11T18:00:00Z", "Simulated deposit. No money was transferred."),
+    paid("bk-jordan-leo", "jordan-ellis", "leo-marino", 220, 66, "2026-10-09T12:00:00Z", "Deposit paid at checkout."),
+    paid("bk-owen-priya", "owen-brooks", "priya-shah", 260, 78, "2026-10-11T18:00:00Z", "Deposit paid at checkout."),
   ];
   const priya = find("bk-owen-priya");
   const deposit = rows.find((row) => row.id === "tx-bk-owen-priya-deposit")!;
@@ -1105,7 +1105,7 @@ function buildTransactions(bookings: Booking[]): Transaction[] {
     commission: -deposit.commission,
     artistNet: -deposit.artistNet,
     createdAt: "2026-10-18T16:00:00Z",
-    note: "Simulated refund after the studio week was cancelled.",
+    note: "Refunded after the studio week was cancelled.",
   });
   return rows;
 }
@@ -1120,7 +1120,7 @@ function buildConversations(): Conversation[] {
       messages: [
         { id: "m1", senderRole: "customer", senderId: "maya-chen", body: "Hi Nova — inner forearm, about four inches, fine line olive branch. I attached the study.", createdAt: "2026-11-01T15:05:00Z", attachment: { name: "Olive study", url: workAt(0, 800) } },
         { id: "m2", senderRole: "artist", senderId: "nova-reyes", body: "This scale works. I can draw the stem so it follows the arm. November 18 at 2pm is open once the deposit is in.", createdAt: "2026-11-01T19:30:00Z" },
-        { id: "m3", senderRole: "customer", senderId: "maya-chen", body: "November 18 is good. I'll confirm the simulated deposit.", createdAt: "2026-11-02T18:12:00Z" },
+        { id: "m3", senderRole: "customer", senderId: "maya-chen", body: "November 18 is good. I'll pay the deposit.", createdAt: "2026-11-02T18:12:00Z" },
         { id: "m4", senderRole: "artist", senderId: "nova-reyes", body: "See you on the 18th. Come hydrated, and skip anything that thins your blood that week.", createdAt: "2026-11-09T15:00:00Z" },
       ],
     },
@@ -1197,14 +1197,14 @@ function buildReviews(): Review[] {
     ["rev-amara-1", "amara-blake", "lila-nguyen", undefined, 5, "She refused a bad photo", "Amara sent me back for a sharper print and the portrait is better for it.", "published", "2026-06-02T12:00:00Z"],
     ["rev-amara-2", "amara-blake", "owen-brooks", undefined, 4, "Slow and careful", "Two sessions for a pet portrait. Healing was straightforward.", "published", "2026-04-18T12:00:00Z"],
     ["rev-sage-1", "sage-okonkwo", "maya-chen", "bk-maya-sage", 5, "Band lines up", "Measured on the ankle while I was standing. It survived a month of boots.", "published", "2026-10-20T12:00:00Z"],
-    ["rev-leo-1", "leo-marino", "jordan-ellis", "bk-jordan-leo", 3, "Color healed uneven", "The dagger is bold, but the red healed patchy. I opened a dispute in this demo.", "published", "2026-11-01T12:30:00Z"],
+    ["rev-leo-1", "leo-marino", "jordan-ellis", "bk-jordan-leo", 3, "Color healed uneven", "The dagger is bold, but the red healed patchy. I opened a dispute.", "published", "2026-11-01T12:30:00Z"],
     ["rev-leo-2", "leo-marino", "owen-brooks", undefined, 5, "What traditional should be", "Readable across the room. Harbor Flash still feels like a shop, not a lobby.", "published", "2026-05-09T12:00:00Z"],
     ["rev-priya-1", "priya-shah", "samira-patel", undefined, 5, "Anklet placement was right", "She stopped the pattern where my shoe starts. That was the whole brief.", "published", "2026-09-02T12:00:00Z"],
     ["rev-cass-1", "cass-nguyen", "lila-nguyen", undefined, 5, "Looks like a print", "The snake has real contrast. Bushwick room, no upsell.", "published", "2026-10-30T12:00:00Z"],
     ["rev-cass-2", "cass-nguyen", "jordan-ellis", undefined, 4, "Good drawing, tight schedule", "Cass was clear that the date I wanted was too soon.", "published", "2026-11-09T18:00:00Z"],
     ["rev-river-1", "river-alvarez", "owen-brooks", undefined, 5, "Cover-up advice was honest", "Told me what could be covered and what needed laser. I respected the no.", "published", "2026-07-14T12:00:00Z"],
     ["rev-river-2", "river-alvarez", "samira-patel", undefined, 4, "Soft black and gray", "Moth healed softly. Appointment ran long, and he said so up front.", "published", "2026-03-22T12:00:00Z"],
-    ["rev-drew-1", "drew-hale", "chris-delgado", undefined, 2, "Missed the appointment window", "Reported separately. Keeping this flagged for the admin demo.", "flagged", "2026-10-02T12:00:00Z"],
+    ["rev-drew-1", "drew-hale", "chris-delgado", undefined, 2, "Missed the appointment window", "Reported separately. Keeping this flagged for review.", "flagged", "2026-10-02T12:00:00Z"],
   ];
   return rows.map(([id, artistId, customerId, bookingId, rating, title, body, status, createdAt]) => ({
     id,
@@ -1257,19 +1257,19 @@ function buildState(): DemoState {
     reviews: buildReviews(),
     transactions,
     notifications: [
-      { id: "nt-maya-1", userId: "maya-chen", role: "customer", title: "Deposit due", body: "Amara Blake is holding December 2. The deposit in this demo is simulated.", href: "/customer/bookings/detail?id=bk-maya-amara", read: false, createdAt: "2026-11-06T17:05:00Z", kind: "payment" },
+      { id: "nt-maya-1", userId: "maya-chen", role: "customer", title: "Deposit due", body: "Amara Blake is holding December 2. Pay the deposit to confirm.", href: "/customer/bookings/detail?id=bk-maya-amara", read: false, createdAt: "2026-11-06T17:05:00Z", kind: "payment" },
       { id: "nt-maya-2", userId: "maya-chen", role: "customer", title: "Cass proposed a new date", body: "November 28 at 2:00 PM, with a revised price for the snake.", href: "/customer/bookings/detail?id=bk-maya-cass", read: false, createdAt: "2026-11-09T16:05:00Z", kind: "booking" },
       { id: "nt-maya-3", userId: "maya-chen", role: "customer", title: "Appointment reminder", body: "Olive branch with Nova Reyes is on November 18 at 2:00 PM.", href: "/customer/bookings/detail?id=bk-maya-nova", read: false, createdAt: "2026-11-10T09:00:00Z", kind: "reminder" },
       { id: "nt-maya-4", userId: "maya-chen", role: "customer", title: "New message from Julian Cho", body: "A readable wave is two sessions minimum.", href: "/customer/messages?thread=conv-maya-julian", read: true, createdAt: "2026-11-09T13:00:00Z", kind: "message" },
-      { id: "nt-maya-5", userId: "maya-chen", role: "customer", title: "Deposit confirmed", body: "Your November 18 appointment with Nova is confirmed. No money was transferred.", href: "/customer/bookings/detail?id=bk-maya-nova", read: true, createdAt: "2026-11-02T18:10:00Z", kind: "payment" },
+      { id: "nt-maya-5", userId: "maya-chen", role: "customer", title: "Deposit confirmed", body: "Your November 18 appointment with Nova is confirmed.", href: "/customer/bookings/detail?id=bk-maya-nova", read: true, createdAt: "2026-11-02T18:10:00Z", kind: "payment" },
       { id: "nt-nova-1", userId: "nova-reyes", role: "artist", title: "New request from Jordan Ellis", body: "Collarbone script, November 20 at 3:30 PM.", href: "/artist/bookings/detail?id=bk-jordan-nova", read: false, createdAt: "2026-11-10T14:20:00Z", kind: "booking" },
       { id: "nt-nova-2", userId: "nova-reyes", role: "artist", title: "Message from Samira Patel", body: "She confirmed the anklet has to stop before the shoe line.", href: "/artist/messages?thread=conv-samira-nova", read: false, createdAt: "2026-11-07T11:00:00Z", kind: "message" },
-      { id: "nt-nova-3", userId: "nova-reyes", role: "artist", title: "Deposit received", body: "Owen Brooks confirmed the blackwork band. Simulated payment only.", href: "/artist/bookings/detail?id=bk-owen-nova", read: true, createdAt: "2026-11-04T20:00:00Z", kind: "payment" },
+      { id: "nt-nova-3", userId: "nova-reyes", role: "artist", title: "Deposit received", body: "Owen Brooks confirmed the blackwork band.", href: "/artist/bookings/detail?id=bk-owen-nova", read: true, createdAt: "2026-11-04T20:00:00Z", kind: "payment" },
       { id: "nt-nova-4", userId: "nova-reyes", role: "artist", title: "Reminder", body: "Maya Chen is booked November 18 at 2:00 PM.", href: "/artist/bookings/detail?id=bk-maya-nova", read: false, createdAt: "2026-11-10T09:00:00Z", kind: "reminder" },
       { id: "nt-admin-1", userId: "avery-quinn", role: "admin", title: "Dispute opened", body: "Jordan Ellis disputed the dagger with Leo Marino.", href: "/admin/bookings/detail?id=bk-jordan-leo", read: false, createdAt: "2026-11-01T12:00:00Z", kind: "booking" },
       { id: "nt-admin-2", userId: "avery-quinn", role: "admin", title: "Artist application waiting", body: "Mina Park's Long Island City application is still pending.", href: "/admin/artists/detail?id=mina-park", read: false, createdAt: "2026-11-06T10:00:00Z", kind: "verification" },
       { id: "nt-admin-3", userId: "avery-quinn", role: "admin", title: "Report filed", body: "A review of Drew Hale was flagged for moderation.", href: "/admin/marketplace", read: true, createdAt: "2026-10-02T12:30:00Z", kind: "system" },
-      { id: "nt-admin-4", userId: "avery-quinn", role: "admin", title: "Refund recorded", body: "Owen Brooks was refunded for the cancelled Mott Haven week. Simulated only.", href: "/admin/finance", read: true, createdAt: "2026-10-18T16:00:00Z", kind: "payment" },
+      { id: "nt-admin-4", userId: "avery-quinn", role: "admin", title: "Refund recorded", body: "Owen Brooks was refunded for the cancelled Mott Haven week.", href: "/admin/finance", read: true, createdAt: "2026-10-18T16:00:00Z", kind: "payment" },
     ],
     reports: [
       { id: "rpt-drew-review", type: "review", targetId: "rev-drew-1", targetLabel: "Review of Drew Hale by Chris Delgado", reporterId: "maya-chen", reason: "The review describes a missed appointment and should be checked before it stays public.", status: "open", createdAt: "2026-10-03T12:00:00Z" },
@@ -1284,12 +1284,12 @@ function buildState(): DemoState {
       { id: "act-5", userId: "nova-reyes", role: "artist", text: "Deposit confirmed for Owen Brooks.", createdAt: "2026-11-04T20:00:00Z" },
       { id: "act-6", userId: "nova-reyes", role: "artist", text: "Proposed a new anklet date for Samira Patel.", createdAt: "2026-11-08T15:30:00Z" },
       { id: "act-7", userId: "avery-quinn", role: "admin", text: "Mina Park submitted a Long Island City application.", createdAt: "2026-11-06T10:00:00Z" },
-      { id: "act-8", userId: "avery-quinn", role: "admin", text: "Recorded a simulated refund for Owen Brooks.", createdAt: "2026-10-18T16:00:00Z" },
+      { id: "act-8", userId: "avery-quinn", role: "admin", text: "Recorded a refund for Owen Brooks.", createdAt: "2026-10-18T16:00:00Z" },
     ],
     settings: {
       commissionPercent: COMMISSION,
-      bookingPolicy: "Artists respond to requests in this demo by accepting, declining, or proposing a new time and price. A date is held only after the simulated deposit is confirmed.",
-      cancellationPolicy: "Customers can cancel a pending or confirmed demo booking. Confirmed dates return to the artist's calendar. Refunds are simulated and move no money.",
+      bookingPolicy: "Artists respond to requests by accepting, declining, or proposing a new time and price. A date is held only after the deposit is confirmed.",
+      cancellationPolicy: "Customers can cancel a pending or confirmed booking. Confirmed dates return to the artist's calendar.",
       platformName: "BLACKLINE",
       supportEmail: "hello@blackline.demo",
       tagline: "A curated index of New York tattoo artists.",

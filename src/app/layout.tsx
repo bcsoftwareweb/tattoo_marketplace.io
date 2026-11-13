@@ -9,7 +9,7 @@ const syne = Syne({ subsets: ["latin"], variable: "--font-syne", display: "swap"
 
 export const metadata: Metadata = {
   title: { default: "BLACKLINE", template: "%s · BLACKLINE" },
-  description: "A frontend demo of a curated New York tattoo artist marketplace. Accounts, messages, and payments are simulated.",
+  description: "A curated marketplace of New York tattoo artists. Browse work by style and borough, then request an appointment.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

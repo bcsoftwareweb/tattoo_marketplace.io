@@ -478,7 +478,7 @@ export function setVerification(state: DemoState, artistId: string, status: Arti
           userId: artistId,
           role: "artist",
           title: "Verification updated",
-          body: `Your demo profile is now ${status}. ${verificationNote}`,
+          body: `Your profile is now ${status}. ${verificationNote}`,
           href: "/artist/profile",
           read: false,
           createdAt: now,

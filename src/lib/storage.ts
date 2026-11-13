@@ -33,7 +33,7 @@ export function saveState(state: DemoState) {
     window.localStorage.setItem(STATE_KEY, JSON.stringify(state));
     return null;
   } catch {
-    return "Demo storage is full. Remove a large image or reset demo data.";
+    return "Storage is full. Remove a large image and try again.";
   }
 }
 

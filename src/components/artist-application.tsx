@@ -111,7 +111,7 @@ export function ArtistApplicationForm() {
               <TextInput value={form.instagram} onChange={(event) => patch({ instagram: event.target.value })} placeholder="@studio" />
             </Field>
           </div>
-          <Field label="Portrait" hint="Optional. Stored only in this browser.">
+          <Field label="Portrait" hint="Optional.">
             <input type="file" accept="image/*" className="block w-full min-w-0 max-w-full text-base text-mist" onChange={(event) => void addPortrait(event.target.files?.[0])} />
           </Field>
           {form.photo ? <Photo src={form.photo} alt="" className="h-28 w-28" /> : null}

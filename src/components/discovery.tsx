@@ -187,7 +187,7 @@ export function StyleDetail({ slug }: { slug: string }) {
     return (
       <div className={`${frame} py-20`}>
         <h1 className="font-display text-4xl">Style not found</h1>
-        <p className="mt-3 text-sm text-mute">That style is not in the demo index.</p>
+        <p className="mt-3 text-sm text-mute">That style is not in the index.</p>
         <Link href="/styles" className="mt-6 inline-block text-sm">All styles</Link>
       </div>
     );

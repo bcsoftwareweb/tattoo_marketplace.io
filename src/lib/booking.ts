@@ -109,7 +109,7 @@ export function transitionBooking(
           booking.customerId,
           status === "awaiting_deposit" ? "Request accepted" : "Quote needs confirmation",
           status === "awaiting_deposit"
-            ? "Your appointment was accepted. A simulated deposit will hold the date."
+            ? "Your appointment was accepted. A deposit will hold the date."
             : "The artist kept your date and sent a revised quote to confirm.",
           booking.id,
           "booking",
@@ -209,7 +209,7 @@ export function transitionBooking(
       },
       transactions: [],
       notifications: [
-        notice("artist", booking.artistId, "Customer accepted your terms", "The booking is waiting on a simulated deposit.", booking.id, "booking"),
+        notice("artist", booking.artistId, "Customer accepted your terms", "The booking is waiting on the deposit.", booking.id, "booking"),
       ],
       activity: [
         { userId: booking.customerId, role: "customer", text: `Accepted terms for ${booking.serviceName}.`, createdAt: now },
@@ -249,7 +249,7 @@ export function transitionBooking(
     const split = depositSplit(booking.quote, booking.deposit, settings.commissionPercent);
     return {
       ok: true,
-      booking: stamp(booking, "confirmed", "Simulated deposit recorded. No money was transferred.", "customer", now),
+      booking: stamp(booking, "confirmed", "Deposit recorded.", "customer", now),
       transactions: [
         {
           bookingId: booking.id,
@@ -260,15 +260,15 @@ export function transitionBooking(
           commission: split.commission,
           artistNet: split.artistNet,
           createdAt: now,
-          note: "Simulated deposit. No money was transferred.",
+          note: "Deposit paid at checkout.",
         },
       ],
       notifications: [
-        notice("customer", booking.customerId, "Deposit confirmed", "This payment is simulated. Your appointment is now confirmed.", booking.id, "payment"),
-        notice("artist", booking.artistId, "Deposit received", "A simulated deposit confirmed the appointment.", booking.id, "payment"),
+        notice("customer", booking.customerId, "Deposit confirmed", "Your appointment is now confirmed.", booking.id, "payment"),
+        notice("artist", booking.artistId, "Deposit received", "The deposit confirmed the appointment.", booking.id, "payment"),
       ],
       activity: [
-        { userId: booking.customerId, role: "customer", text: `Confirmed ${booking.serviceName} with a simulated deposit.`, createdAt: now },
+        { userId: booking.customerId, role: "customer", text: `Confirmed ${booking.serviceName} with a deposit.`, createdAt: now },
         { userId: booking.artistId, role: "artist", text: `Deposit confirmed for ${booking.serviceName}.`, createdAt: now },
       ],
       blockDate: booking.appointmentDate,
@@ -293,7 +293,7 @@ export function transitionBooking(
       transactions: [],
       notifications: [
         notice("artist", booking.artistId, "Appointment cancelled", note, booking.id, "booking"),
-        notice("customer", booking.customerId, "Cancellation saved", "The appointment is marked cancelled in this demo.", booking.id, "booking"),
+        notice("customer", booking.customerId, "Cancellation saved", "The appointment is marked cancelled.", booking.id, "booking"),
       ],
       activity: [
         { userId: booking.customerId, role: "customer", text: `Cancelled ${booking.serviceName}.`, createdAt: now },
@@ -320,12 +320,12 @@ export function transitionBooking(
         commission: split.commission,
         artistNet: split.artistNet,
         createdAt: now,
-        note: "Simulated remaining balance settled at the appointment.",
+        note: "Remaining balance settled at the appointment.",
       });
     }
     return {
       ok: true,
-      booking: stamp(booking, "completed", "Marked complete. Remaining balance is simulated.", "artist", now),
+      booking: stamp(booking, "completed", "Marked complete. Remaining balance settled.", "artist", now),
       transactions,
       notifications: [
         notice("customer", booking.customerId, "Appointment completed", "The artist marked this sitting complete.", booking.id, "booking"),
@@ -372,7 +372,7 @@ export function transitionBooking(
     const amount = related.reduce((sum, item) => sum + item.amount, 0);
     const commission = related.reduce((sum, item) => sum + item.commission, 0);
     const artistNet = related.reduce((sum, item) => sum + item.artistNet, 0);
-    if (amount <= 0) return fail("There is no simulated payment to refund.");
+    if (amount <= 0) return fail("There is no payment to refund.");
     return {
       ok: true,
       booking: stamp(booking, "refunded", action.note.trim(), "admin", now),
@@ -386,16 +386,16 @@ export function transitionBooking(
           commission: -commission,
           artistNet: -artistNet,
           createdAt: now,
-          note: `Simulated refund. ${action.note.trim()}`,
+          note: `Refunded. ${action.note.trim()}`,
         },
       ],
       notifications: [
-        notice("customer", booking.customerId, "Refund recorded", "A simulated refund was applied. No money moved.", booking.id, "payment"),
-        notice("artist", booking.artistId, "Booking refunded", "An administrator recorded a simulated refund.", booking.id, "payment"),
+        notice("customer", booking.customerId, "Refund recorded", "A refund was applied to your deposit.", booking.id, "payment"),
+        notice("artist", booking.artistId, "Booking refunded", "An administrator recorded a refund.", booking.id, "payment"),
       ],
       activity: [
         { userId: ADMIN_ID, role: "admin", text: `Refunded ${booking.serviceName}.`, createdAt: now },
-        { userId: booking.customerId, role: "customer", text: `${booking.serviceName} was refunded in the demo.`, createdAt: now },
+        { userId: booking.customerId, role: "customer", text: `${booking.serviceName} was refunded.`, createdAt: now },
       ],
       blockDate: null,
       releaseDate: booking.appointmentDate,

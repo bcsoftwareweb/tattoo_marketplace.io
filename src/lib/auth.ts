@@ -51,7 +51,7 @@ export function authenticate(
 
   const account = DEMO_ACCOUNTS.find((item) => item.email === normalized);
   if (!account || account.password !== password) {
-    return { ok: false, error: "Those credentials do not match a demo account." };
+    return { ok: false, error: "That email and password do not match an account." };
   }
 
   return {
@@ -72,14 +72,14 @@ export function accountForRole(role: Role) {
 export function accountBlock(state: DemoState, session: Session) {
   if (session.role === "customer") {
     const customer = state.customers.find((item) => item.id === session.userId);
-    if (!customer) return "This demo customer profile is missing. Reset demo data and try again.";
-    if (customer.status === "suspended") return "This demo customer account is suspended.";
+    if (!customer) return "This customer profile is missing.";
+    if (customer.status === "suspended") return "This customer account is suspended.";
   }
   if (session.role === "artist") {
     const artist = state.artists.find((item) => item.id === session.userId);
-    if (!artist) return "This demo artist profile is missing. Reset demo data and try again.";
-    if (artist.verificationStatus === "suspended") return "This demo artist account is suspended.";
-    if (artist.verificationStatus === "rejected") return "This demo artist application was rejected.";
+    if (!artist) return "This artist profile is missing.";
+    if (artist.verificationStatus === "suspended") return "This artist account is suspended.";
+    if (artist.verificationStatus === "rejected") return "This artist application was rejected.";
   }
   return null;
 }

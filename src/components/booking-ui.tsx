@@ -43,9 +43,9 @@ export function BookingScreen({ role }: { role: Role }) {
   const id = params.get("id") ?? "";
   const { state, session, act, toast } = useDemo();
   const booking = state.bookings.find((item) => item.id === id);
-  if (!session || !booking) return <Empty title="Booking not found" body="That appointment is not in this demo session." />;
+  if (!session || !booking) return <Empty title="Booking not found" body="That appointment is not on this account." />;
   const owns = (role === "customer" && booking.customerId === session.userId) || (role === "artist" && booking.artistId === session.userId) || role === "admin";
-  if (!owns) return <Empty title="Outside this account" body="This demo account cannot open that booking." />;
+  if (!owns) return <Empty title="Outside this account" body="This account cannot open that booking." />;
   return <BookingBody role={role} booking={booking} onAct={(action) => { const error = act(booking.id, action); if (!error) toast("Booking updated."); }} />;
 }
 
@@ -120,8 +120,7 @@ function BookingBody({ role, booking, onAct }: { role: Role; booking: Booking; o
               <Row label="Artist net after commission" value={money(split.artistNet)} />
             </dl>
           ) : <p className="text-sm text-mute">The artist has not sent a quote yet. Budget on the request is {money(booking.customerBudget)}.</p>}
-          <p className="text-xs leading-5 text-mute">Demo figures only. No payment is processed.</p>
-          {role === "customer" && booking.status === "awaiting_deposit" ? <Button href={`/checkout?booking=${booking.id}`}>Continue to simulated checkout</Button> : null}
+          {role === "customer" && booking.status === "awaiting_deposit" ? <Button href={`/checkout?booking=${booking.id}`}>Continue to checkout</Button> : null}
           {role === "artist" && (booking.status === "pending" || booking.status === "artist_proposed_changes") ? (
             <form className="grid gap-3" onSubmit={(event) => event.preventDefault()}>
               <Field label="Quote"><TextInput inputMode="numeric" value={quote} onChange={(event) => setQuote(event.target.value)} /></Field>
@@ -165,7 +164,7 @@ function BookingBody({ role, booking, onAct }: { role: Role; booking: Booking; o
           {role === "admin" && ["disputed", "confirmed", "completed"].includes(booking.status) ? (
             <form className="grid gap-2" onSubmit={(event) => { event.preventDefault(); onAct({ type: "refund", note }); }}>
               <Field label="Refund note"><Area required value={note} onChange={(event) => setNote(event.target.value)} /></Field>
-              <Button type="submit">Record simulated refund</Button>
+              <Button type="submit">Record refund</Button>
             </form>
           ) : null}
         </aside>
@@ -204,9 +203,9 @@ export function CheckoutScreen() {
   const booking = state.bookings.find((item) => item.id === id);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ name: session?.name ?? "", number: "", expiry: "", cvc: "" });
-  if (!session) return <Empty title="Sign in to check out" body="Use the customer demo account. No real card is charged." action={<Button href={`/login?next=${encodeURIComponent(`/checkout?booking=${id}`)}`}>Sign in</Button>} />;
-  if (session.role !== "customer") return <Empty title="Customers check out" body="Switch to the customer demo to pay a simulated deposit." />;
-  if (!booking || booking.customerId !== session.userId) return <Empty title="Booking not found" body="This checkout does not belong to the signed-in demo customer." />;
+  if (!session) return <Empty title="Sign in to check out" body="Sign in with the customer account that made this booking." action={<Button href={`/login?next=${encodeURIComponent(`/checkout?booking=${id}`)}`}>Sign in</Button>} />;
+  if (session.role !== "customer") return <Empty title="Customers check out" body="Sign in with a customer account to pay a deposit." />;
+  if (!booking || booking.customerId !== session.userId) return <Empty title="Booking not found" body="This checkout does not belong to the signed-in customer." />;
   if (booking.status !== "awaiting_deposit" || booking.quote == null || booking.deposit == null) {
     return <Empty title="Nothing to pay" body="This booking is not waiting on a deposit." action={<Button href={bookingPath("customer", booking.id)}>View booking</Button>} />;
   }
@@ -217,7 +216,7 @@ export function CheckoutScreen() {
     event.preventDefault();
     const digits = form.number.replace(/\s/g, "");
     if (form.name.trim().length < 2) return setError("Enter the name on the card.");
-    if (!/^\d{16}$/.test(digits)) return setError("Enter a 16-digit demo card number. Any number works.");
+    if (!/^\d{16}$/.test(digits)) return setError("Enter a 16-digit card number.");
     if (!/^\d{2}\/\d{2}$/.test(form.expiry)) return setError("Enter an expiry as MM/YY.");
     if (!/^\d{3,4}$/.test(form.cvc)) return setError("Enter a 3 or 4 digit CVC.");
     const failure = act(booking!.id, { type: "pay_deposit" });
@@ -228,9 +227,9 @@ export function CheckoutScreen() {
   return (
     <div className={`${"mx-auto grid max-w-5xl gap-8 px-5 py-12 md:grid-cols-2 md:px-8"}`}>
       <section>
-        <p className="text-xs uppercase tracking-[0.18em] text-mute">Simulated checkout</p>
+        <p className="text-xs uppercase tracking-[0.18em] text-mute">Checkout</p>
         <h1 className="mt-3 font-display text-4xl">Hold {formatDate(booking.appointmentDate)}</h1>
-        <p className="mt-4 text-sm leading-6 text-mute">Paying the deposit confirms {booking.serviceName} with {artist?.name}. This form does not contact a bank. No money is transferred.</p>
+        <p className="mt-4 text-sm leading-6 text-mute">Paying the deposit confirms {booking.serviceName} with {artist?.name}.</p>
         <dl className="mt-8 grid gap-3 border border-line bg-white p-5 text-sm">
           <Row label="Tattoo price" value={money(split.quote)} />
           <Row label="Deposit due now" value={money(split.deposit)} />
@@ -239,7 +238,6 @@ export function CheckoutScreen() {
         </dl>
       </section>
       <form className="grid gap-4 border border-line bg-white p-5" onSubmit={submit}>
-        <p className="border border-line bg-paper px-3 py-3 text-sm">Demo payment only. Use any 16-digit number.</p>
         <Field label="Name on card"><TextInput value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} autoComplete="name" /></Field>
         <Field label="Card number"><TextInput inputMode="numeric" value={form.number} onChange={(event) => setForm({ ...form, number: event.target.value })} placeholder="4242 4242 4242 4242" /></Field>
         <div className="grid grid-cols-2 gap-3">
@@ -247,7 +245,7 @@ export function CheckoutScreen() {
           <Field label="CVC"><TextInput value={form.cvc} onChange={(event) => setForm({ ...form, cvc: event.target.value })} placeholder="123" /></Field>
         </div>
         {error ? <p role="alert" className="text-sm">{error}</p> : null}
-        <Button type="submit">Pay {money(split.deposit)} deposit — simulated</Button>
+        <Button type="submit">Pay {money(split.deposit)} deposit</Button>
       </form>
     </div>
   );
@@ -258,14 +256,14 @@ export function ConfirmationScreen() {
   const id = params.get("booking") ?? "";
   const { state, session } = useDemo();
   const booking = state.bookings.find((item) => item.id === id);
-  if (!booking) return <Empty title="No receipt" body="That payment is not in the demo." />;
+  if (!booking) return <Empty title="No receipt" body="That payment could not be found." />;
   return (
     <div className="mx-auto max-w-2xl px-5 py-16">
-      <p className="text-xs uppercase tracking-[0.18em] text-mute">Simulated receipt</p>
-      <h1 className="mt-3 font-express text-5xl leading-none">No money moved.</h1>
+      <p className="text-xs uppercase tracking-[0.18em] text-mute">Receipt</p>
+      <h1 className="mt-3 font-express text-5xl leading-none">Deposit paid.</h1>
       <p className="mt-6 text-sm leading-6 text-mute">
         {booking.status === "confirmed"
-          ? `${booking.serviceName} is confirmed for ${formatDate(booking.appointmentDate)} at ${formatTime(booking.appointmentTime)}. The deposit was recorded only inside this browser.`
+          ? `${booking.serviceName} is confirmed for ${formatDate(booking.appointmentDate)} at ${formatTime(booking.appointmentTime)}.`
           : "This booking is not in a paid state yet."}
       </p>
       {session?.role === "customer" ? <div className="mt-8"><Button href={bookingPath("customer", booking.id)}>View booking</Button></div> : null}

@@ -116,7 +116,7 @@ export function PublicFooter() {
       <div className={`${frame} grid gap-10 py-14 md:grid-cols-4`}>
         <div>
           <p className="font-display tracking-[0.18em]">{state.settings.platformName}</p>
-          <p className="mt-4 max-w-xs text-sm leading-6 text-mist">{state.settings.tagline} This prototype stores everything in your browser.</p>
+          <p className="mt-4 max-w-xs text-sm leading-6 text-mist">{state.settings.tagline}</p>
         </div>
         <div className="grid grid-cols-3 gap-x-3 md:contents md:gap-0">
           <FooterColumn title="Company" links={[["/about", "About Us"], ["/legal/privacy", "Privacy Policy"], ["/legal/terms", "Terms of Service"]]} />
@@ -124,7 +124,6 @@ export function PublicFooter() {
           <FooterColumn title="Studios" links={[["/for-artists", "Artist application"]]} />
         </div>
       </div>
-      <div className={`${frame} border-t border-panel py-5 text-xs text-mist`}>Simulated bookings and payments. No real money, messages, or accounts.</div>
     </footer>
   );
 }
@@ -151,7 +150,7 @@ export function RequireRole({ role, children }: { role: Role; children: React.Re
     else if (session.role !== role) router.replace(homeFor(session.role));
   }, [ready, session, role, router]);
   if (!ready || !session || session.role !== role) {
-    return <div className="grid min-h-screen place-items-center bg-ink text-sm text-mist">Checking the demo session…</div>;
+    return <div className="grid min-h-screen place-items-center bg-ink text-sm text-mist">Checking your session…</div>;
   }
   return children;
 }
@@ -213,7 +212,7 @@ function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
   return (
     <div className="flex h-16 items-center justify-between border-b border-panel bg-ink px-4 text-white md:px-8">
       <button type="button" className="text-sm md:hidden" onClick={onMenu}>Menu</button>
-      <p className="hidden text-sm text-mist md:block">Demo session · {session.email}</p>
+      <p className="hidden text-sm text-mist md:block">Signed in · {session.email}</p>
       <div className="ml-auto flex items-center gap-2">
         <div className="relative">
           <button type="button" className="h-10 border border-detail px-3 text-sm" aria-expanded={notesOpen} onClick={() => { setNotesOpen((value) => !value); setAccountOpen(false); }}>

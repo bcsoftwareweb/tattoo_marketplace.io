@@ -6,7 +6,7 @@ const steps = [
   ["Find a chair", "Search by style, borough, price, and who actually has an open day."],
   ["Write the request", "Pick a service or ask for a custom quote, describe the tattoo, and attach a reference."],
   ["Let the artist answer", "They can accept, decline, or propose another time and price. You confirm before any deposit."],
-  ["Confirm in the demo", "Checkout records a simulated deposit. The date moves to confirmed. No bank is involved."],
+  ["Confirm with a deposit", "Pay the deposit at checkout and the date moves to confirmed on both calendars."],
 ];
 
 export default function Page() {

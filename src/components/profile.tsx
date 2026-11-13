@@ -13,7 +13,7 @@ export function ArtistProfile({ slug }: { slug: string }) {
   const router = useRouter();
   const artist = state.artists.find((item) => item.slug === slug);
   if (!artist) {
-    return <div className={`${frame} py-20`}><h1 className="font-display text-4xl">Artist not found</h1><p className="mt-3 text-sm text-mute">That profile is not in the demo index.</p></div>;
+    return <div className={`${frame} py-20`}><h1 className="font-display text-4xl">Artist not found</h1><p className="mt-3 text-sm text-mute">That profile is not in the index.</p></div>;
   }
   const services = servicesFor(state, artist.id);
   const portfolio = portfolioFor(state, artist.id);
@@ -28,7 +28,7 @@ export function ArtistProfile({ slug }: { slug: string }) {
       return;
     }
     if (session.role !== "customer") {
-      toast("Sign in with the customer demo to message artists.");
+      toast("Sign in with a customer account to message artists.");
       return;
     }
     const result = openThread(artist!.id);
@@ -45,7 +45,7 @@ export function ArtistProfile({ slug }: { slug: string }) {
       return;
     }
     if (session.role !== "customer") {
-      toast("Sign in with the customer demo to request an appointment.");
+      toast("Sign in with a customer account to request an appointment.");
       return;
     }
     router.push(`/artists/${artist!.slug}/request`);

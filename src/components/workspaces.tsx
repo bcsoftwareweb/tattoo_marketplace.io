@@ -120,7 +120,7 @@ export function CustomerBookings() {
   };
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="Customer" title="My bookings" description="Open a booking to accept a proposal, pay a simulated deposit, or cancel." />
+      <PageHeader eyebrow="Customer" title="My bookings" description="Open a booking to accept a proposal, pay the deposit, or cancel." />
       <Tabs tabs={[{ id: "upcoming", label: "Upcoming" }, { id: "pending", label: "Pending" }, { id: "completed", label: "Completed" }, { id: "closed", label: "Closed" }]} value={tab} onChange={setTab} />
       <BookingCards bookings={groups[tab] ?? []} role="customer" empty="Nothing in this tab." />
     </div>
@@ -174,7 +174,7 @@ export function CustomerProfile() {
       <Field label="Borough"><SelectInput value={form.borough} onChange={(event) => setForm({ ...form, borough: event.target.value })}>{BOROUGHS.map((item) => <option key={item}>{item}</option>)}</SelectInput></Field>
       <Field label="Neighborhood"><TextInput value={form.neighborhood} onChange={(event) => setForm({ ...form, neighborhood: event.target.value })} /></Field>
       <Field label="About"><Area value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} /></Field>
-      <p className="text-xs text-mute">Email stays on the demo account so sign-in keeps working.</p>
+      <p className="text-xs text-mute">Email cannot be changed here so sign-in keeps working.</p>
       <div className="flex flex-wrap gap-2">
         <Button type="submit">Save</Button>
         <Button type="button" variant="secondary" onClick={resetDemo}>Reset demo data</Button>
@@ -195,13 +195,13 @@ export function ArtistOverview() {
   return (
     <div className="grid gap-8">
       {artist.verificationStatus !== "approved" ? <p className="border border-line bg-white px-4 py-3 text-sm">Public status: {verificationLabel(artist.verificationStatus)}. {artist.verificationNote}</p> : null}
-      <PageHeader eyebrow="Artist" title={artist.studioName} description="Bookings, simulated earnings, and the conversations waiting on you." />
+      <PageHeader eyebrow="Artist" title={artist.studioName} description="Bookings, earnings, and the conversations waiting on you." />
       <StatGrid items={[
         { label: "Total bookings", value: String(bookings.length) },
         { label: "Upcoming", value: String(bookings.filter((item) => item.status === "confirmed").length) },
         { label: "Open requests", value: String(bookings.filter((item) => isOpenBooking(item.status)).length) },
         { label: "Completed", value: String(bookings.filter((item) => item.status === "completed").length) },
-        { label: "November net", value: money(finance.monthNet), note: "Demo data for November 2026." },
+        { label: "November net", value: money(finance.monthNet), note: "November 2026." },
       ]} />
       <section>
         <h2 className="mb-3 font-display text-2xl">Needs a response</h2>
@@ -235,7 +235,7 @@ export function ArtistProfileEditor() {
   if (!form) return null;
   return (
     <form className="grid max-w-3xl gap-4" onSubmit={(event) => { event.preventDefault(); updateArtist(form); }}>
-      <PageHeader eyebrow="Artist" title="Profile" description="Changes stay in this browser and show on your public page." />
+      <PageHeader eyebrow="Artist" title="Profile" description="Changes show on your public page." />
       <Photo src={form.photo} alt="" className="h-32 w-28" />
       <label className="text-sm">Profile photo<input className="mt-2 block" type="file" accept="image/*" onChange={async (event) => {
         const file = event.target.files?.[0];
@@ -289,7 +289,7 @@ export function ArtistPortfolio() {
   const items = portfolioFor(state, artist.id);
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="Artist" title="Portfolio" description="Uploads stay in this browser as compressed previews." />
+      <PageHeader eyebrow="Artist" title="Portfolio" description="Add, edit, and remove the pieces on your public page." />
       <form className="grid gap-3 border border-line bg-white p-4 md:grid-cols-2" onSubmit={(event) => {
         event.preventDefault();
         const error = addPortfolioItem({ title, description, category, styleId, image });
@@ -468,7 +468,7 @@ export function ArtistEarnings() {
   const finance = artistFinance(state, artist.id);
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="Demo data" title="Earnings" description="Every figure is simulated. The platform commission is deducted from the artist side and no payout is sent." />
+      <PageHeader eyebrow="Artist" title="Earnings" description="The platform commission is deducted from the artist side of each payment." />
       <StatGrid items={[
         { label: "Recorded artist net", value: money(finance.net), note: "Deposits, balances, and refunds." },
         { label: "Commission deducted", value: money(finance.commission) },
@@ -482,7 +482,7 @@ export function ArtistEarnings() {
 
 function TransactionTable({ rows }: { rows: ReturnType<typeof artistFinance>["transactions"] }) {
   const { state } = useDemo();
-  if (!rows.length) return <Empty title="No transactions" body="Simulated payments will show up here." />;
+  if (!rows.length) return <Empty title="No transactions" body="Payments will show up here." />;
   return (
     <div className="overflow-x-auto border border-line bg-white">
       <table className="w-full min-w-[640px] text-left text-sm">
@@ -512,7 +512,7 @@ export function AdminOverview() {
   const activity = state.activity.filter((item) => item.role === "admin").slice(0, 5);
   return (
     <div className="grid gap-8">
-      <PageHeader eyebrow="Administrator" title="Marketplace" description="Sample totals from the demo ledger. Nothing here is a live payment." />
+      <PageHeader eyebrow="Administrator" title="Marketplace" description="Totals across artists, customers, bookings, and payments." />
       <StatGrid items={[
         { label: "Customers", value: String(stats.customers) },
         { label: "Artists", value: String(stats.artists) },
@@ -521,8 +521,8 @@ export function AdminOverview() {
         { label: "Suspended", value: String(stats.suspendedArtists) },
         { label: "Bookings", value: String(stats.bookings) },
         { label: "Completed", value: String(stats.completed) },
-        { label: "Transaction volume", value: money(stats.volume), note: "Demo data" },
-        { label: "Commission", value: money(stats.commission), note: "Demo data" },
+        { label: "Transaction volume", value: money(stats.volume) },
+        { label: "Commission", value: money(stats.commission) },
       ]} />
       <section>
         <h2 className="mb-3 font-display text-2xl">Recent admin activity</h2>
@@ -571,7 +571,7 @@ export function AdminArtistDetail() {
   const artist = state.artists.find((item) => item.id === params.get("id"));
   const [note, setNote] = useState(artist?.verificationNote ?? "");
   useEffect(() => setNote(artist?.verificationNote ?? ""), [artist]);
-  if (!artist) return <Empty title="Artist not found" body="That application is not in the demo." />;
+  if (!artist) return <Empty title="Artist not found" body="That application could not be found." />;
   return (
     <div className="grid gap-6">
       <PageHeader eyebrow="License review" title={artist.name} description={artist.verificationNote} action={<Button href={`/artists/${artist.slug}`} variant="secondary">Public profile</Button>} />
@@ -621,7 +621,7 @@ export function AdminCustomerDetail() {
   const params = useSearchParams();
   const { state, setCustomerAccess } = useDemo();
   const customer = state.customers.find((item) => item.id === params.get("id"));
-  if (!customer) return <Empty title="Customer not found" body="That account is not in the demo." />;
+  if (!customer) return <Empty title="Customer not found" body="That account could not be found." />;
   const bookings = state.bookings.filter((booking) => booking.customerId === customer.id);
   return (
     <div className="grid gap-6">
@@ -668,7 +668,7 @@ export function AdminFinance() {
   const stats = adminStats(state);
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="Demo data" title="Finance" description="Transaction volume, commission, artist net, and refunds are calculated from simulated ledger rows." />
+      <PageHeader eyebrow="Administrator" title="Finance" description="Transaction volume, commission, artist net, and refunds from every recorded payment." />
       <StatGrid items={[
         { label: "Volume", value: money(stats.volume) },
         { label: "Commission revenue", value: money(stats.commission) },
@@ -758,7 +758,7 @@ export function AdminSettings() {
   useEffect(() => setForm(state.settings), [state.settings]);
   return (
     <form className="grid max-w-2xl gap-4" onSubmit={(event) => { event.preventDefault(); savePlatform(form); }}>
-      <PageHeader eyebrow="Administrator" title="Platform settings" description="Commission applies to new simulated payments. Existing ledger rows stay as recorded." />
+      <PageHeader eyebrow="Administrator" title="Platform settings" description="Commission applies to new payments. Existing payments stay as recorded." />
       <Field label="Platform name"><TextInput value={form.platformName} onChange={(event) => setForm({ ...form, platformName: event.target.value })} /></Field>
       <Field label="Tagline"><TextInput value={form.tagline} onChange={(event) => setForm({ ...form, tagline: event.target.value })} /></Field>
       <Field label="City"><TextInput value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} /></Field>
