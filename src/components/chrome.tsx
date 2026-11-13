@@ -118,9 +118,11 @@ export function PublicFooter() {
           <p className="font-display tracking-[0.18em]">{state.settings.platformName}</p>
           <p className="mt-4 max-w-xs text-sm leading-6 text-mist">{state.settings.tagline} This prototype stores everything in your browser.</p>
         </div>
-        <FooterColumn title="Marketplace" links={[["/artists", "Find artists"], ["/styles", "Styles"], ["/how-it-works", "How it works"]]} />
-        <FooterColumn title="Studios" links={[["/for-artists", "Artist application"]]} />
-        <FooterColumn title="About" links={[["/about", "About"], ["/legal/privacy", "Privacy"], ["/legal/terms", "Terms"]]} />
+        <div className="grid grid-cols-3 gap-x-3 md:contents md:gap-0">
+          <FooterColumn title="Marketplace" links={[["/artists", "Find artists"], ["/styles", "Styles"], ["/how-it-works", "How it works"]]} />
+          <FooterColumn title="Studios" links={[["/for-artists", "Artist application"]]} />
+          <FooterColumn title="About" links={[["/about", "About"], ["/legal/privacy", "Privacy"], ["/legal/terms", "Terms"]]} />
+        </div>
       </div>
       <div className={`${frame} border-t border-panel py-5 text-xs text-mist`}>Simulated bookings and payments. No real money, messages, or accounts.</div>
     </footer>
@@ -129,8 +131,8 @@ export function PublicFooter() {
 
 function FooterColumn({ title, links }: { title: string; links: string[][] }) {
   return (
-    <div>
-      <p className="text-xs uppercase tracking-[0.18em] text-mist">{title}</p>
+    <div className="min-w-0">
+      <p className="text-xs uppercase tracking-[0.14em] text-mist sm:tracking-[0.18em]">{title}</p>
       <ul className="mt-4 grid gap-2 text-sm">
         {links.map(([href, label]) => (
           <li key={href}><Link href={href} className="hover:text-mist">{label}</Link></li>
