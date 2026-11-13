@@ -113,15 +113,16 @@ export function PublicFooter() {
   const { state } = useDemo();
   return (
     <footer className="mt-20 border-t border-line bg-ink text-white max-md:pb-20">
-      <div className={`${frame} grid gap-10 py-14 md:grid-cols-4`}>
+      <div className={`${frame} grid gap-10 py-14 md:grid-cols-5`}>
         <div>
           <p className="font-display tracking-[0.18em]">{state.settings.platformName}</p>
           <p className="mt-4 max-w-xs text-sm leading-6 text-mist">{state.settings.tagline}</p>
         </div>
-        <div className="grid grid-cols-3 gap-x-3 md:contents md:gap-0">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-4 md:contents md:gap-0">
           <FooterColumn title="Company" links={[["/about", "About Us"], ["/legal/privacy", "Privacy Policy"], ["/legal/terms", "Terms of Service"]]} />
           <FooterColumn title="Marketplace" links={[["/artists", "Find artists"], ["/styles", "Styles"], ["/how-it-works", "How it works"]]} />
           <FooterColumn title="Studios" links={[["/for-artists", "Artist application"]]} />
+          <FooterColumn title="Support" links={[["/legal/cancellation", "Cancellation & Refund Policy"], ["/contact", "Contact"]]} />
         </div>
       </div>
     </footer>
