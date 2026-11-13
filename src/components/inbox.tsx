@@ -79,7 +79,7 @@ export function Inbox({ role }: { role: "customer" | "artist" }) {
 
   return (
     <div className="grid h-[calc(100svh-7rem)] min-w-0 grid-rows-[minmax(0,1fr)] overflow-hidden border border-line bg-white md:h-[calc(100svh-8rem)] lg:grid-cols-[320px_minmax(0,1fr)]">
-      <aside className={`min-h-0 flex-col lg:flex lg:border-r lg:border-line ${open ? "hidden" : "flex"}`}>
+      <aside className={`min-h-0 flex-col border-line lg:flex lg:border-r ${open ? "hidden" : "flex"}`}>
         <h1 className="border-b border-line px-4 py-4 font-display text-2xl">Messages</h1>
         <ul className="min-h-0 flex-1 overflow-y-auto">
           {threads.map((thread) => {
@@ -91,7 +91,7 @@ export function Inbox({ role }: { role: "customer" | "artist" }) {
                 <button
                   type="button"
                   onClick={() => router.push(`${base}?thread=${thread.id}`)}
-                  className={`flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left hover:bg-paper ${selected ? "lg:bg-paper" : ""}`}
+                  className={`flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left hover:bg-[#252525] ${selected ? "lg:bg-[#2a2a2a]" : ""}`}
                 >
                   <Photo src={who.photo} alt="" className="h-12 w-12 shrink-0 rounded-full" />
                   <span className="min-w-0 flex-1">
