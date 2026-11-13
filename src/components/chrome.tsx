@@ -161,6 +161,14 @@ export function DashboardShell({ role, items, children }: { role: Role; items: A
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+  useEffect(() => {
     document.body.classList.add("dashboard");
     return () => document.body.classList.remove("dashboard");
   }, []);
@@ -171,14 +179,25 @@ export function DashboardShell({ role, items, children }: { role: Role; items: A
       </aside>
       <div className="min-w-0">
         <TopBar role={role} onMenu={() => setOpen(true)} />
-        {open ? (
-          <div className="fixed inset-0 z-50 bg-ink text-white md:hidden">
-            <div className="flex justify-end p-4">
-              <button type="button" onClick={() => setOpen(false)} className="text-sm">Close</button>
+        <div className={`fixed inset-0 z-50 md:hidden ${open ? "" : "pointer-events-none"}`} aria-hidden={!open} inert={!open}>
+          <div
+            className={`absolute inset-0 bg-ink/60 transition-opacity duration-500 ease-out motion-reduce:transition-none ${open ? "opacity-100" : "opacity-0"}`}
+            onClick={() => setOpen(false)}
+          />
+          <div className={`absolute inset-y-0 right-0 w-[85%] max-w-sm overflow-y-auto border-l border-panel bg-ink text-white transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform motion-reduce:transition-none ${open ? "translate-x-0" : "translate-x-full"}`}>
+            <div className="flex h-16 items-center justify-end border-b border-panel px-4">
+              <button type="button" aria-label="Close menu" onClick={() => setOpen(false)} className="grid h-10 w-10 place-items-center">
+                <MenuIcon open />
+              </button>
             </div>
-            <SideNav role={role} items={items} pathname={pathname} />
+            <div>
+              <SideNav role={role} items={items} pathname={pathname} />
+            </div>
+            <div className="border-t border-panel px-5 py-6">
+              <AccountActions onDone={() => setOpen(false)} />
+            </div>
           </div>
-        ) : null}
+        </div>
         <div id="content" className="min-w-0 px-4 py-6 md:px-8 md:py-8">{children}</div>
       </div>
     </div>
@@ -205,9 +224,40 @@ function SideNav({ role, items, pathname }: { role: Role; items: Array<{ href: s
   );
 }
 
-function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
-  const { session, state, logout, switchTo, resetDemo, readNotification, toast } = useDemo();
+function AccountActions({ onDone }: { onDone: () => void }) {
+  const { session, logout, switchTo, resetDemo, toast } = useDemo();
   const router = useRouter();
+  if (!session) return null;
+  return (
+    <div>
+      <p className="text-sm font-medium">{session.name}</p>
+      <p className="mt-1 text-xs text-mute">{session.email}</p>
+      <p className="mt-5 text-xs uppercase tracking-[0.16em] text-mute">Switch demo account</p>
+      <div className="mt-2 grid gap-1">
+        {DEMO_ACCOUNTS.map((account) => (
+          <button
+            key={account.role}
+            type="button"
+            className="px-2 py-2 text-left text-sm hover:bg-paper"
+            onClick={() => {
+              const result = switchTo(account.role);
+              onDone();
+              if (result.ok) router.push(homeFor(account.role));
+              else toast(result.error);
+            }}
+          >
+            {account.blurb}
+          </button>
+        ))}
+      </div>
+      <button type="button" className="mt-2 w-full border border-line px-2 py-2 text-left text-sm" onClick={() => { resetDemo(); onDone(); }}>Reset demo data</button>
+      <button type="button" className="mt-1 w-full px-2 py-2 text-left text-sm" onClick={() => { logout(); router.push("/"); }}>Log out</button>
+    </div>
+  );
+}
+
+function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
+  const { session, state, readNotification } = useDemo();
   const [accountOpen, setAccountOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   if (!session) return null;
@@ -215,10 +265,9 @@ function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
   const unread = unreadCount(state, session.userId);
 
   return (
-    <div className="flex h-16 items-center justify-between border-b border-panel bg-ink px-4 text-white md:px-8">
-      <button type="button" className="shrink-0 text-sm md:hidden" onClick={onMenu}>Menu</button>
+    <div className="flex h-16 items-center justify-between gap-3 border-b border-panel bg-ink px-4 text-white md:px-8">
       {role === "customer" ? (
-        <p className="ml-4 min-w-0 truncate font-display text-lg md:ml-0 md:text-xl">Hello, {session.name.split(" ")[0]}.</p>
+        <p className="min-w-0 truncate font-display text-lg md:text-xl">Hello, {session.name.split(" ")[0]}.</p>
       ) : (
         <p className="hidden text-sm text-mist md:block">Signed in · {session.email}</p>
       )}
@@ -250,35 +299,19 @@ function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
             </div>
           ) : null}
         </div>
-        <div className="relative">
-          <button type="button" className="h-10 max-w-[8rem] truncate bg-white px-3 text-sm text-ink sm:max-w-none" aria-expanded={accountOpen} onClick={() => { setAccountOpen((value) => !value); setNotesOpen(false); }}>
+        <div className="relative hidden md:block">
+          <button type="button" className="h-10 bg-white px-3 text-sm text-ink" aria-expanded={accountOpen} onClick={() => { setAccountOpen((value) => !value); setNotesOpen(false); }}>
             {session.name}
           </button>
           {accountOpen ? (
             <div className="absolute right-0 z-30 mt-2 w-64 max-w-[calc(100vw-2rem)] border border-line bg-white p-3">
-              <p className="text-xs uppercase tracking-[0.16em] text-mute">Switch demo account</p>
-              <div className="mt-2 grid gap-1">
-                {DEMO_ACCOUNTS.map((account) => (
-                  <button
-                    key={account.role}
-                    type="button"
-                    className="px-2 py-2 text-left text-sm hover:bg-paper"
-                    onClick={() => {
-                      const result = switchTo(account.role);
-                      setAccountOpen(false);
-                      if (result.ok) router.push(homeFor(account.role));
-                      else toast(result.error);
-                    }}
-                  >
-                    {account.blurb}
-                  </button>
-                ))}
-              </div>
-              <button type="button" className="mt-2 w-full border border-line px-2 py-2 text-left text-sm" onClick={() => { resetDemo(); setAccountOpen(false); }}>Reset demo data</button>
-              <button type="button" className="mt-1 w-full px-2 py-2 text-left text-sm" onClick={() => { logout(); router.push("/"); }}>Log out</button>
+              <AccountActions onDone={() => setAccountOpen(false)} />
             </div>
           ) : null}
         </div>
+        <button type="button" aria-label="Open menu" className="grid h-10 w-10 place-items-center md:hidden" onClick={() => { onMenu(); setNotesOpen(false); }}>
+          <MenuIcon open={false} />
+        </button>
       </div>
     </div>
   );
