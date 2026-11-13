@@ -94,10 +94,10 @@ export function ArtistApplicationForm() {
           Tattoo artists use this form to join the index. An administrator reviews the license, studio permit, and portfolio note before the profile can be booked. Customer sign-in stays in the navigation.
         </p>
       </header>
-      <form className="mt-12 grid w-full min-w-0 max-w-3xl gap-10" onSubmit={submit} noValidate>
+      <form className="application-form mt-12 grid w-full min-w-0 max-w-3xl gap-10" onSubmit={submit} noValidate>
         <section className="grid gap-4">
           <h2 className="font-display text-2xl">You</h2>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2">
             <Field label="Name">
               <TextInput autoComplete="name" value={form.name} onChange={(event) => patch({ name: event.target.value })} required />
             </Field>
@@ -119,7 +119,7 @@ export function ArtistApplicationForm() {
 
         <section className="grid gap-4">
           <h2 className="font-display text-2xl">Studio</h2>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2">
             <Field label="Borough">
               <SelectInput value={form.borough} onChange={(event) => patch({ borough: event.target.value })} required>
                 <option value="">Select a borough</option>
@@ -175,7 +175,7 @@ export function ArtistApplicationForm() {
 
         <section className="grid gap-4">
           <h2 className="font-display text-2xl">License</h2>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2">
             <Field label="NYC tattoo license number">
               <TextInput value={form.licenseNumber} onChange={(event) => patch({ licenseNumber: event.target.value })} required />
             </Field>

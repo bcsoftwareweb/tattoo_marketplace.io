@@ -86,6 +86,29 @@ select {
   }
 }
 
+/* Safari sizes each input type from its own content, so the application
+   boxes end up different widths. Pin every control to its column. */
+.application-form input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),
+.application-form textarea,
+.application-form button[aria-haspopup="listbox"] {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+}
+
+.application-form button[aria-haspopup="listbox"] {
+  display: flex;
+}
+
+@media (max-width: 1023px) {
+  .application-form input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
 input[type="file"]::file-selector-button {
   margin-right: 0.75rem;
   border: 0;

@@ -198,7 +198,7 @@ export function SelectInput({
         aria-expanded={open}
         aria-controls={listId}
         onClick={() => setOpen((currentOpen) => !currentOpen)}
-        className={cn("inline-flex h-11 items-center justify-between gap-3 text-left text-sm outline-none", className?.includes("w-auto") ? "w-auto" : "w-full", className ?? `${control}`)}
+        className={cn("h-11 items-center justify-between gap-3 text-left text-sm outline-none", className?.includes("w-auto") ? "inline-flex w-auto" : "flex w-full", className ?? control)}
       >
         <span className="truncate">{selected?.label ?? ""}</span>
         <span aria-hidden="true" className="h-0 w-0 shrink-0 border-x-4 border-t-[5px] border-x-transparent border-t-current" />
