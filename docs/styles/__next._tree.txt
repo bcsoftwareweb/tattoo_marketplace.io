@@ -1,8 +1,8 @@
-:HL["/tattoo_marketplace.io/_next/static/chunks/3w7stn4pfymal.css","style"]
+:HL["/tattoo_marketplace.io/_next/static/chunks/11b9ier5sdi6j.css","style"]
 :HL["/tattoo_marketplace.io/_next/static/media/07c7676b89ed2778-s.p.2bn3s6zvc0dyp.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/tattoo_marketplace.io/_next/static/media/237858b39a32779d-s.p.2cyn07wtgehh0.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/tattoo_marketplace.io/_next/static/media/2b81eeca71e9850c-s.p.3vm0tq4e-zz_5.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 3:[["children",{"s":"__PAGE__","h":160}]]
 2:[["children",{"s":"styles","h":96,"c":"$Q3"}]]
 1:[["children",{"s":"(public)","h":96,"c":"$Q2"}]]
-0:{"b":"bqqbcXl1VBQgdHqONT6C6","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"sZ_Dx9jr9yvcPudgnBglF","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
