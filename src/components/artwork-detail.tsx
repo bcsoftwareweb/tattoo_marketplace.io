@@ -63,7 +63,12 @@ export function ArtworkDetail() {
     <article className={`${frame} py-8 md:py-12`}>
       <Link href="/" className="text-sm text-mist">Discover</Link>
       <div className="mt-6 grid items-start gap-10 lg:grid-cols-[1.3fr_0.7fr]">
-        <Photo src={artwork.image} alt={artwork.title} loading="eager" className="w-full" />
+        <Photo
+          src={artwork.image}
+          alt={artwork.title}
+          loading="eager"
+          className="mx-auto block h-auto max-h-[calc(100svh-13rem)] w-auto max-w-full lg:max-h-[calc(100svh-11.5rem)]"
+        />
         <div>
           <p className="font-display text-xs uppercase tracking-[0.22em] text-mute">{artwork.styleName}</p>
           <h1 className="mt-3 font-express text-5xl leading-[0.9]">{artwork.title}</h1>
