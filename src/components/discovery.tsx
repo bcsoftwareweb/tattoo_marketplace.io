@@ -27,13 +27,13 @@ export function ArtistCard({ artistId }: { artistId: string }) {
   if (!artist) return null;
   const styles = artist.styleIds.map((id) => state.styles.find((style) => style.id === id)?.name).filter(Boolean).slice(0, 3);
   return (
-    <Link href={`/artists/${artist.slug}`} className="group block">
+    <Link href={`/artists/${artist.slug}`} className="group block min-w-0">
       <div className="overflow-hidden">
         <Photo src={artist.photo} alt={artist.name} className="aspect-[4/5] w-full" />
       </div>
-      <div className="mt-4 flex items-start justify-between gap-3">
-        <h2 className="font-display text-2xl tracking-tight group-hover:text-mute">{artist.name}</h2>
-        <p className="pt-1 text-sm">From {money(artist.startingPrice)}</p>
+      <div className="mt-3 flex flex-col gap-1 sm:mt-4 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+        <h2 className="font-display text-lg leading-tight tracking-tight group-hover:text-mute sm:text-2xl">{artist.name}</h2>
+        <p className="text-sm sm:pt-1">From {money(artist.startingPrice)}</p>
       </div>
       <p className="mt-1 text-sm text-mute">{artist.neighborhood}, {artist.borough}</p>
       <p className="mt-3 text-sm text-mist">{styles.join(" · ")}</p>
@@ -132,7 +132,7 @@ export function Discovery() {
         </div>
       </div>
       {results.length ? (
-        <div className="mt-8 grid gap-x-5 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-x-5 sm:gap-y-12 lg:grid-cols-3">
           {results.map((artist) => <ArtistCard key={artist.id} artistId={artist.id} />)}
         </div>
       ) : (
