@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useDemo } from "@/context/demo-context";
 import { BOROUGHS, PRICE_FILTERS, SORTS } from "@/lib/constants";
 import { money } from "@/lib/format";
@@ -71,6 +71,9 @@ export function Discovery() {
   }
 
   const filtered = Boolean(query.q || query.style || query.borough || query.specialty || query.price !== "any" || query.availability !== "any");
+  const [advanced, setAdvanced] = useState(
+    Boolean(query.style || query.borough || query.specialty || query.price !== "any" || query.availability !== "any"),
+  );
 
   return (
     <div className={`${frame} py-10 md:py-16`}>
@@ -81,12 +84,21 @@ export function Discovery() {
         </div>
         <p className="max-w-sm text-sm leading-6 text-mist lg:justify-self-end">Approved studios, read by style, borough, and the next open date.</p>
       </header>
-      <form className="mt-8 grid gap-6" onSubmit={(event) => event.preventDefault()}>
+      <form className="mt-8" onSubmit={(event) => event.preventDefault()}>
         <label className="block">
           <span className="sr-only">Search artists</span>
           <input value={query.q} onChange={(event) => update({ q: event.target.value })} placeholder="Search name or studio" className={`${inkField} h-12 px-4`} />
         </label>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <button
+          type="button"
+          className="mt-3 border-b border-white pb-0.5 text-sm text-white hover:border-mist hover:text-mist"
+          aria-expanded={advanced}
+          onClick={() => setAdvanced((open) => !open)}
+        >
+          Advance Search
+        </button>
+        {advanced ? (
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <FilterField label="Style">
             <SelectInput value={query.style} onChange={(event) => update({ style: event.target.value })} className={inkField}>
               <option value="">Any style</option>
@@ -118,6 +130,7 @@ export function Discovery() {
             </SelectInput>
           </FilterField>
         </div>
+        ) : null}
       </form>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-b border-panel pb-4">
         <p className="font-display text-xs uppercase tracking-[0.18em] text-mist">{results.length} artist{results.length === 1 ? "" : "s"}</p>
