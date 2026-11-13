@@ -586,6 +586,17 @@ export function AdminArtistDetail() {
         <div><dt className="text-mute">Studio</dt><dd>{artist.studioAddress}</dd></div>
       </dl>
       <p className="text-sm">{artist.license.notes}</p>
+      <section className="grid gap-3 border border-line bg-white p-5 text-sm">
+        <h2 className="font-medium">License photo</h2>
+        {artist.license.document ? (
+          <>
+            <Photo src={artist.license.document} alt={`${artist.name} license`} className="block max-h-[32rem] w-auto max-w-full" />
+            <p className="text-mute">Compare the number, name, and expiration on the photo with the details above.</p>
+          </>
+        ) : (
+          <p className="text-mute">No license photo was uploaded with this application.</p>
+        )}
+      </section>
       <Field label="Review note"><Area value={note} onChange={(event) => setNote(event.target.value)} /></Field>
       <div className="flex flex-wrap gap-2">
         <Button type="button" onClick={() => verifyArtist(artist.id, "approved", note)}>Approve</Button>

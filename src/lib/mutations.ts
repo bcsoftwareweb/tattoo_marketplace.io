@@ -561,6 +561,7 @@ export interface ArtistApplication {
   studioPermit: string;
   bloodbornePathogenDate: string;
   licenseExpiresOn: string;
+  licenseDocument: string;
   notes: string;
 }
 
@@ -611,6 +612,9 @@ export function submitArtistApplication(state: DemoState, input: ArtistApplicati
   if (!DATE_PATTERN.test(input.licenseExpiresOn) || input.licenseExpiresOn < DEMO_TODAY) {
     return fail(state, "Enter a license expiration that is still current.");
   }
+  if (!input.licenseDocument.startsWith("data:image/")) {
+    return fail(state, "Upload a photo or scan of your tattoo license.");
+  }
   if (input.photo && !input.photo.startsWith("data:image/") && !input.photo.startsWith("https://")) {
     return fail(state, "Use a portrait image.");
   }
@@ -657,6 +661,7 @@ export function submitArtistApplication(state: DemoState, input: ArtistApplicati
       bloodbornePathogenDate: input.bloodbornePathogenDate,
       studioPermit,
       notes: notes || "Submitted from the public artist application.",
+      document: input.licenseDocument,
     },
     workingHours: [0, 1, 2, 3, 4, 5, 6].map((day) => ({
       day,

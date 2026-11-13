@@ -67,6 +67,7 @@ export interface LicenseInfo {
   bloodbornePathogenDate: string;
   studioPermit: string;
   notes: string;
+  document?: string;
 }
 
 export interface Service {

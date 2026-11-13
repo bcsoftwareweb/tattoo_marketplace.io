@@ -26,6 +26,7 @@ const empty: ArtistApplication = {
   studioPermit: "",
   bloodbornePathogenDate: "",
   licenseExpiresOn: "",
+  licenseDocument: "",
   notes: "",
 };
 
@@ -54,6 +55,15 @@ export function ArtistApplicationForm() {
       patch({ photo: await readImageFile(file, 800) });
     } catch (reason) {
       toast(reason instanceof Error ? reason.message : "Could not use that portrait.");
+    }
+  }
+
+  async function addLicense(file: File | undefined) {
+    if (!file) return;
+    try {
+      patch({ licenseDocument: await readImageFile(file, 1600) });
+    } catch (reason) {
+      toast(reason instanceof Error ? reason.message : "Could not use that license image.");
     }
   }
 
@@ -189,6 +199,10 @@ export function ArtistApplicationForm() {
               <TextInput type="date" value={form.licenseExpiresOn} min="2026-11-10" onChange={(event) => patch({ licenseExpiresOn: event.target.value })} required />
             </Field>
           </div>
+          <Field label="License photo" hint="A clear photo or scan of your NYC tattoo license, used to verify the number above.">
+            <input type="file" accept="image/*" className="block w-full min-w-0 max-w-full text-base text-mist" onChange={(event) => void addLicense(event.target.files?.[0])} required />
+          </Field>
+          {form.licenseDocument ? <Photo src={form.licenseDocument} alt="Uploaded license" className="block max-h-56 w-auto max-w-full" /> : null}
           <Field label="Note for review" hint="Optional. Anything the administrator should check on the permit.">
             <Area value={form.notes} onChange={(event) => patch({ notes: event.target.value })} />
           </Field>

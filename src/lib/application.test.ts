@@ -26,6 +26,7 @@ function draft(overrides: Partial<ArtistApplication> = {}): ArtistApplication {
     studioPermit: "SP-51002",
     bloodbornePathogenDate: "2026-02-01",
     licenseExpiresOn: "2027-08-31",
+    licenseDocument: "data:image/jpeg;base64,AAAA",
     notes: "Permit is posted in the room.",
     ...overrides,
   };
@@ -51,5 +52,13 @@ describe("artist applications", () => {
     const seed = createSeed();
     expect(submitArtistApplication(seed, draft({ email: "artist@demo.com" }), now).error).toMatch(/email/i);
     expect(submitArtistApplication(seed, draft({ styleIds: [] }), now).error).toMatch(/style/i);
+  });
+
+  it("requires a license photo and keeps it for review", () => {
+    const seed = createSeed();
+    expect(submitArtistApplication(seed, draft({ licenseDocument: "" }), now).error).toMatch(/license/i);
+    const result = submitArtistApplication(seed, draft(), now);
+    const artist = result.state.artists.find((item) => item.email === "remy.santos@blackline.demo");
+    expect(artist?.license.document).toBe("data:image/jpeg;base64,AAAA");
   });
 });
