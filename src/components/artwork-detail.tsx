@@ -67,7 +67,7 @@ export function ArtworkDetail() {
           src={artwork.image}
           alt={artwork.title}
           loading="eager"
-          className="mx-auto block h-auto max-h-[calc(100svh-13rem)] w-auto max-w-full lg:max-h-[calc(100svh-11.5rem)]"
+          className="mx-auto block aspect-[9/16] h-[calc(100svh-13rem)] w-auto max-w-full lg:h-[calc(100svh-11.5rem)]"
         />
         <div>
           <p className="font-display text-xs uppercase tracking-[0.22em] text-mute">{artwork.styleName}</p>
