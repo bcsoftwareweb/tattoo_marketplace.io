@@ -1,7 +1,7 @@
 import type { Role } from "@/lib/types";
 
 export function homeFor(role: Role) {
-  if (role === "customer") return "/customer";
+  if (role === "customer") return "/customer/bookings";
   if (role === "artist") return "/artist";
   return "/admin";
 }

@@ -216,8 +216,12 @@ function TopBar({ role, onMenu }: { role: Role; onMenu: () => void }) {
 
   return (
     <div className="flex h-16 items-center justify-between border-b border-panel bg-ink px-4 text-white md:px-8">
-      <button type="button" className="text-sm md:hidden" onClick={onMenu}>Menu</button>
-      <p className="hidden text-sm text-mist md:block">Signed in · {session.email}</p>
+      <button type="button" className="shrink-0 text-sm md:hidden" onClick={onMenu}>Menu</button>
+      {role === "customer" ? (
+        <p className="ml-4 min-w-0 truncate font-display text-lg md:ml-0 md:text-xl">Hello, {session.name.split(" ")[0]}.</p>
+      ) : (
+        <p className="hidden text-sm text-mist md:block">Signed in · {session.email}</p>
+      )}
       <div className="ml-auto flex items-center gap-2">
         <div className="relative">
           <button type="button" className="h-10 border border-detail px-3 text-sm" aria-expanded={notesOpen} onClick={() => { setNotesOpen((value) => !value); setAccountOpen(false); }}>

@@ -1,7 +1,7 @@
-import { CustomerOverview } from "@/components/workspaces";
+import { CustomerHome } from "@/components/workspaces";
 
-export const metadata = { title: "Overview" };
+export const metadata = { title: "Bookings" };
 
 export default function Page() {
-  return <CustomerOverview />;
+  return <CustomerHome />;
 }

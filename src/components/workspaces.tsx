@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BookingCards } from "@/components/booking-ui";
 import { MonthCalendar } from "@/components/calendar";
@@ -11,6 +11,7 @@ import { readImageFile } from "@/lib/files";
 import { formatDate, formatDateTime, formatDuration, money, weekdayName } from "@/lib/format";
 import { isOpenBooking, portfolioFor, servicesFor } from "@/lib/selectors";
 import { adminStats, artistFinance } from "@/lib/selectors";
+import { homeFor } from "@/lib/permissions";
 import { verificationLabel } from "@/lib/status";
 import type { Artist, BookingStatus, Category, Customer, Service, TattooStyle } from "@/lib/types";
 import { Button, Empty, Field, PageHeader, Photo, SelectInput, StatGrid, Tabs, TextInput, Area } from "@/components/ui";
@@ -52,58 +53,12 @@ export function NotificationList() {
   );
 }
 
-export function CustomerOverview() {
-  const { state, session } = useDemo();
-  const customer = useSignedCustomer();
-  if (!session || !customer) return null;
-  const bookings = state.bookings.filter((booking) => booking.customerId === customer.id);
-  const upcoming = bookings.filter((booking) => booking.status === "confirmed");
-  const pending = bookings.filter((booking) => isOpenBooking(booking.status));
-  const favorites = state.favorites[customer.id] ?? [];
-  const threads = state.conversations.filter((item) => item.customerId === customer.id).slice(0, 3);
-  const activity = state.activity.filter((item) => item.userId === customer.id).slice(0, 4);
-  return (
-    <div className="grid gap-8">
-      <PageHeader eyebrow="Customer" title={`Hello, ${customer.name.split(" ")[0]}.`} description="Upcoming sittings, open requests, and the artists you saved." />
-      <StatGrid items={[
-        { label: "Upcoming", value: String(upcoming.length) },
-        { label: "Open requests", value: String(pending.length) },
-        { label: "Saved artists", value: String(favorites.length) },
-        { label: "Conversations", value: String(threads.length) },
-      ]} />
-      <section>
-        <h2 className="mb-3 font-display text-2xl">Upcoming</h2>
-        <BookingCards bookings={upcoming} role="customer" empty="No confirmed appointments yet." />
-      </section>
-      <section>
-        <h2 className="mb-3 font-display text-2xl">Pending requests</h2>
-        <BookingCards bookings={pending} role="customer" empty="You have no open requests." />
-      </section>
-      <section className="grid gap-6 lg:grid-cols-2">
-        <div>
-          <h2 className="mb-3 font-display text-2xl">Recent conversations</h2>
-          <ul className="border border-line bg-white">
-            {threads.map((thread) => {
-              const artist = state.artists.find((item) => item.id === thread.artistId);
-              const last = thread.messages.at(-1);
-              return <li key={thread.id} className="border-b border-line px-4 py-3 last:border-b-0"><Link href={`/customer/messages?thread=${thread.id}`} className="text-sm"><span className="font-medium">{artist?.name}</span><span className="mt-1 block text-mute">{last?.body}</span></Link></li>;
-            })}
-          </ul>
-        </div>
-        <div>
-          <h2 className="mb-3 font-display text-2xl">Favorites</h2>
-          <ul className="grid gap-2">
-            {favorites.map((id) => {
-              const artist = state.artists.find((item) => item.id === id);
-              return artist ? <li key={id}><Link className="block border border-line bg-white px-4 py-3 text-sm" href={`/artists/${artist.slug}`}>{artist.name}</Link></li> : null;
-            })}
-          </ul>
-          <h2 className="mt-6 mb-3 font-display text-2xl">Activity</h2>
-          <ul className="text-sm text-mute">{activity.map((item) => <li key={item.id} className="border-b border-line py-2">{item.text}</li>)}</ul>
-        </div>
-      </section>
-    </div>
-  );
+export function CustomerHome() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace(homeFor("customer"));
+  }, [router]);
+  return null;
 }
 
 export function CustomerBookings() {

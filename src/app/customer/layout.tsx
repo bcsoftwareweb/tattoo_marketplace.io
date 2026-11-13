@@ -3,7 +3,6 @@
 import { DashboardShell, RequireRole } from "@/components/chrome";
 
 const items = [
-  { href: "/customer", label: "Overview" },
   { href: "/customer/bookings", label: "Bookings" },
   { href: "/customer/messages", label: "Messages" },
   { href: "/customer/favorites", label: "Favorites" },
