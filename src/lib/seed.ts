@@ -21,6 +21,9 @@ import type {
 
 const COMMISSION = 12;
 
+// Raise this whenever sample artists, bookings, reviews, or payments are added, so browsers with saved data pick them up.
+export const SEED_VERSION = 2;
+
 export const ADMIN_PROFILE = {
   id: "avery-quinn",
   name: "Avery Quinn",
@@ -1799,6 +1802,7 @@ function buildState(): DemoState {
         ...MORE_ARTISTS.map((artist) => artist.id),
       ],
     },
+    seedVersion: SEED_VERSION,
   };
   return deriveState(base);
 }
@@ -1808,6 +1812,35 @@ let cached: DemoState | null = null;
 export function createSeed(): DemoState {
   if (!cached) cached = buildState();
   return structuredClone(cached);
+}
+
+function withMissing<T extends { id: string }>(current: T[], incoming: T[]) {
+  const known = new Set(current.map((item) => item.id));
+  return [...current, ...incoming.filter((item) => !known.has(item.id))];
+}
+
+export function upgradeState(stored: DemoState): DemoState {
+  if ((stored.seedVersion ?? 1) >= SEED_VERSION) return stored;
+  const seed = createSeed();
+  const known = new Set(stored.artists.map((artist) => artist.id));
+  const newArtists = new Set(seed.artists.filter((artist) => !known.has(artist.id)).map((artist) => artist.id));
+  const favorites = { ...stored.favorites };
+  for (const [customerId, ids] of Object.entries(seed.favorites)) {
+    const current = favorites[customerId] ?? [];
+    const added = ids.filter((id) => newArtists.has(id) && !current.includes(id));
+    if (added.length) favorites[customerId] = [...current, ...added];
+  }
+  return deriveState({
+    ...stored,
+    artists: withMissing(stored.artists, seed.artists),
+    services: withMissing(stored.services, seed.services),
+    portfolio: withMissing(stored.portfolio, seed.portfolio),
+    bookings: withMissing(stored.bookings, seed.bookings),
+    reviews: withMissing(stored.reviews, seed.reviews),
+    transactions: withMissing(stored.transactions, seed.transactions),
+    favorites,
+    seedVersion: SEED_VERSION,
+  });
 }
 
 export function artistParams() {

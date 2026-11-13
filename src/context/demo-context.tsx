@@ -36,7 +36,7 @@ import {
   type ArtistPatch,
   type BookingDraft,
 } from "@/lib/mutations";
-import { createSeed } from "@/lib/seed";
+import { createSeed, upgradeState } from "@/lib/seed";
 import { loadLocalAccounts, loadSession, loadState, saveLocalAccounts, saveSession, saveState } from "@/lib/storage";
 import type { Actor, Category, Customer, DemoState, PlatformSettings, PortfolioItem, Role, Service, Session, TattooStyle } from "@/lib/types";
 import { uid } from "@/lib/format";
@@ -98,7 +98,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const stored = loadState();
-    if (stored) setState(stored);
+    if (stored) setState(upgradeState(stored));
     setSession(loadSession());
     setReady(true);
   }, []);

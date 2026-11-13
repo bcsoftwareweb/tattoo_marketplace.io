@@ -271,6 +271,7 @@ export interface DemoState {
   activity: Activity[];
   settings: PlatformSettings;
   favorites: Record<string, string[]>;
+  seedVersion?: number;
 }
 
 export interface Session {
