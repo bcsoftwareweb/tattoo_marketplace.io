@@ -66,7 +66,6 @@ export function ArtistProfile({ slug }: { slug: string }) {
           <p className="mt-4 max-w-xl text-sm leading-6">{artist.bio}</p>
           <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
             <div><dt className="text-mute">Experience</dt><dd>{artist.yearsExperience} years</dd></div>
-            <div><dt className="text-mute">Starting price</dt><dd>{money(artist.startingPrice)}</dd></div>
             <div><dt className="text-mute">Styles</dt><dd>{styles.join(", ")}</dd></div>
             <div><dt className="text-mute">Specialties</dt><dd>{artist.specialties.join(", ")}</dd></div>
           </dl>
@@ -121,12 +120,12 @@ export function ArtistProfile({ slug }: { slug: string }) {
       <section className="border-y border-line bg-white py-14">
         <div className={frame}>
           <h2 className="font-display text-3xl">Portfolio</h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
             {portfolio.map((item) => (
-              <figure key={item.id}>
+              <figure key={item.id} className="min-w-0">
                 <Photo src={item.image} alt={item.title} className="aspect-[4/5] w-full" />
                 <figcaption className="mt-3">
-                  <p className="font-medium">{item.title}</p>
+                  <p className="text-sm font-medium sm:text-base">{item.title}</p>
                   <p className="mt-1 text-sm text-mute">{item.category} · {item.description}</p>
                 </figcaption>
               </figure>
