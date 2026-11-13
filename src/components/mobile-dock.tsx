@@ -30,6 +30,29 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
     if (!isHome(pathname)) setSearchOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) return;
+    const base = (meta.getAttribute("content") ?? "width=device-width, initial-scale=1").replace(/,?\s*maximum-scale=[^,]*/g, "");
+    meta.setAttribute("content", `${base}, maximum-scale=1`);
+    let touched = false;
+    const mark = () => {
+      touched = true;
+    };
+    document.addEventListener("pointerdown", mark, true);
+    const timer = window.setTimeout(() => {
+      const active = document.activeElement;
+      if (!touched && (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement)) active.blur();
+      meta.setAttribute("content", base);
+    }, 400);
+    return () => {
+      document.removeEventListener("pointerdown", mark, true);
+      window.clearTimeout(timer);
+      meta.setAttribute("content", base);
+    };
+  }, [pathname]);
+
   return (
     <SearchDockContext.Provider value={{ open: searchOpen }}>
       <PublicHeader />

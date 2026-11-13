@@ -94,7 +94,7 @@ export function ArtistApplicationForm() {
           Tattoo artists use this form to join the index. An administrator reviews the license, studio permit, and portfolio note before the profile can be booked. Customer sign-in stays in the navigation.
         </p>
       </header>
-      <form className="mt-12 grid max-w-3xl gap-10" onSubmit={submit} noValidate>
+      <form className="mt-12 grid w-full min-w-0 max-w-3xl gap-10" onSubmit={submit} noValidate>
         <section className="grid gap-4">
           <h2 className="font-display text-2xl">You</h2>
           <div className="grid gap-4 md:grid-cols-2">
@@ -112,7 +112,7 @@ export function ArtistApplicationForm() {
             </Field>
           </div>
           <Field label="Portrait" hint="Optional. Stored only in this browser.">
-            <input type="file" accept="image/*" className="text-sm text-mist" onChange={(event) => void addPortrait(event.target.files?.[0])} />
+            <input type="file" accept="image/*" className="block w-full min-w-0 max-w-full text-base text-mist" onChange={(event) => void addPortrait(event.target.files?.[0])} />
           </Field>
           {form.photo ? <Photo src={form.photo} alt="" className="h-28 w-28" /> : null}
         </section>

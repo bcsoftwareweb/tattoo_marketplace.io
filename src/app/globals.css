@@ -63,11 +63,25 @@ button {
   accent-color: #090909;
 }
 
-/* Phones zoom the page when a focused field is smaller than 16px. */
+/* Phones zoom the page when a focused field is smaller than 16px.
+   Date and file fields also have a large intrinsic width, and a grid
+   item's default min-width lets them stretch the page past the screen. */
+.grid > * {
+  min-width: 0;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="hidden"]),
+textarea,
+select {
+  min-width: 0;
+  max-width: 100%;
+}
+
 @media (max-width: 767px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="hidden"]),
   textarea,
-  select {
+  select,
+  input[type="file"]::file-selector-button {
     font-size: 16px;
   }
 }

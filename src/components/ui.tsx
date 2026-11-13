@@ -62,14 +62,14 @@ export function Field({
   );
 }
 
-const control = "h-11 w-full border border-line bg-white px-3 text-sm outline-none transition-colors focus:border-ink";
+const control = "h-11 w-full min-w-0 max-w-full border border-line bg-white px-3 text-base outline-none transition-colors focus:border-ink md:text-sm";
 
 export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(control, props.className)} />;
 }
 
 export function Area(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={cn("min-h-28 w-full border border-line bg-white px-3 py-3 text-sm outline-none focus:border-ink", props.className)} />;
+  return <textarea {...props} className={cn("min-h-28 w-full min-w-0 max-w-full border border-line bg-white px-3 py-3 text-base outline-none focus:border-ink md:text-sm", props.className)} />;
 }
 
 function optionLabel(node: React.ReactNode): string {
@@ -204,7 +204,17 @@ export function SelectInput({
         <span aria-hidden="true" className="h-0 w-0 shrink-0 border-x-4 border-t-[5px] border-x-transparent border-t-current" />
       </button>
       {menu && typeof document !== "undefined" ? createPortal(menu, document.body) : null}
-      {required ? <input tabIndex={-1} aria-hidden="true" className="sr-only" value={current} required onChange={() => undefined} /> : null}
+      {required ? (
+        <input
+          tabIndex={-1}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-11 w-full opacity-0"
+          value={current}
+          required
+          onChange={() => undefined}
+          onFocus={(event) => event.currentTarget.blur()}
+        />
+      ) : null}
     </div>
   );
 }
