@@ -14,6 +14,13 @@ function savedBeforeUpgrade() {
 }
 
 describe("saved data upgrade", () => {
+  it("adds social posts to saved demo state", () => {
+    const seed = createSeed();
+    const saved = { ...seed, posts: undefined, seedVersion: SEED_VERSION };
+    const upgraded = upgradeState(saved as unknown as typeof seed);
+    expect(upgraded.posts.length).toBeGreaterThan(0);
+  });
+
   it("adds new sample artists and bookings without undoing visitor changes", () => {
     const upgraded = upgradeState(savedBeforeUpgrade());
     expect(upgraded.seedVersion).toBe(SEED_VERSION);

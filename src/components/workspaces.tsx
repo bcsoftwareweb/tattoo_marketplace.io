@@ -128,7 +128,7 @@ export function CustomerPosts() {
   const [error, setError] = useState("");
   if (!customer) return null;
 
-  const mine = state.posts.filter((post) => post.customerId === customer.id && post.status === "published");
+  const mine = (Array.isArray(state.posts) ? state.posts : []).filter((post) => post.customerId === customer.id && post.status === "published");
 
   async function readPhoto(file: File | undefined) {
     if (!file) return;

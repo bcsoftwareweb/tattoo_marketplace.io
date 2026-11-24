@@ -126,7 +126,7 @@ export function DiscoveryFeed() {
       .split(/[^a-z0-9]+/)
       .map((term) => term.replace(/^#+/, ""))
       .filter((term) => term.length > 0);
-    return state.posts
+    return (Array.isArray(state.posts) ? state.posts : [])
       .filter((post) => post.status === "published")
       .filter((post) => {
         if (!terms.length) return true;

@@ -1,6 +1,7 @@
 import type { DemoState } from "@/lib/types";
 
 export function deriveState(state: DemoState): DemoState {
+  const posts = Array.isArray(state.posts) ? state.posts : [];
   const artists = state.artists.map((artist) => {
     const reviews = state.reviews.filter((review) => review.artistId === artist.id && review.status === "published");
     const rating = reviews.length
@@ -13,5 +14,5 @@ export function deriveState(state: DemoState): DemoState {
     const featured = artist.verificationStatus === "approved" ? artist.featured : false;
     return { ...artist, rating, reviewCount: reviews.length, startingPrice, featured };
   });
-  return { ...state, artists };
+  return { ...state, artists, posts };
 }

@@ -22,7 +22,7 @@ import type {
 const COMMISSION = 12;
 
 // Raise this whenever sample artists, bookings, reviews, or payments are added, so browsers with saved data pick them up.
-export const SEED_VERSION = 2;
+export const SEED_VERSION = 3;
 
 export const ADMIN_PROFILE = {
   id: "avery-quinn",
@@ -1857,7 +1857,7 @@ function withMissing<T extends { id: string }>(current: T[], incoming: T[]) {
 }
 
 export function upgradeState(stored: DemoState): DemoState {
-  if ((stored.seedVersion ?? 1) >= SEED_VERSION) return stored;
+  if ((stored.seedVersion ?? 1) >= SEED_VERSION && Array.isArray(stored.posts)) return stored;
   const seed = createSeed();
   const known = new Set(stored.artists.map((artist) => artist.id));
   const newArtists = new Set(seed.artists.filter((artist) => !known.has(artist.id)).map((artist) => artist.id));
