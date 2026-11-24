@@ -138,6 +138,8 @@ describe("marketplace data", () => {
   it("filters public artists and hides unlisted applications", () => {
     const artists = createSeed().artists;
     expect(filterArtists(artists, { q: "harbor" }).map((artist) => artist.id)).toEqual(["leo-marino"]);
+    expect(filterArtists(artists, { q: "#fine-line" }).map((artist) => artist.id)).toContain("nova-reyes");
+    expect(filterArtists(artists, { q: "Williamsburg nova" }).map((artist) => artist.id)).toEqual(["nova-reyes"]);
     expect(filterArtists(artists, { borough: "Queens" }).some((artist) => artist.id === "mina-park")).toBe(false);
     expect(filterArtists(artists, { borough: "Queens", includeUnlisted: true }).some((artist) => artist.id === "mina-park")).toBe(true);
     expect(filterArtists(artists, { price: "500-plus" }).map((artist) => artist.id)).toContain("julian-cho");

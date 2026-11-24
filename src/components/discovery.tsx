@@ -2,23 +2,12 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
 import { useDemo } from "@/context/demo-context";
-import { BOROUGHS, PRICE_FILTERS, SORTS } from "@/lib/constants";
-import { filterArtists, type ArtistQuery, type ArtistSort, type AvailabilityFilter, type PriceFilter } from "@/lib/filters";
+import { filterArtists, type ArtistQuery } from "@/lib/filters";
 import { createSeed } from "@/lib/seed";
-import { Button, Empty, frame, Photo, Rating, SelectInput } from "@/components/ui";
+import { Button, Empty, frame, Photo, Rating } from "@/components/ui";
 
 const inkField = "h-11 w-full border border-detail bg-ink px-3 text-sm text-white outline-none";
-
-function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block min-w-0">
-      <span className="mb-2 block font-display text-[0.68rem] uppercase tracking-[0.18em] text-mute">{label}</span>
-      {children}
-    </label>
-  );
-}
 
 export function ArtistCard({ artistId }: { artistId: string }) {
   const { state } = useDemo();
@@ -44,17 +33,7 @@ export function Discovery() {
   const router = useRouter();
   const query: ArtistQuery = {
     q: params.get("q") ?? "",
-    style: params.get("style") ?? "",
-    borough: params.get("borough") ?? "",
-    specialty: params.get("specialty") ?? "",
-    price: (params.get("price") as PriceFilter) || "any",
-    availability: (params.get("availability") as AvailabilityFilter) || "any",
-    sort: (params.get("sort") as ArtistSort) || "relevance",
   };
-  const specialties = useMemo(
-    () => [...new Set(state.artists.filter((artist) => artist.verificationStatus === "approved").flatMap((artist) => artist.specialties))].sort(),
-    [state.artists],
-  );
   const results = filterArtists(state.artists, query);
 
   function update(next: Record<string, string>) {
@@ -66,10 +45,7 @@ export function Discovery() {
     router.replace(`/artists?${search.toString()}`, { scroll: false });
   }
 
-  const filtered = Boolean(query.q || query.style || query.borough || query.specialty || query.price !== "any" || query.availability !== "any");
-  const [advanced, setAdvanced] = useState(
-    Boolean(query.style || query.borough || query.specialty || query.price !== "any" || query.availability !== "any"),
-  );
+  const filtered = Boolean(query.q);
 
   return (
     <div className={`${frame} py-10 md:py-16`}>
@@ -83,61 +59,13 @@ export function Discovery() {
       <form className="mt-8" onSubmit={(event) => event.preventDefault()}>
         <label className="block">
           <span className="sr-only">Search artists</span>
-          <input value={query.q} onChange={(event) => update({ q: event.target.value })} placeholder="Search name or studio" className={`${inkField} h-12 px-4`} />
+          <input value={query.q} onChange={(event) => update({ q: event.target.value })} placeholder="Search artist, location, or #tattoo-style" className={`${inkField} h-12 px-4`} />
         </label>
-        <button
-          type="button"
-          className="mt-3 border-b border-white pb-0.5 text-sm text-white hover:border-mist hover:text-mist"
-          aria-expanded={advanced}
-          onClick={() => setAdvanced((open) => !open)}
-        >
-          Advance Search
-        </button>
-        {advanced ? (
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          <FilterField label="Style">
-            <SelectInput value={query.style} onChange={(event) => update({ style: event.target.value })} className={inkField}>
-              <option value="">Any style</option>
-              {state.styles.map((style) => <option key={style.id} value={style.id}>{style.name}</option>)}
-            </SelectInput>
-          </FilterField>
-          <FilterField label="Borough">
-            <SelectInput value={query.borough} onChange={(event) => update({ borough: event.target.value })} className={inkField}>
-              <option value="">Any borough</option>
-              {BOROUGHS.map((borough) => <option key={borough}>{borough}</option>)}
-            </SelectInput>
-          </FilterField>
-          <FilterField label="Specialty">
-            <SelectInput value={query.specialty} onChange={(event) => update({ specialty: event.target.value })} className={inkField}>
-              <option value="">Any specialty</option>
-              {specialties.map((item) => <option key={item}>{item}</option>)}
-            </SelectInput>
-          </FilterField>
-          <FilterField label="Price">
-            <SelectInput value={query.price} onChange={(event) => update({ price: event.target.value })} className={inkField}>
-              {PRICE_FILTERS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-            </SelectInput>
-          </FilterField>
-          <FilterField label="Availability">
-            <SelectInput value={query.availability} onChange={(event) => update({ availability: event.target.value })} className={inkField}>
-              <option value="any">Any time</option>
-              <option value="open-7">Open in 7 days</option>
-              <option value="open-30">Open in 30 days</option>
-            </SelectInput>
-          </FilterField>
-        </div>
-        ) : null}
       </form>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-b border-panel pb-4">
         <p className="font-display text-xs uppercase tracking-[0.18em] text-mist">{results.length} artist{results.length === 1 ? "" : "s"}</p>
         <div className="flex items-center gap-5">
           {filtered ? <button type="button" onClick={() => router.replace("/artists")} className="text-sm text-mist hover:text-white">Clear</button> : null}
-          <label className="flex items-center gap-3 text-sm text-mist">
-            <span className="font-display text-[0.68rem] uppercase tracking-[0.18em]">Sort</span>
-            <SelectInput value={query.sort} onChange={(event) => update({ sort: event.target.value })} className="h-11 w-auto border border-detail bg-ink px-3 text-sm text-white outline-none">
-              {SORTS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-            </SelectInput>
-          </label>
         </div>
       </div>
       {results.length ? (
@@ -146,7 +74,7 @@ export function Discovery() {
         </div>
       ) : (
         <div className="mt-8">
-          <Empty title="No artists match" body="Clear a filter or try another borough." action={<Button type="button" variant="secondary" onClick={() => router.replace("/artists")}>Clear filters</Button>} />
+          <Empty title="No artists match" body="Try an artist name, location, or tattoo hashtag." action={<Button type="button" variant="secondary" onClick={() => router.replace("/artists")}>Clear search</Button>} />
         </div>
       )}
     </div>

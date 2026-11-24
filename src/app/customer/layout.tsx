@@ -6,6 +6,7 @@ const items = [
   { href: "/customer/bookings", label: "Bookings" },
   { href: "/customer/messages", label: "Messages" },
   { href: "/customer/favorites", label: "Favorites" },
+  { href: "/customer/posts", label: "Posts" },
   { href: "/customer/profile", label: "Profile" },
 ];
 

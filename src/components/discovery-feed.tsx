@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useDemo } from "@/context/demo-context";
 import { artworkFeed, mixArtwork, type Artwork } from "@/lib/artwork";
-import { BOROUGHS, PLACEMENTS } from "@/lib/constants";
 import { money } from "@/lib/format";
+import { hashtagLabel } from "@/lib/hashtags";
 import { recommendArtists, recommendSketches, type Recommendation, type SearchTaste } from "@/lib/recommend";
 import type { Artist } from "@/lib/types";
 import { useSearchDock } from "@/components/mobile-dock";
-import { Button, frame, Modal, Photo, SelectInput } from "@/components/ui";
+import { Button, frame, Modal, Photo } from "@/components/ui";
 
 const SAVED_KEY = "blackline.saved-art.v1";
 const SEARCH_KEY = "blackline.searches.v1";
@@ -63,9 +63,6 @@ export function DiscoveryFeed() {
   const catalogRef = useRef("");
   const [mixed, setMixed] = useState<Artwork[] | null>(null);
   const [query, setQuery] = useState("");
-  const [styleId, setStyleId] = useState("");
-  const [borough, setBorough] = useState("");
-  const [placement, setPlacement] = useState("");
   const [shown, setShown] = useState(18);
   const [saved, setSaved] = useState<string[]>([]);
   const [history, setHistory] = useState<SearchTaste[]>([]);
@@ -86,8 +83,8 @@ export function DiscoveryFeed() {
   }, [feed]);
 
   useEffect(() => {
-    const entry = { query: query.trim(), styleId, borough, placement };
-    if (!entry.query && !entry.styleId && !entry.borough && !entry.placement) return;
+    const entry = { query: query.trim(), styleId: "", borough: "", placement: "" };
+    if (!entry.query) return;
     if (entry.query.length === 1) return;
     const handle = window.setTimeout(() => {
       setHistory((current) => {
@@ -97,21 +94,61 @@ export function DiscoveryFeed() {
       });
     }, entry.query ? 500 : 0);
     return () => window.clearTimeout(handle);
-  }, [query, styleId, borough, placement]);
+  }, [query]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
+    const terms = needle
+      .split(/[^a-z0-9]+/)
+      .map((term) => term.replace(/^#+/, ""))
+      .filter((term) => term.length > 0);
     return (mixed ?? []).filter((item) => {
-      if (styleId && item.styleId !== styleId) return false;
-      if (borough && item.borough !== borough) return false;
-      if (placement && item.placement !== placement) return false;
-      if (!needle) return true;
-      const haystack = [item.title, item.description, item.artistName, item.styleName, item.category, item.neighborhood, item.placement, ...item.tags].join(" ").toLowerCase();
-      return haystack.includes(needle);
+      if (!terms.length) return true;
+      const haystack = [
+        item.title,
+        item.description,
+        item.artistName,
+        item.styleName,
+        item.category,
+        item.neighborhood,
+        item.borough,
+        item.placement,
+        item.styleId,
+        ...item.tags,
+      ].join(" ").toLowerCase();
+      return terms.every((term) => haystack.includes(term));
     });
-  }, [mixed, query, styleId, borough, placement]);
+  }, [mixed, query]);
 
-  useEffect(() => setShown(18), [query, styleId, borough, placement]);
+  const matchingPosts = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const terms = needle
+      .split(/[^a-z0-9]+/)
+      .map((term) => term.replace(/^#+/, ""))
+      .filter((term) => term.length > 0);
+    return state.posts
+      .filter((post) => post.status === "published")
+      .filter((post) => {
+        if (!terms.length) return true;
+        const customer = state.customers.find((item) => item.id === post.customerId);
+        const artist = post.artistId ? state.artists.find((item) => item.id === post.artistId) : null;
+        const haystack = [
+          post.caption,
+          post.placement,
+          customer?.name,
+          customer?.borough,
+          customer?.neighborhood,
+          artist?.name,
+          artist?.borough,
+          artist?.neighborhood,
+          ...post.hashtags,
+        ].join(" ").toLowerCase();
+        return terms.every((term) => haystack.includes(term));
+      })
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }, [state.posts, state.customers, state.artists, query]);
+
+  useEffect(() => setShown(18), [query]);
 
   useEffect(() => {
     if (!searchOpen) return;
@@ -134,10 +171,10 @@ export function DiscoveryFeed() {
   }, [filtered.length]);
 
   const taste = useMemo(() => {
-    const current = { query: query.trim(), styleId, borough, placement };
-    const active = Boolean(current.query || current.styleId || current.borough || current.placement);
+    const current = { query: query.trim(), styleId: "", borough: "", placement: "" };
+    const active = Boolean(current.query);
     return active ? [current, ...history.filter((item) => !sameTaste(item, current))] : history;
-  }, [query, styleId, borough, placement, history]);
+  }, [query, history]);
 
   const sketches = useMemo(
     () => recommendSketches(feed, { savedIds: saved, savedArtistIds, searches: taste }),
@@ -168,15 +205,15 @@ export function DiscoveryFeed() {
         <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">Blackline</p>
         <h1 className="mt-3 font-express text-[clamp(2.6rem,5vw,4.5rem)] leading-[0.9] tracking-[-0.045em]">Discover the art. Find the artist.</h1>
         <p className="mt-3 max-w-xl text-base leading-7 text-mist">Explore tattoos, sketches, and original work from independent tattoo artists.</p>
-        <form className="mt-6 hidden gap-3 md:grid md:grid-cols-2 xl:grid-cols-4" onSubmit={(event) => event.preventDefault()}>
-          <SearchFields query={query} setQuery={setQuery} styleId={styleId} setStyleId={setStyleId} borough={borough} setBorough={setBorough} placement={placement} setPlacement={setPlacement} styles={state.styles} />
+        <form className="mt-6 max-w-xl" onSubmit={(event) => event.preventDefault()}>
+          <SearchFields query={query} setQuery={setQuery} inputRef={searchRef} />
         </form>
       </section>
       {searchOpen ? (
         <form id="mobile-search" className="fixed inset-x-0 top-16 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-40 overflow-y-auto border-t border-panel bg-ink px-5 py-6 md:hidden" onSubmit={(event) => event.preventDefault()}>
           <p className="text-xs uppercase tracking-[0.18em] text-mist">Search</p>
           <div className="mt-4 grid gap-3">
-            <SearchFields query={query} setQuery={setQuery} styleId={styleId} setStyleId={setStyleId} borough={borough} setBorough={setBorough} placement={placement} setPlacement={setPlacement} styles={state.styles} inputRef={searchRef} />
+            <SearchFields query={query} setQuery={setQuery} inputRef={searchRef} />
           </div>
           <SearchIdeas
             sketches={sketches}
@@ -184,6 +221,42 @@ export function DiscoveryFeed() {
             styleName={(id) => state.styles.find((style) => style.id === id)?.name ?? ""}
           />
         </form>
+      ) : null}
+
+      {matchingPosts.length ? (
+        <section className={`${frame} pb-12`} aria-label="Tattoo posts">
+          <div className="mb-5 flex items-end justify-between gap-4 border-b border-panel pb-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-mist">Community</p>
+              <h2 className="mt-2 font-display text-2xl">Tattoo posts</h2>
+            </div>
+            <p className="text-xs text-mute">{matchingPosts.length} post{matchingPosts.length === 1 ? "" : "s"}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {matchingPosts.map((post) => {
+              const customer = state.customers.find((item) => item.id === post.customerId);
+              const artist = post.artistId ? state.artists.find((item) => item.id === post.artistId) : null;
+              return (
+                <article key={post.id} className="border border-panel bg-ink">
+                  <Photo src={post.image} alt={post.caption} className="aspect-[4/5] w-full object-cover" />
+                  <div className="grid gap-2 p-3">
+                    <p className="text-xs text-mist">{customer?.name ?? "Community member"}{artist ? ` · ${artist.name}` : ""}</p>
+                    <p className="line-clamp-2 text-sm leading-5">{post.caption}</p>
+                    {post.hashtags.length ? (
+                      <div className="flex flex-wrap gap-x-2 gap-y-1">
+                        {post.hashtags.slice(0, 4).map((tag) => (
+                          <button key={tag} type="button" className="text-xs text-mute hover:text-white" onClick={() => setQuery(hashtagLabel(tag))}>
+                            {hashtagLabel(tag)}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
       ) : null}
 
       <section className={`${frame} pb-20`} aria-label="Artwork">
@@ -214,45 +287,23 @@ export function DiscoveryFeed() {
 function SearchFields({
   query,
   setQuery,
-  styleId,
-  setStyleId,
-  borough,
-  setBorough,
-  placement,
-  setPlacement,
-  styles,
   inputRef,
 }: {
   query: string;
   setQuery: (value: string) => void;
-  styleId: string;
-  setStyleId: (value: string) => void;
-  borough: string;
-  setBorough: (value: string) => void;
-  placement: string;
-  setPlacement: (value: string) => void;
-  styles: Array<{ id: string; name: string }>;
   inputRef?: RefObject<HTMLInputElement | null>;
 }) {
   return (
-    <>
-      <label className="block md:col-span-2 xl:col-span-1">
-        <span className="sr-only">Search artwork</span>
-        <input ref={inputRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Subject, artist, or style" className={inkField} />
-      </label>
-      <SelectInput value={styleId} onChange={(event) => setStyleId(event.target.value)} className={inkField} aria-label="Style">
-        <option value="">Any style</option>
-        {styles.map((style) => <option key={style.id} value={style.id}>{style.name}</option>)}
-      </SelectInput>
-      <SelectInput value={borough} onChange={(event) => setBorough(event.target.value)} className={inkField} aria-label="Location">
-        <option value="">Any borough</option>
-        {BOROUGHS.map((item) => <option key={item}>{item}</option>)}
-      </SelectInput>
-      <SelectInput value={placement} onChange={(event) => setPlacement(event.target.value)} className={inkField} aria-label="Body placement">
-        <option value="">Any placement</option>
-        {PLACEMENTS.map((item) => <option key={item}>{item}</option>)}
-      </SelectInput>
-    </>
+    <label className="block">
+      <span className="sr-only">Search artists, locations, or tattoo hashtags</span>
+      <input
+        ref={inputRef}
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="Search artists, locations, or #tattoo-style"
+        className={`${inkField} h-12 px-4`}
+      />
+    </label>
   );
 }
 

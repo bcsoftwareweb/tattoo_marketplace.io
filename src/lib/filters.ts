@@ -35,6 +35,10 @@ function hasOpening(artist: Artist, today: string, days: number) {
 export function filterArtists(artists: Artist[], query: ArtistQuery) {
   const today = query.today ?? DEMO_TODAY;
   const needle = query.q?.trim().toLowerCase() ?? "";
+  const terms = needle
+    .split(/[^a-z0-9]+/)
+    .map((term) => term.replace(/^#+/, ""))
+    .filter((term) => term.length > 0);
   const filtered = artists.filter((artist) => {
     if (!query.includeUnlisted && artist.verificationStatus !== "approved") return false;
     if (query.borough && artist.borough !== query.borough) return false;
@@ -44,18 +48,20 @@ export function filterArtists(artists: Artist[], query: ArtistQuery) {
     if (query.price && !matchesPrice(artist.startingPrice, query.price)) return false;
     if (query.availability === "open-7" && !hasOpening(artist, today, 7)) return false;
     if (query.availability === "open-30" && !hasOpening(artist, today, 30)) return false;
-    if (!needle) return true;
+    if (!terms.length) return true;
     const haystack = [
       artist.name,
       artist.studioName,
       artist.neighborhood,
       artist.borough,
       artist.bio,
+      artist.instagram,
+      ...artist.styleIds,
       ...artist.specialties,
     ]
       .join(" ")
       .toLowerCase();
-    return haystack.includes(needle);
+    return terms.every((term) => haystack.includes(term));
   });
 
   const sort = query.sort ?? "relevance";

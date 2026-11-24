@@ -201,6 +201,18 @@ export interface Conversation {
   updatedAt: string;
 }
 
+export interface SocialPost {
+  id: string;
+  customerId: string;
+  artistId?: string;
+  image: string;
+  caption: string;
+  placement: string;
+  hashtags: string[];
+  createdAt: string;
+  status: "published" | "removed";
+}
+
 export interface Transaction {
   id: string;
   bookingId: string;
@@ -264,6 +276,7 @@ export interface DemoState {
   portfolio: PortfolioItem[];
   bookings: Booking[];
   conversations: Conversation[];
+  posts: SocialPost[];
   reviews: Review[];
   transactions: Transaction[];
   notifications: AppNotification[];

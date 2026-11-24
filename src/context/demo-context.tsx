@@ -11,6 +11,8 @@ import {
   deleteCategory,
   deletePortfolio,
   deleteService,
+  createSocialPost,
+  removeSocialPost,
   deleteStyle,
   ensureConversation,
   markAllRead,
@@ -35,6 +37,7 @@ import {
   type ArtistApplication,
   type ArtistPatch,
   type BookingDraft,
+  type SocialPostDraft,
 } from "@/lib/mutations";
 import { createSeed, upgradeState } from "@/lib/seed";
 import { loadLocalAccounts, loadSession, loadState, saveLocalAccounts, saveSession, saveState } from "@/lib/storage";
@@ -86,6 +89,8 @@ interface DemoContextValue {
   removeCategory: (id: string) => string | null;
   savePlatform: (patch: Partial<PlatformSettings>) => string | null;
   submitApplication: (input: ArtistApplication) => { id?: string; error?: string };
+  publishPost: (draft: SocialPostDraft) => { id?: string; error?: string };
+  removePost: (postId: string) => string | null;
 }
 
 const DemoContext = createContext<DemoContextValue | null>(null);
@@ -350,6 +355,20 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         if (result.error) return { error: result.error };
         setState(result.state);
         return { id: result.id };
+      },
+      publishPost: (draft) => {
+        const who = actor();
+        if (!who) return { error: "Sign in as a customer to publish a post." };
+        const result = createSocialPost(state, draft, who, now());
+        if (result.error) return { error: result.error };
+        setState(result.state);
+        toast("Post published.");
+        return { id: result.id };
+      },
+      removePost: (postId) => {
+        const who = actor();
+        if (!who) return "Sign in again.";
+        return commit(removeSocialPost(state, postId, who), "Post removed.");
       },
     };
   }, [ready, session, state, toasts]);

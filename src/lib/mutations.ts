@@ -2,6 +2,7 @@ import { transitionBooking, type BookingAction } from "@/lib/booking";
 import { ADMIN_ID, BOROUGHS, DEMO_TODAY, TIME_SLOTS } from "@/lib/constants";
 import { deriveState } from "@/lib/derive";
 import { addDays, uid, weekdayIndex } from "@/lib/format";
+import { normalizeHashtag, parseHashtags } from "@/lib/hashtags";
 import { bookingPath, messagePath } from "@/lib/permissions";
 import type {
   Actor,
@@ -14,6 +15,7 @@ import type {
   PortfolioItem,
   ReferenceImage,
   Service,
+  SocialPost,
   TattooStyle,
 } from "@/lib/types";
 
@@ -766,6 +768,76 @@ export function updateSettings(state: DemoState, patch: Partial<PlatformSettings
         tagline: next.tagline.trim(),
         city: next.city.trim(),
       },
+    },
+  };
+}
+
+export interface SocialPostDraft {
+  image: string;
+  caption: string;
+  placement: string;
+  hashtags: string[];
+  artistName: string;
+}
+
+export function createSocialPost(state: DemoState, draft: SocialPostDraft, actor: Actor, now: string): Result {
+  if (actor.role !== "customer") return fail(state, "Only customers can publish a customer tattoo post.");
+  const customer = state.customers.find((item) => item.id === actor.userId);
+  if (!customer || customer.status !== "active") return fail(state, "This customer account cannot publish posts.");
+  if (!draft.image) return fail(state, "Choose a photo for the post.");
+  const caption = draft.caption.trim();
+  if (!caption) return fail(state, "Add a caption.");
+  if (!draft.placement.trim()) return fail(state, "Choose the tattoo placement.");
+
+  const artistName = draft.artistName.trim();
+  const artist = artistName
+    ? state.artists.find((item) => item.name.toLowerCase() === artistName.toLowerCase())
+    : undefined;
+
+  const hashtags = [
+    ...draft.hashtags,
+    ...parseHashtags(caption),
+  ]
+    .map(normalizeHashtag)
+    .filter(Boolean)
+    .filter((tag, index, tags) => tags.indexOf(tag) === index)
+    .slice(0, 12);
+
+  const post: SocialPost = {
+    id: uid("post"),
+    customerId: customer.id,
+    artistId: artist?.id,
+    image: draft.image,
+    caption,
+    placement: draft.placement,
+    hashtags,
+    createdAt: now,
+    status: "published",
+  };
+
+  return {
+    state: {
+      ...state,
+      posts: [post, ...state.posts],
+      activity: [
+        { id: uid("act"), userId: customer.id, role: "customer", text: `Shared a new tattoo post${hashtags.length ? ` tagged ${hashtags.slice(0, 3).map((tag) => `#${tag}`).join(" ")}` : ""}.`, createdAt: now },
+        ...state.activity,
+      ],
+    },
+    id: post.id,
+  };
+}
+
+export function removeSocialPost(state: DemoState, postId: string, actor: Actor): Result {
+  const post = state.posts.find((item) => item.id === postId);
+  if (!post) return fail(state, "Post not found.");
+  if (actor.role !== "admin" && !(actor.role === "customer" && actor.userId === post.customerId)) {
+    return fail(state, "Only the post owner or an administrator can remove this post.");
+  }
+  return {
+    state: {
+      ...state,
+      posts: state.posts.map((item) => item.id === postId ? { ...item, status: "removed" } : item),
     },
   };
 }

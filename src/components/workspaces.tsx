@@ -6,8 +6,9 @@ import { useEffect, useState } from "react";
 import { BookingCards } from "@/components/booking-ui";
 import { MonthCalendar } from "@/components/calendar";
 import { useDemo } from "@/context/demo-context";
-import { BOROUGHS, WEEKDAYS } from "@/lib/constants";
+import { BOROUGHS, PLACEMENTS, WEEKDAYS } from "@/lib/constants";
 import { readImageFile } from "@/lib/files";
+import { hashtagLabel, parseHashtags } from "@/lib/hashtags";
 import { formatDate, formatDateTime, formatDuration, money, weekdayName } from "@/lib/format";
 import { isOpenBooking, portfolioFor, servicesFor } from "@/lib/selectors";
 import { adminStats, artistFinance } from "@/lib/selectors";
@@ -112,6 +113,117 @@ export function CustomerFavorites() {
         ) : null}
         </>
       ) : <Empty title="No saved artists" body="Save an artist from their profile." action={<Button href="/artists">Browse artists</Button>} />}
+    </div>
+  );
+}
+
+export function CustomerPosts() {
+  const customer = useSignedCustomer();
+  const { state, publishPost, removePost, toast } = useDemo();
+  const [image, setImage] = useState("");
+  const [caption, setCaption] = useState("");
+  const [placement, setPlacement] = useState("");
+  const [artistName, setArtistName] = useState("");
+  const [hashtags, setHashtags] = useState("");
+  const [error, setError] = useState("");
+  if (!customer) return null;
+
+  const mine = state.posts.filter((post) => post.customerId === customer.id && post.status === "published");
+
+  async function readPhoto(file: File | undefined) {
+    if (!file) return;
+    try {
+      setImage(await readImageFile(file, 900));
+    } catch (reason) {
+      toast(reason instanceof Error ? reason.message : "Could not read that photo.");
+    }
+  }
+
+  function publish(event: React.FormEvent) {
+    event.preventDefault();
+    setError("");
+    const hashtagValues = hashtags
+      .split(/[\s,]+/)
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+    const result = publishPost({
+      image,
+      caption,
+      placement,
+      hashtags: [...hashtagValues, ...parseHashtags(caption)],
+      artistName,
+    });
+    if (result.error) setError(result.error);
+    else {
+      setImage("");
+      setCaption("");
+      setPlacement("");
+      setArtistName("");
+      setHashtags("");
+    }
+  }
+
+  return (
+    <div className="grid gap-8">
+      <PageHeader eyebrow="Customer" title="Tattoo posts" description="Share a finished piece, healed work, or work in progress." />
+      <form className="grid max-w-2xl gap-4 border border-line bg-white p-5" onSubmit={publish}>
+        <Field label="Photo">
+          {image ? (
+            <div className="grid gap-3">
+              <Photo src={image} alt="New tattoo post preview" className="max-h-96 w-full object-cover" />
+              <Button type="button" variant="secondary" onClick={() => setImage("")}>Remove photo</Button>
+            </div>
+          ) : (
+            <input type="file" accept="image/*" onChange={(event) => readPhoto(event.target.files?.[0])} />
+          )}
+        </Field>
+        <Field label="Caption" hint="Describe the piece. Hashtags in the caption are added automatically.">
+          <Area value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="Healed #fineline work by Nova Reyes…" />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Placement">
+            <SelectInput value={placement} onChange={(event) => setPlacement(event.target.value)}>
+              <option value="">Choose placement</option>
+              {PLACEMENTS.map((item) => <option key={item}>{item}</option>)}
+            </SelectInput>
+          </Field>
+          <Field label="Artist credit">
+            <TextInput value={artistName} onChange={(event) => setArtistName(event.target.value)} placeholder="Nova Reyes" />
+          </Field>
+        </div>
+        <Field label="Hashtags" hint="Separate hashtags with spaces or commas.">
+          <TextInput value={hashtags} onChange={(event) => setHashtags(event.target.value)} placeholder="#healed #nyctattoo #fineline" />
+        </Field>
+        {error ? <p role="alert" className="text-sm">{error}</p> : null}
+        <Button type="submit" className="justify-self-start">Publish post</Button>
+      </form>
+
+      <section>
+        <h2 className="mb-4 font-display text-2xl">My posts</h2>
+        {mine.length ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {mine.map((post) => {
+              const artist = post.artistId ? state.artists.find((item) => item.id === post.artistId) : null;
+              return (
+                <article key={post.id} className="border border-line bg-white">
+                  <Photo src={post.image} alt={post.caption} className="aspect-[4/5] w-full object-cover" />
+                  <div className="grid gap-3 p-4">
+                    <p className="text-sm leading-6">{post.caption}</p>
+                    {artist ? <p className="text-xs text-mute">Artist: {artist.name}</p> : null}
+                    {post.hashtags.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {post.hashtags.map((tag) => <span key={tag} className="text-xs text-mute">{hashtagLabel(tag)}</span>)}
+                      </div>
+                    ) : null}
+                    <p className="text-xs text-mute">{formatDateTime(post.createdAt)}</p>
+                    <Button type="button" variant="secondary" onClick={() => removePost(post.id)}>Remove</Button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : <Empty title="No posts yet" body="Your tattoo posts will appear here." />}
+      </section>
     </div>
   );
 }

@@ -1024,6 +1024,42 @@ const CUSTOMERS: Customer[] = [
   },
 ];
 
+const CUSTOMER_POSTS = [
+  {
+    id: "post-maya-olive",
+    customerId: "maya-chen",
+    artistId: "nova-reyes",
+    image: workAt(16, 1400),
+    caption: "Healed fine-line olive branch. Nova kept the line soft and let the spacing breathe.",
+    placement: "Forearm",
+    hashtags: ["fineline", "olivebranch", "nyctattoo", "healed"],
+    createdAt: "2026-11-10T18:30:00Z",
+    status: "published" as const,
+  },
+  {
+    id: "post-samira-anklet",
+    customerId: "samira-patel",
+    artistId: "nova-reyes",
+    image: workAt(23, 1400),
+    caption: "The anklet is still settling in, but I love how it follows the ankle.",
+    placement: "Ankle",
+    hashtags: ["ornamental", "anklet", "firsttattoo", "healed"],
+    createdAt: "2026-11-08T20:10:00Z",
+    status: "published" as const,
+  },
+  {
+    id: "post-jordan-blackwork",
+    customerId: "jordan-ellis",
+    artistId: "sage-okonkwo",
+    image: workAt(29, 1400),
+    caption: "First sitting for the geometric shoulder panel. Already measuring the next session.",
+    placement: "Shoulder",
+    hashtags: ["geometric", "blackwork", "workinprogress", "brooklyn"],
+    createdAt: "2026-11-07T16:45:00Z",
+    status: "published" as const,
+  },
+];
+
 function event(at: string, status: Booking["status"], note: string, actor: Booking["history"][number]["actor"]) {
   return { at, status, note, actor };
 }
@@ -1753,6 +1789,7 @@ function buildState(): DemoState {
     portfolio,
     bookings,
     conversations: buildConversations(),
+    posts: CUSTOMER_POSTS,
     reviews: buildReviews(),
     transactions,
     notifications: [
@@ -1836,6 +1873,7 @@ export function upgradeState(stored: DemoState): DemoState {
     services: withMissing(stored.services, seed.services),
     portfolio: withMissing(stored.portfolio, seed.portfolio),
     bookings: withMissing(stored.bookings, seed.bookings),
+    posts: withMissing((stored as DemoState).posts ?? [], seed.posts),
     reviews: withMissing(stored.reviews, seed.reviews),
     transactions: withMissing(stored.transactions, seed.transactions),
     favorites,
