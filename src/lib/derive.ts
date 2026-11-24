@@ -11,6 +11,7 @@ export function deriveState(state: DemoState): DemoState {
         ? [post.artistId]
         : [],
   }));
+  const shops = Array.isArray(state.shops) ? state.shops : [];
   const artists = state.artists.map((artist) => {
     const reviews = state.reviews.filter((review) => review.artistId === artist.id && review.status === "published");
     const rating = reviews.length
@@ -21,7 +22,7 @@ export function deriveState(state: DemoState): DemoState {
     );
     const startingPrice = priced.length ? Math.min(...priced.map((service) => service.minPrice)) : artist.startingPrice;
     const featured = artist.verificationStatus === "approved" ? artist.featured : false;
-    return { ...artist, rating, reviewCount: reviews.length, startingPrice, featured };
+    return { ...artist, shopIds: Array.isArray(artist.shopIds) ? artist.shopIds : [], rating, reviewCount: reviews.length, startingPrice, featured };
   });
-  return { ...state, artists, posts };
+  return { ...state, artists, posts, shops };
 }

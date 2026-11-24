@@ -139,6 +139,7 @@ function accountPhoto(session: { role: string; userId: string } | null, state: R
   if (!session) return "";
   if (session.role === "customer") return state.customers.find((item) => item.id === session.userId)?.photo ?? "";
   if (session.role === "artist") return state.artists.find((item) => item.id === session.userId)?.photo ?? "";
+  if (session.role === "shop") return state.shops.find((item) => item.id === session.userId)?.photo ?? "";
   if (session.role === "admin") return ADMIN_PROFILE.photo;
   return "";
 }

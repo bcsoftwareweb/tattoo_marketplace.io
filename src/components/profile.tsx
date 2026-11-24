@@ -19,6 +19,9 @@ export function ArtistProfile({ slug }: { slug: string }) {
   const portfolio = portfolioFor(state, artist.id);
   const reviews = reviewsFor(state, artist.id);
   const styles = artist.styleIds.map((id) => state.styles.find((style) => style.id === id)?.name).filter(Boolean);
+  const shops = (Array.isArray(state.shops) ? state.shops : []).filter((shop) =>
+    (artist.shopIds ?? []).includes(shop.id) && shop.status === "active",
+  );
   const saved = session?.role === "customer" && (state.favorites[session.userId] ?? []).includes(artist.id);
   const listed = artist.verificationStatus === "approved";
 
@@ -68,6 +71,7 @@ export function ArtistProfile({ slug }: { slug: string }) {
             <div><dt className="text-mute">Experience</dt><dd>{artist.yearsExperience} years</dd></div>
             <div><dt className="text-mute">Styles</dt><dd>{styles.join(", ")}</dd></div>
             <div><dt className="text-mute">Specialties</dt><dd>{artist.specialties.join(", ")}</dd></div>
+            {shops.length ? <div className="sm:col-span-2"><dt className="text-mute">Associated shops</dt><dd>{shops.map((shop) => shop.name).join(", ")}</dd></div> : null}
           </dl>
           {!listed ? <p className="mt-4 border border-line px-3 py-3 text-sm">This profile is {verificationLabel(artist.verificationStatus).toLowerCase()} and is hidden from public search. {artist.verificationNote}</p> : null}
           <div className="mt-5 flex flex-wrap gap-3">

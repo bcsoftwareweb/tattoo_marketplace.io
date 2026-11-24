@@ -16,13 +16,14 @@ import type {
   Service,
   TattooStyle,
   Transaction,
+  TattooShop,
   WorkingHours,
 } from "@/lib/types";
 
 const COMMISSION = 12;
 
 // Raise this whenever sample artists, bookings, reviews, or payments are added, so browsers with saved data pick them up.
-export const SEED_VERSION = 4;
+export const SEED_VERSION = 5;
 
 export const ADMIN_PROFILE = {
   id: "avery-quinn",
@@ -704,6 +705,7 @@ function toArtist(input: ArtistInput): Artist {
     availability: availability(input.closed, input.booked, input.name.length),
     joinedAt: input.joinedAt,
     instagram: input.instagram,
+    shopIds: input.id === "nova-reyes" ? ["atelier-north"] : input.id === "sage-okonkwo" ? ["30th-avenue-studio"] : [],
   };
 }
 
@@ -1776,6 +1778,39 @@ function buildReviews(): Review[] {
   }));
 }
 
+const SHOPS: TattooShop[] = [
+  {
+    id: "atelier-north",
+    name: "Atelier North",
+    slug: "atelier-north",
+    email: "shop@demo.com",
+    phone: "347-555-0108",
+    photo: portraits.nova,
+    bio: "A private Williamsburg studio for fine line, ornamental, and blackwork artists.",
+    borough: "Brooklyn",
+    neighborhood: "Williamsburg",
+    address: "118 N 6th Street, Brooklyn, NY 11249",
+    website: "ateliernorth.demo",
+    status: "active",
+    joinedAt: "2024-01-10",
+  },
+  {
+    id: "30th-avenue-studio",
+    name: "30th Avenue Studio",
+    slug: "30th-avenue-studio",
+    email: "studio@30thavenue.demo",
+    phone: "718-555-0102",
+    photo: portraits.sage,
+    bio: "An Astoria studio for measured geometric work and bold blackwork.",
+    borough: "Queens",
+    neighborhood: "Astoria",
+    address: "31-18 30th Avenue, Astoria, NY 11102",
+    website: "30thavenue.demo",
+    status: "active",
+    joinedAt: "2024-04-18",
+  },
+];
+
 function alignCalendar(artists: Artist[], bookings: Booking[]) {
   const active = new Set(["confirmed", "completed", "disputed"]);
   const waiting = new Set(["pending", "artist_proposed_changes", "awaiting_customer_confirmation", "awaiting_deposit"]);
@@ -1804,6 +1839,7 @@ function buildState(): DemoState {
   const transactions = buildTransactions(bookings);
   const base: DemoState = {
     artists,
+    shops: SHOPS,
     customers: CUSTOMERS,
     styles: buildStyles(),
     categories: buildCategories(),
@@ -1879,7 +1915,7 @@ function withMissing<T extends { id: string }>(current: T[], incoming: T[]) {
 }
 
 export function upgradeState(stored: DemoState): DemoState {
-  if ((stored.seedVersion ?? 1) >= SEED_VERSION && Array.isArray(stored.posts)) return stored;
+  if ((stored.seedVersion ?? 1) >= SEED_VERSION && Array.isArray(stored.posts) && Array.isArray(stored.shops)) return stored;
   const seed = createSeed();
   const known = new Set(stored.artists.map((artist) => artist.id));
   const newArtists = new Set(seed.artists.filter((artist) => !known.has(artist.id)).map((artist) => artist.id));
@@ -1892,6 +1928,7 @@ export function upgradeState(stored: DemoState): DemoState {
   return deriveState({
     ...stored,
     artists: withMissing(stored.artists, seed.artists),
+    shops: withMissing((stored as DemoState).shops ?? [], seed.shops),
     services: withMissing(stored.services, seed.services),
     portfolio: withMissing(stored.portfolio, seed.portfolio),
     bookings: withMissing(stored.bookings, seed.bookings),

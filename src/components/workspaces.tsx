@@ -14,7 +14,7 @@ import { isOpenBooking, portfolioFor, servicesFor } from "@/lib/selectors";
 import { adminStats, artistFinance } from "@/lib/selectors";
 import { homeFor } from "@/lib/permissions";
 import { verificationLabel } from "@/lib/status";
-import type { Artist, BookingStatus, Category, Customer, Service, TattooStyle } from "@/lib/types";
+import type { Artist, BookingStatus, Category, Customer, Service, TattooShop, TattooStyle } from "@/lib/types";
 import { Button, Empty, Field, PageHeader, Photo, SelectInput, StatGrid, Tabs, TextInput, Area } from "@/components/ui";
 
 function useSignedArtist() {
@@ -487,6 +487,30 @@ export function ArtistProfileEditor() {
           ))}
         </div>
       </fieldset>
+      <fieldset>
+        <legend className="text-sm font-medium">Associated tattoo shops</legend>
+        <p className="mt-1 text-xs text-mute">Independent artists can keep one or more shop associations. Remove a shop if you no longer work there.</p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {(Array.isArray(state.shops) ? state.shops : []).filter((shop) => shop.status === "active").map((shop) => (
+            <label key={shop.id} className="flex items-start gap-2 border border-line p-3 text-sm">
+              <input
+                type="checkbox"
+                checked={(form.shopIds ?? []).includes(shop.id)}
+                onChange={() => setForm({
+                  ...form,
+                  shopIds: (form.shopIds ?? []).includes(shop.id)
+                    ? (form.shopIds ?? []).filter((id) => id !== shop.id)
+                    : [...(form.shopIds ?? []), shop.id],
+                })}
+              />
+              <span>
+                <span className="block font-medium">{shop.name}</span>
+                <span className="block text-xs text-mute">{shop.neighborhood}, {shop.borough}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <Field label="Add a specialty">
         <div className="flex gap-2">
           <TextInput value={specialty} onChange={(event) => setSpecialty(event.target.value)} />
@@ -727,6 +751,80 @@ function TransactionTable({ rows }: { rows: ReturnType<typeof artistFinance>["tr
         </tbody>
       </table>
     </div>
+  );
+}
+
+export function ShopOverview() {
+  const { state, session } = useDemo();
+  const shop = Array.isArray(state.shops)
+    ? state.shops.find((item) => item.id === session?.userId)
+    : null;
+  if (!shop) return null;
+  const artists = state.artists.filter((artist) =>
+    (artist.shopIds ?? []).includes(shop.id) && artist.verificationStatus === "approved",
+  );
+  return (
+    <div className="grid gap-8">
+      <PageHeader eyebrow="Tattoo shop" title={shop.name} description="Independent artists with a current association to this shop." />
+      <StatGrid items={[
+        { label: "Associated artists", value: String(artists.length) },
+        { label: "Approved artists", value: String(artists.filter((artist) => artist.verificationStatus === "approved").length) },
+        { label: "Location", value: `${shop.neighborhood}, ${shop.borough}` },
+      ]} />
+      <section>
+        <h2 className="mb-4 font-display text-2xl">Artists at this shop</h2>
+        {artists.length ? (
+          <ul className="border border-line bg-white">
+            {artists.map((artist) => (
+              <li key={artist.id} className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 last:border-b-0">
+                <span className="flex items-center gap-3">
+                  <Photo src={artist.photo} alt="" className="h-14 w-12" />
+                  <span>
+                    <span className="block font-medium">{artist.name}</span>
+                    <span className="block text-sm text-mute">{artist.specialties.slice(0, 3).join(" · ")}</span>
+                  </span>
+                </span>
+                <Button href={`/artists/${artist.slug}`} variant="secondary">View profile</Button>
+              </li>
+            ))}
+          </ul>
+        ) : <Empty title="No associated artists" body="Approved artists can add this shop from their profile." />}
+      </section>
+    </div>
+  );
+}
+
+export function ShopProfileEditor() {
+  const { state, session, saveShop, toast } = useDemo();
+  const shop = Array.isArray(state.shops)
+    ? state.shops.find((item) => item.id === session?.userId)
+    : null;
+  const [form, setForm] = useState<TattooShop | null>(shop ?? null);
+  useEffect(() => setForm(shop ?? null), [shop]);
+  if (!form || !shop) return null;
+  return (
+    <form className="grid max-w-2xl gap-4" onSubmit={(event) => { event.preventDefault(); saveShop(form); }}>
+      <PageHeader eyebrow="Tattoo shop" title="Shop profile" description={shop.email} />
+      <Photo src={form.photo} alt="" className="h-28 w-28" />
+      <label className="text-sm">Replace photo
+        <input className="mt-2 block" type="file" accept="image/*" onChange={async (event) => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          try { setForm({ ...form, photo: await readImageFile(file, 800) }); }
+          catch (reason) { toast(reason instanceof Error ? reason.message : "Could not read that image."); }
+        }} />
+      </label>
+      <Field label="Shop name"><TextInput value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></Field>
+      <Field label="Biography"><Area value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} /></Field>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Borough"><SelectInput value={form.borough} onChange={(event) => setForm({ ...form, borough: event.target.value })}>{BOROUGHS.map((item) => <option key={item}>{item}</option>)}</SelectInput></Field>
+        <Field label="Neighborhood"><TextInput value={form.neighborhood} onChange={(event) => setForm({ ...form, neighborhood: event.target.value })} /></Field>
+      </div>
+      <Field label="Address"><TextInput value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} /></Field>
+      <Field label="Phone"><TextInput value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></Field>
+      <Field label="Website"><TextInput value={form.website} onChange={(event) => setForm({ ...form, website: event.target.value })} /></Field>
+      <Button type="submit" className="justify-self-start">Save shop profile</Button>
+    </form>
   );
 }
 

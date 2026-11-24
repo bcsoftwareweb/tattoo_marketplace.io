@@ -34,6 +34,8 @@ import {
   updateService,
   updateSettings,
   updateWorkingHours,
+  updateArtistShops,
+  updateShopProfile,
   type ArtistApplication,
   type ArtistPatch,
   type BookingDraft,
@@ -41,7 +43,7 @@ import {
 } from "@/lib/mutations";
 import { createSeed, upgradeState } from "@/lib/seed";
 import { loadLocalAccounts, loadSession, loadState, saveLocalAccounts, saveSession, saveState } from "@/lib/storage";
-import type { Actor, Category, Customer, DemoState, PlatformSettings, PortfolioItem, Role, Service, Session, TattooStyle } from "@/lib/types";
+import type { Actor, Category, Customer, DemoState, PlatformSettings, PortfolioItem, Role, Service, Session, TattooShop, TattooStyle } from "@/lib/types";
 import { uid } from "@/lib/format";
 
 interface Toast {
@@ -91,6 +93,8 @@ interface DemoContextValue {
   submitApplication: (input: ArtistApplication) => { id?: string; error?: string };
   publishPost: (draft: SocialPostDraft) => { id?: string; error?: string };
   removePost: (postId: string) => string | null;
+  updateArtistShopAssociations: (shopIds: string[]) => string | null;
+  saveShop: (patch: Partial<Pick<TattooShop, "name" | "phone" | "photo" | "bio" | "borough" | "neighborhood" | "address" | "website">>) => string | null;
 }
 
 const DemoContext = createContext<DemoContextValue | null>(null);
@@ -258,6 +262,16 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         const who = actor();
         if (!who) return "Sign in again.";
         return commit(updateCustomer(state, who.userId, patch, who), "Profile saved.");
+      },
+      updateArtistShopAssociations: (shopIds) => {
+        const who = actor();
+        if (!who) return "Sign in again.";
+        return commit(updateArtistShops(state, who.userId, shopIds, who), "Shop associations saved.");
+      },
+      saveShop: (patch) => {
+        const who = actor();
+        if (!who) return "Sign in again.";
+        return commit(updateShopProfile(state, who.userId, patch, who), "Shop profile saved.");
       },
       favorite: (artistId) => {
         const who = actor();

@@ -17,6 +17,7 @@ import type {
   Service,
   SocialPost,
   TattooStyle,
+  TattooShop,
 } from "@/lib/types";
 
 export interface Result {
@@ -214,6 +215,7 @@ export type ArtistPatch = Partial<
     | "yearsExperience"
     | "styleIds"
     | "specialties"
+    | "shopIds"
   >
 >;
 
@@ -239,6 +241,23 @@ export function updateArtistProfile(state: DemoState, artistId: string, patch: A
   const saved: Artist = { ...next, name: next.name.trim(), bio: next.bio.trim(), specialties };
   return {
     state: deriveState({ ...state, artists: state.artists.map((item) => (item.id === artistId ? saved : item)) }),
+  };
+}
+
+export function updateArtistShops(state: DemoState, artistId: string, shopIds: string[], actor: Actor): Result {
+  if (actor.role !== "artist" || actor.userId !== artistId) return fail(state, "Only the artist can change shop associations.");
+  const artist = artistOf(state, artistId);
+  if (!artist) return fail(state, "Artist not found.");
+  const uniqueIds = [...new Set(shopIds)].filter((id) =>
+    Array.isArray(state.shops) && state.shops.some((shop) => shop.id === id && shop.status === "active"),
+  );
+  return {
+    state: {
+      ...state,
+      artists: state.artists.map((item) =>
+        item.id === artistId ? { ...item, shopIds: uniqueIds } : item,
+      ),
+    },
   };
 }
 
@@ -674,6 +693,7 @@ export function submitArtistApplication(state: DemoState, input: ArtistApplicati
     availability: applicationCalendar(closed),
     joinedAt: now.slice(0, 10),
     instagram: handle,
+    shopIds: [],
   };
 
   return {
@@ -745,6 +765,29 @@ export function deleteCategory(state: DemoState, id: string, actor: Actor): Resu
   if (!category) return fail(state, "Category not found.");
   if (state.portfolio.some((item) => item.category === category.name)) return fail(state, "Portfolio pieces still use that category.");
   return { state: { ...state, categories: state.categories.filter((item) => item.id !== id) } };
+}
+
+export function updateShopProfile(
+  state: DemoState,
+  shopId: string,
+  patch: Partial<Pick<TattooShop, "name" | "phone" | "photo" | "bio" | "borough" | "neighborhood" | "address" | "website">>,
+  actor: Actor,
+): Result {
+  if (actor.role !== "shop" || actor.userId !== shopId) return fail(state, "Only the shop account can edit this profile.");
+  const shop = state.shops.find((item) => item.id === shopId);
+  if (!shop) return fail(state, "Shop not found.");
+  const next = { ...shop, ...patch };
+  if (next.name.trim().length < 2 || next.address.trim().length < 5 || !next.neighborhood.trim()) {
+    return fail(state, "Enter a shop name, neighborhood, and address.");
+  }
+  return {
+    state: {
+      ...state,
+      shops: state.shops.map((item) => item.id === shopId
+        ? { ...next, name: next.name.trim(), address: next.address.trim(), neighborhood: next.neighborhood.trim(), website: next.website.trim() }
+        : item),
+    },
+  };
 }
 
 export function updateSettings(state: DemoState, patch: Partial<PlatformSettings>, actor: Actor): Result {

@@ -19,7 +19,7 @@ export function LoginForm() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  function finish(role: "customer" | "artist" | "admin") {
+  function finish(role: "customer" | "artist" | "shop" | "admin") {
     router.push(safeNextPath(params.get("next"), role));
   }
 

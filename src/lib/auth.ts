@@ -29,6 +29,14 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
     blurb: "Artist · Nova Reyes",
   },
   {
+    email: "shop@demo.com",
+    password: DEMO_PASSWORD,
+    role: "shop",
+    userId: "atelier-north",
+    name: "Atelier North",
+    blurb: "Shop · Atelier North",
+  },
+  {
     email: "admin@demo.com",
     password: DEMO_PASSWORD,
     role: "admin",
@@ -80,6 +88,11 @@ export function accountBlock(state: DemoState, session: Session) {
     if (!artist) return "This artist profile is missing.";
     if (artist.verificationStatus === "suspended") return "This artist account is suspended.";
     if (artist.verificationStatus === "rejected") return "This artist application was rejected.";
+  }
+  if (session.role === "shop") {
+    const shop = state.shops.find((item) => item.id === session.userId);
+    if (!shop) return "This shop profile is missing.";
+    if (shop.status === "suspended") return "This shop account is suspended.";
   }
   return null;
 }

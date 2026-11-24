@@ -1,4 +1,4 @@
-export type Role = "customer" | "artist" | "admin";
+export type Role = "customer" | "artist" | "shop" | "admin";
 
 export type VerificationStatus = "pending" | "approved" | "rejected" | "suspended";
 
@@ -118,6 +118,23 @@ export interface Artist {
   availability: AvailabilityDay[];
   joinedAt: string;
   instagram: string;
+  shopIds: string[];
+}
+
+export interface TattooShop {
+  id: string;
+  name: string;
+  slug: string;
+  email: string;
+  phone: string;
+  photo: string;
+  bio: string;
+  borough: string;
+  neighborhood: string;
+  address: string;
+  website: string;
+  status: AccountStatus;
+  joinedAt: string;
 }
 
 export interface Customer {
@@ -272,6 +289,7 @@ export interface PlatformSettings {
 
 export interface DemoState {
   artists: Artist[];
+  shops: TattooShop[];
   customers: Customer[];
   styles: TattooStyle[];
   categories: Category[];

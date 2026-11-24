@@ -23,6 +23,7 @@ describe("demo authentication", () => {
   it("keeps dashboard homes separate", () => {
     expect(homeFor("customer")).toBe("/customer/bookings");
     expect(homeFor("artist")).toBe("/artist");
+    expect(homeFor("shop")).toBe("/shop");
     expect(homeFor("admin")).toBe("/admin");
     expect(canAccess("customer", "artist")).toBe(false);
     expect(canAccess("admin", "admin")).toBe(true);

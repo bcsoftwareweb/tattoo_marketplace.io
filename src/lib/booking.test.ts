@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { transitionBooking } from "@/lib/booking";
 import { balanceSplit, depositSplit } from "@/lib/money";
 import { createSeed } from "@/lib/seed";
-import { createBookingRequest, createSocialPost, slotsFor } from "@/lib/mutations";
+import { createBookingRequest, createSocialPost, slotsFor, updateArtistShops } from "@/lib/mutations";
 import { filterArtists } from "@/lib/filters";
 import type { Actor, Booking, PlatformSettings } from "@/lib/types";
 
@@ -135,6 +135,21 @@ describe("money", () => {
 });
 
 describe("marketplace data", () => {
+  it("lets an artist control shop associations", () => {
+    const state = createSeed();
+    const result = updateArtistShops(
+      state,
+      "nova-reyes",
+      ["atelier-north", "30th-avenue-studio", "missing-shop"],
+      { role: "artist", userId: "nova-reyes" },
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.state.artists.find((artist) => artist.id === "nova-reyes")?.shopIds).toEqual([
+      "atelier-north",
+      "30th-avenue-studio",
+    ]);
+  });
+
   it("lets an artist publish a post and tag another artist", () => {
     const state = createSeed();
     const result = createSocialPost(state, {

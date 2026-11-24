@@ -3,6 +3,7 @@ import type { Role } from "@/lib/types";
 export function homeFor(role: Role) {
   if (role === "customer") return "/customer/bookings";
   if (role === "artist") return "/artist";
+  if (role === "shop") return "/shop";
   return "/admin";
 }
 
@@ -28,6 +29,7 @@ export function safeNextPath(value: string | null, role: Role) {
     return value;
   }
   if (role === "artist" && path.startsWith("/artist")) return value;
+  if (role === "shop" && path.startsWith("/shop")) return value;
   if (role === "admin" && path.startsWith("/admin")) return value;
   if (path.startsWith("/artists") || path.startsWith("/artwork") || path === "/") return value;
   return homeFor(role);
