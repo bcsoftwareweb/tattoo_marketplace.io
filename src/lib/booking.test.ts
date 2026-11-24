@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { transitionBooking } from "@/lib/booking";
 import { balanceSplit, depositSplit } from "@/lib/money";
 import { createSeed } from "@/lib/seed";
-import { createBookingRequest, slotsFor } from "@/lib/mutations";
+import { createBookingRequest, createSocialPost, slotsFor } from "@/lib/mutations";
 import { filterArtists } from "@/lib/filters";
 import type { Actor, Booking, PlatformSettings } from "@/lib/types";
 
@@ -135,6 +135,24 @@ describe("money", () => {
 });
 
 describe("marketplace data", () => {
+  it("lets an artist publish a post and tag another artist", () => {
+    const state = createSeed();
+    const result = createSocialPost(state, {
+      image: "data:image/jpeg;base64,test",
+      caption: "Collaborative sleeve",
+      placement: "Upper arm",
+      hashtags: ["collaboration"],
+      artistName: "",
+      taggedArtistIds: ["priya-shah", "nova-reyes"],
+    }, { role: "artist", userId: "nova-reyes" }, "2026-11-11T16:00:00Z");
+    expect(result.error).toBeUndefined();
+    expect(result.state.posts[0]).toMatchObject({
+      authorRole: "artist",
+      authorId: "nova-reyes",
+      taggedArtistIds: ["priya-shah"],
+    });
+  });
+
   it("filters public artists and hides unlisted applications", () => {
     const artists = createSeed().artists;
     expect(filterArtists(artists, { q: "harbor" }).map((artist) => artist.id)).toEqual(["leo-marino"]);

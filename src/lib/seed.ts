@@ -22,7 +22,7 @@ import type {
 const COMMISSION = 12;
 
 // Raise this whenever sample artists, bookings, reviews, or payments are added, so browsers with saved data pick them up.
-export const SEED_VERSION = 3;
+export const SEED_VERSION = 4;
 
 export const ADMIN_PROFILE = {
   id: "avery-quinn",
@@ -1027,8 +1027,11 @@ const CUSTOMERS: Customer[] = [
 const CUSTOMER_POSTS = [
   {
     id: "post-maya-olive",
+    authorRole: "customer" as const,
+    authorId: "maya-chen",
     customerId: "maya-chen",
     artistId: "nova-reyes",
+    taggedArtistIds: ["nova-reyes"],
     image: workAt(16, 1400),
     caption: "Healed fine-line olive branch. Nova kept the line soft and let the spacing breathe.",
     placement: "Forearm",
@@ -1038,8 +1041,11 @@ const CUSTOMER_POSTS = [
   },
   {
     id: "post-samira-anklet",
+    authorRole: "customer" as const,
+    authorId: "samira-patel",
     customerId: "samira-patel",
     artistId: "nova-reyes",
+    taggedArtistIds: ["nova-reyes"],
     image: workAt(23, 1400),
     caption: "The anklet is still settling in, but I love how it follows the ankle.",
     placement: "Ankle",
@@ -1049,13 +1055,29 @@ const CUSTOMER_POSTS = [
   },
   {
     id: "post-jordan-blackwork",
+    authorRole: "customer" as const,
+    authorId: "jordan-ellis",
     customerId: "jordan-ellis",
     artistId: "sage-okonkwo",
+    taggedArtistIds: ["sage-okonkwo"],
     image: workAt(29, 1400),
     caption: "First sitting for the geometric shoulder panel. Already measuring the next session.",
     placement: "Shoulder",
     hashtags: ["geometric", "blackwork", "workinprogress", "brooklyn"],
     createdAt: "2026-11-07T16:45:00Z",
+    status: "published" as const,
+  },
+  {
+    id: "post-nova-collaboration",
+    authorRole: "artist" as const,
+    authorId: "nova-reyes",
+    taggedArtistIds: ["priya-shah"],
+    artistId: "nova-reyes",
+    image: workAt(18, 1400),
+    caption: "A collaborative ornamental floral piece. Priya brought the linework, Nova finished the fine-line detail.",
+    placement: "Back",
+    hashtags: ["collaboration", "ornamental", "fineline", "artistcredit"],
+    createdAt: "2026-11-11T15:20:00Z",
     status: "published" as const,
   },
 ];

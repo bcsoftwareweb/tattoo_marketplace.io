@@ -152,6 +152,7 @@ export function CustomerPosts() {
       placement,
       hashtags: [...hashtagValues, ...parseHashtags(caption)],
       artistName,
+      taggedArtistIds: [],
     });
     if (result.error) setError(result.error);
     else {
@@ -256,6 +257,154 @@ export function CustomerProfile() {
         <Button type="button" variant="ghost" onClick={logout}>Log out</Button>
       </div>
     </form>
+  );
+}
+
+export function ArtistPosts() {
+  const artist = useSignedArtist();
+  const { state, publishPost, removePost, toast } = useDemo();
+  const [image, setImage] = useState("");
+  const [caption, setCaption] = useState("");
+  const [placement, setPlacement] = useState("");
+  const [hashtags, setHashtags] = useState("");
+  const [taggedArtistIds, setTaggedArtistIds] = useState<string[]>([]);
+  const [error, setError] = useState("");
+  if (!artist) return null;
+
+  const mine = (Array.isArray(state.posts) ? state.posts : []).filter((post) =>
+    post.status === "published"
+    && (
+      (post.authorRole === "artist" && post.authorId === artist.id)
+      || (!post.authorRole && post.artistId === artist.id)
+    ),
+  );
+  const collaborators = state.artists.filter((item) =>
+    item.id !== artist.id && item.verificationStatus === "approved",
+  );
+
+  async function readPhoto(file: File | undefined) {
+    if (!file) return;
+    try {
+      setImage(await readImageFile(file, 900));
+    } catch (reason) {
+      toast(reason instanceof Error ? reason.message : "Could not read that photo.");
+    }
+  }
+
+  function publish(event: React.FormEvent) {
+    event.preventDefault();
+    setError("");
+    const result = publishPost({
+      image,
+      caption,
+      placement,
+      artistName: "",
+      hashtags: [
+        ...hashtags.split(/[\s,]+/).map((tag) => tag.trim()).filter(Boolean),
+        ...parseHashtags(caption),
+      ],
+      taggedArtistIds,
+    });
+    if (result.error) setError(result.error);
+    else {
+      setImage("");
+      setCaption("");
+      setPlacement("");
+      setHashtags("");
+      setTaggedArtistIds([]);
+    }
+  }
+
+  function toggleArtist(id: string) {
+    setTaggedArtistIds((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    );
+  }
+
+  return (
+    <div className="grid gap-8">
+      <PageHeader eyebrow="Artist" title="Community posts" description="Share finished work, collaborations, and work in progress." />
+      <form className="grid max-w-3xl gap-4 border border-line bg-white p-5" onSubmit={publish}>
+        <Field label="Photo">
+          {image ? (
+            <div className="grid gap-3">
+              <Photo src={image} alt="New artist post preview" className="max-h-96 w-full object-cover" />
+              <Button type="button" variant="secondary" onClick={() => setImage("")}>Remove photo</Button>
+            </div>
+          ) : (
+            <input type="file" accept="image/*" onChange={(event) => readPhoto(event.target.files?.[0])} />
+          )}
+        </Field>
+        <Field label="Caption" hint="Tag artists below to give collaborators public credit.">
+          <Area value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="Collaboration with @artistname…" />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Placement (optional)">
+            <SelectInput value={placement} onChange={(event) => setPlacement(event.target.value)}>
+              <option value="">Choose placement</option>
+              {PLACEMENTS.map((item) => <option key={item}>{item}</option>)}
+            </SelectInput>
+          </Field>
+          <Field label="Hashtags" hint="Separate hashtags with spaces or commas.">
+            <TextInput value={hashtags} onChange={(event) => setHashtags(event.target.value)} placeholder="#collaboration #healed #fineline" />
+          </Field>
+        </div>
+        <fieldset>
+          <legend className="text-sm font-medium">Tag collaborating artists</legend>
+          <div className="mt-2 grid max-h-56 gap-2 overflow-y-auto border border-line p-3 sm:grid-cols-2">
+            {collaborators.map((item) => (
+              <label key={item.id} className="flex items-center gap-3 text-sm">
+                <input type="checkbox" checked={taggedArtistIds.includes(item.id)} onChange={() => toggleArtist(item.id)} />
+                <Photo src={item.photo} alt="" className="h-10 w-10 rounded-full" />
+                <span>{item.name}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        {taggedArtistIds.length ? (
+          <div className="flex flex-wrap gap-2">
+            {taggedArtistIds.map((id) => {
+              const tagged = state.artists.find((item) => item.id === id);
+              return tagged ? (
+                <button key={id} type="button" className="border border-line px-2 py-1 text-xs" onClick={() => toggleArtist(id)}>
+                  @{tagged.name} ×
+                </button>
+              ) : null;
+            })}
+          </div>
+        ) : null}
+        {error ? <p role="alert" className="text-sm">{error}</p> : null}
+        <Button type="submit" className="justify-self-start">Publish post</Button>
+      </form>
+
+      <section>
+        <h2 className="mb-4 font-display text-2xl">My community posts</h2>
+        {mine.length ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {mine.map((post) => (
+              <article key={post.id} className="border border-line bg-white">
+                <Photo src={post.image} alt={post.caption} className="aspect-[4/5] w-full object-cover" />
+                <div className="grid gap-3 p-4">
+                  <p className="text-sm leading-6">{post.caption}</p>
+                  {post.taggedArtistIds?.length ? (
+                    <p className="text-xs text-mute">
+                      With {post.taggedArtistIds.map((id) => state.artists.find((item) => item.id === id)?.name).filter(Boolean).join(", ")}
+                    </p>
+                  ) : null}
+                  {post.hashtags.length ? (
+                    <div className="flex flex-wrap gap-2">
+                      {post.hashtags.map((tag) => <span key={tag} className="text-xs text-mute">{hashtagLabel(tag)}</span>)}
+                    </div>
+                  ) : null}
+                  <p className="text-xs text-mute">{formatDateTime(post.createdAt)}</p>
+                  <Button type="button" variant="secondary" onClick={() => removePost(post.id)}>Remove</Button>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : <Empty title="No artist posts yet" body="Share a piece or collaboration with the community." />}
+      </section>
+    </div>
   );
 }
 

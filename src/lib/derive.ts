@@ -1,7 +1,16 @@
 import type { DemoState } from "@/lib/types";
 
 export function deriveState(state: DemoState): DemoState {
-  const posts = Array.isArray(state.posts) ? state.posts : [];
+  const posts = (Array.isArray(state.posts) ? state.posts : []).map((post) => ({
+    ...post,
+    authorRole: post.authorRole ?? "customer",
+    authorId: post.authorId ?? post.customerId ?? "",
+    taggedArtistIds: Array.isArray(post.taggedArtistIds)
+      ? post.taggedArtistIds
+      : post.artistId
+        ? [post.artistId]
+        : [],
+  }));
   const artists = state.artists.map((artist) => {
     const reviews = state.reviews.filter((review) => review.artistId === artist.id && review.status === "published");
     const rating = reviews.length

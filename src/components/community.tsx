@@ -24,12 +24,19 @@ export function CommunityPage() {
       .filter((post) => {
         if (!terms.length) return true;
         const customer = state.customers.find((item) => item.id === post.customerId);
+        const author = post.authorRole === "artist"
+          ? state.artists.find((item) => item.id === post.authorId)
+          : customer;
         const artist = post.artistId
           ? state.artists.find((item) => item.id === post.artistId)
           : null;
+        const taggedArtists = (post.taggedArtistIds ?? [])
+          .map((id) => state.artists.find((item) => item.id === id))
+          .filter(Boolean);
         const haystack = [
           post.caption,
           post.placement,
+          author?.name,
           customer?.name,
           customer?.borough,
           customer?.neighborhood,
@@ -37,6 +44,7 @@ export function CommunityPage() {
           artist?.borough,
           artist?.neighborhood,
           ...post.hashtags,
+          ...taggedArtists.flatMap((item) => item ? [item.name, item.neighborhood, item.borough] : []),
         ].join(" ").toLowerCase();
         return terms.every((term) => haystack.includes(term));
       })
@@ -55,6 +63,8 @@ export function CommunityPage() {
         <div className="lg:justify-self-end">
           {session?.role === "customer" ? (
             <Button href="/customer/posts">Post your tattoo</Button>
+          ) : session?.role === "artist" ? (
+            <Button href="/artist/posts">Post to community</Button>
           ) : (
             <Button href="/login">Sign in to post</Button>
           )}
@@ -88,19 +98,38 @@ export function CommunityPage() {
         <div className="mt-8 columns-1 gap-4 sm:columns-2 lg:columns-3 xl:columns-4">
           {posts.map((post) => {
             const customer = state.customers.find((item) => item.id === post.customerId);
+            const author = post.authorRole === "artist"
+              ? state.artists.find((item) => item.id === post.authorId)
+              : customer;
             const artist = post.artistId
               ? state.artists.find((item) => item.id === post.artistId)
               : null;
+            const taggedArtists = (post.taggedArtistIds ?? [])
+              .map((id) => state.artists.find((item) => item.id === id))
+              .filter((item): item is (typeof state.artists)[number] => Boolean(item));
             return (
               <article key={post.id} className="mb-4 break-inside-avoid border border-panel bg-ink">
                 <Photo src={post.image} alt={post.caption} className="w-full" />
                 <div className="grid gap-3 p-4">
                   <div>
-                    <p className="text-sm font-medium">{customer?.name ?? "Community member"}</p>
+                    {author ? (
+                      <p className="text-sm font-medium">{author.name}</p>
+                    ) : (
+                      <p className="text-sm font-medium">Community member</p>
+                    )}
                     {artist ? (
                       <Link href={`/artists/${artist.slug}`} className="mt-1 block text-xs text-mute hover:text-white">
                         Tattoo by {artist.name}
                       </Link>
+                    ) : null}
+                    {taggedArtists.length ? (
+                      <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1">
+                        {taggedArtists.map((item) => (
+                          <Link key={item.id} href={`/artists/${item.slug}`} className="text-xs text-mist hover:text-white">
+                            @{item.name}
+                          </Link>
+                        ))}
+                      </div>
                     ) : null}
                   </div>
                   <p className="text-sm leading-6 text-mist">{post.caption}</p>

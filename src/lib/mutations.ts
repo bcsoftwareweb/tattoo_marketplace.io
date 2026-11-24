@@ -778,21 +778,35 @@ export interface SocialPostDraft {
   placement: string;
   hashtags: string[];
   artistName: string;
+  taggedArtistIds: string[];
 }
 
 export function createSocialPost(state: DemoState, draft: SocialPostDraft, actor: Actor, now: string): Result {
-  if (actor.role !== "customer") return fail(state, "Only customers can publish a customer tattoo post.");
-  const customer = state.customers.find((item) => item.id === actor.userId);
-  if (!customer || customer.status !== "active") return fail(state, "This customer account cannot publish posts.");
+  if (actor.role !== "customer" && actor.role !== "artist") return fail(state, "Only customers and artists can publish community posts.");
   if (!draft.image) return fail(state, "Choose a photo for the post.");
   const caption = draft.caption.trim();
   if (!caption) return fail(state, "Add a caption.");
-  if (!draft.placement.trim()) return fail(state, "Choose the tattoo placement.");
+  if (actor.role === "customer" && !draft.placement.trim()) return fail(state, "Choose the tattoo placement.");
 
-  const artistName = draft.artistName.trim();
-  const artist = artistName
-    ? state.artists.find((item) => item.name.toLowerCase() === artistName.toLowerCase())
-    : undefined;
+  let customerId: string | undefined;
+  let artistId: string | undefined;
+  if (actor.role === "customer") {
+    const customer = state.customers.find((item) => item.id === actor.userId);
+    if (!customer || customer.status !== "active") return fail(state, "This customer account cannot publish posts.");
+    customerId = customer.id;
+    const artistName = draft.artistName.trim();
+    artistId = artistName
+      ? state.artists.find((item) => item.name.toLowerCase() === artistName.toLowerCase())?.id
+      : undefined;
+  } else {
+    const artist = state.artists.find((item) => item.id === actor.userId);
+    if (!artist || artist.verificationStatus !== "approved") return fail(state, "Only approved artists can publish community posts.");
+  }
+
+  const taggedArtistIds = draft.taggedArtistIds
+    .filter((id) => state.artists.some((artist) => artist.id === id && artist.verificationStatus === "approved"))
+    .filter((id, index, ids) => ids.indexOf(id) === index && id !== actor.userId)
+    .slice(0, 8);
 
   const hashtags = [
     ...draft.hashtags,
@@ -805,8 +819,11 @@ export function createSocialPost(state: DemoState, draft: SocialPostDraft, actor
 
   const post: SocialPost = {
     id: uid("post"),
-    customerId: customer.id,
-    artistId: artist?.id,
+    authorRole: actor.role,
+    authorId: actor.userId,
+    customerId,
+    artistId,
+    taggedArtistIds,
     image: draft.image,
     caption,
     placement: draft.placement,
@@ -818,9 +835,15 @@ export function createSocialPost(state: DemoState, draft: SocialPostDraft, actor
   return {
     state: {
       ...state,
-      posts: [post, ...state.posts],
+      posts: [post, ...(Array.isArray(state.posts) ? state.posts : [])],
       activity: [
-        { id: uid("act"), userId: customer.id, role: "customer", text: `Shared a new tattoo post${hashtags.length ? ` tagged ${hashtags.slice(0, 3).map((tag) => `#${tag}`).join(" ")}` : ""}.`, createdAt: now },
+        {
+          id: uid("act"),
+          userId: actor.userId,
+          role: actor.role,
+          text: `Shared a new community post${taggedArtistIds.length ? ` with ${taggedArtistIds.length} tagged artist${taggedArtistIds.length === 1 ? "" : "s"}` : ""}${hashtags.length ? ` tagged ${hashtags.slice(0, 3).map((tag) => `#${tag}`).join(" ")}` : ""}.`,
+          createdAt: now,
+        },
         ...state.activity,
       ],
     },
@@ -831,7 +854,10 @@ export function createSocialPost(state: DemoState, draft: SocialPostDraft, actor
 export function removeSocialPost(state: DemoState, postId: string, actor: Actor): Result {
   const post = state.posts.find((item) => item.id === postId);
   if (!post) return fail(state, "Post not found.");
-  if (actor.role !== "admin" && !(actor.role === "customer" && actor.userId === post.customerId)) {
+  const ownsPost = post.authorRole
+    ? post.authorId === actor.userId
+    : (actor.role === "customer" && actor.userId === post.customerId);
+  if (actor.role !== "admin" && !ownsPost) {
     return fail(state, "Only the post owner or an administrator can remove this post.");
   }
   return {

@@ -203,8 +203,11 @@ export interface Conversation {
 
 export interface SocialPost {
   id: string;
-  customerId: string;
+  authorRole?: "customer" | "artist";
+  authorId?: string;
+  customerId?: string;
   artistId?: string;
+  taggedArtistIds?: string[];
   image: string;
   caption: string;
   placement: string;
