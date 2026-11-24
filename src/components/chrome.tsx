@@ -12,6 +12,7 @@ import { frame } from "@/components/ui";
 
 const PUBLIC_LINKS = [
   ["/", "Discover"],
+  ["/community", "Community"],
   ["/styles", "Explore styles"],
   ["/artists", "Artists"],
 ];
@@ -129,7 +130,7 @@ export function PublicFooter() {
         </div>
         <div className="grid grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-4 md:contents md:gap-0">
           <FooterColumn title="Company" links={[["/about", "About Us"], ["/legal/privacy", "Privacy Policy"], ["/legal/terms", "Terms of Service"]]} />
-          <FooterColumn title="Marketplace" links={[["/artists", "Find artists"], ["/styles", "Styles"], ["/how-it-works", "How it works"]]} />
+          <FooterColumn title="Marketplace" links={[["/artists", "Find artists"], ["/community", "Community"], ["/styles", "Styles"], ["/how-it-works", "How it works"]]} />
           <FooterColumn title="Studios" links={[["/for-artists", "Artist application"]]} />
           <FooterColumn title="Support" links={[["/legal/cancellation", "Cancellation & Refund Policy"], ["/contact", "Contact"]]} />
         </div>

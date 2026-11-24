@@ -22,6 +22,10 @@ function isHome(pathname: string) {
   return pathname === "/" || pathname === "";
 }
 
+function isCommunity(pathname: string) {
+  return pathname === "/community" || pathname === "/community/";
+}
+
 export function PublicShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -70,6 +74,7 @@ function MobileDock({ searchOpen, setSearchOpen }: { searchOpen: boolean; setSea
   const home = isHome(pathname);
   const accountHref = session ? homeFor(session.role) : "/login";
   const photo = accountPhoto(session, state);
+  const community = isCommunity(pathname);
 
   function openSearch() {
     if (!home) {
@@ -82,7 +87,7 @@ function MobileDock({ searchOpen, setSearchOpen }: { searchOpen: boolean; setSea
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-panel bg-ink pb-[env(safe-area-inset-bottom)] text-white md:hidden" aria-label="Mobile">
-      <ul className="grid h-14 grid-cols-3">
+      <ul className="grid h-14 grid-cols-4">
         <li>
           <Link
             href="/"
@@ -91,6 +96,16 @@ function MobileDock({ searchOpen, setSearchOpen }: { searchOpen: boolean; setSea
           >
             <HomeIcon active={home && !searchOpen} />
             Home
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/community"
+            className={`flex h-full flex-col items-center justify-center gap-1 text-[10px] uppercase tracking-[0.14em] ${community ? "text-white" : "text-mist"}`}
+            onClick={() => setSearchOpen(false)}
+          >
+            <CommunityIcon active={community} />
+            Community
           </Link>
         </li>
         <li>
@@ -147,6 +162,16 @@ function SearchIcon({ active }: { active: boolean }) {
     <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
       <circle cx="11" cy="11" r="6" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.6" />
       <path d="M15.5 15.5 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+function CommunityIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
+      <circle cx="8" cy="9" r="3" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="17" cy="10" r="2" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.6" />
+      <path d="M3.5 19c.4-3.2 2.1-5 4.5-5s4.1 1.8 4.5 5M14 15.5c.7-.8 1.7-1.2 3-1.2 1.8 0 3.1 1.3 3.5 3.7" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }

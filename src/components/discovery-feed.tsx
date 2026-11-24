@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useDemo } from "@/context/demo-context";
 import { artworkFeed, mixArtwork, type Artwork } from "@/lib/artwork";
 import { money } from "@/lib/format";
-import { hashtagLabel } from "@/lib/hashtags";
 import { recommendArtists, recommendSketches, type Recommendation, type SearchTaste } from "@/lib/recommend";
 import type { Artist } from "@/lib/types";
 import { useSearchDock } from "@/components/mobile-dock";
@@ -120,34 +119,6 @@ export function DiscoveryFeed() {
     });
   }, [mixed, query]);
 
-  const matchingPosts = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    const terms = needle
-      .split(/[^a-z0-9]+/)
-      .map((term) => term.replace(/^#+/, ""))
-      .filter((term) => term.length > 0);
-    return (Array.isArray(state.posts) ? state.posts : [])
-      .filter((post) => post.status === "published")
-      .filter((post) => {
-        if (!terms.length) return true;
-        const customer = state.customers.find((item) => item.id === post.customerId);
-        const artist = post.artistId ? state.artists.find((item) => item.id === post.artistId) : null;
-        const haystack = [
-          post.caption,
-          post.placement,
-          customer?.name,
-          customer?.borough,
-          customer?.neighborhood,
-          artist?.name,
-          artist?.borough,
-          artist?.neighborhood,
-          ...post.hashtags,
-        ].join(" ").toLowerCase();
-        return terms.every((term) => haystack.includes(term));
-      })
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  }, [state.posts, state.customers, state.artists, query]);
-
   useEffect(() => setShown(18), [query]);
 
   useEffect(() => {
@@ -221,42 +192,6 @@ export function DiscoveryFeed() {
             styleName={(id) => state.styles.find((style) => style.id === id)?.name ?? ""}
           />
         </form>
-      ) : null}
-
-      {matchingPosts.length ? (
-        <section className={`${frame} pb-12`} aria-label="Tattoo posts">
-          <div className="mb-5 flex items-end justify-between gap-4 border-b border-panel pb-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-mist">Community</p>
-              <h2 className="mt-2 font-display text-2xl">Tattoo posts</h2>
-            </div>
-            <p className="text-xs text-mute">{matchingPosts.length} post{matchingPosts.length === 1 ? "" : "s"}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {matchingPosts.map((post) => {
-              const customer = state.customers.find((item) => item.id === post.customerId);
-              const artist = post.artistId ? state.artists.find((item) => item.id === post.artistId) : null;
-              return (
-                <article key={post.id} className="border border-panel bg-ink">
-                  <Photo src={post.image} alt={post.caption} className="aspect-[4/5] w-full object-cover" />
-                  <div className="grid gap-2 p-3">
-                    <p className="text-xs text-mist">{customer?.name ?? "Community member"}{artist ? ` · ${artist.name}` : ""}</p>
-                    <p className="line-clamp-2 text-sm leading-5">{post.caption}</p>
-                    {post.hashtags.length ? (
-                      <div className="flex flex-wrap gap-x-2 gap-y-1">
-                        {post.hashtags.slice(0, 4).map((tag) => (
-                          <button key={tag} type="button" className="text-xs text-mute hover:text-white" onClick={() => setQuery(hashtagLabel(tag))}>
-                            {hashtagLabel(tag)}
-                          </button>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
       ) : null}
 
       <section className={`${frame} pb-20`} aria-label="Artwork">
