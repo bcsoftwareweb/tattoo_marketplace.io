@@ -15,7 +15,7 @@ import { adminStats, artistFinance } from "@/lib/selectors";
 import { homeFor } from "@/lib/permissions";
 import { verificationLabel } from "@/lib/status";
 import type { Artist, BookingStatus, Category, Customer, Service, TattooShop, TattooStyle } from "@/lib/types";
-import { Button, Empty, Field, PageHeader, Photo, SelectInput, StatGrid, Tabs, TextInput, Area } from "@/components/ui";
+import { Button, Empty, Field, PageHeader, Photo, SelectInput, StatGrid, StatusPill, Tabs, TextInput, Area } from "@/components/ui";
 
 function useSignedArtist() {
   const { state, session } = useDemo();
@@ -750,6 +750,145 @@ function TransactionTable({ rows }: { rows: ReturnType<typeof artistFinance>["tr
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+export function ShopHiring() {
+  const { state, session, hireArtist } = useDemo();
+  const shop = (Array.isArray(state.shops) ? state.shops : []).find((item) => item.id === session?.userId);
+  const [q, setQ] = useState("");
+  const [artistId, setArtistId] = useState("");
+  const [roleTitle, setRoleTitle] = useState("");
+  const [message, setMessage] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [error, setError] = useState("");
+  if (!shop) return null;
+
+  const artists = state.artists.filter((artist) => {
+    if (artist.verificationStatus !== "approved") return false;
+    if (!q) return true;
+    return `${artist.name} ${artist.studioName} ${artist.neighborhood} ${artist.borough} ${artist.specialties.join(" ")}`
+      .toLowerCase()
+      .includes(q.toLowerCase());
+  });
+  const requests = (Array.isArray(state.hireRequests) ? state.hireRequests : [])
+    .filter((request) => request.shopId === shop.id)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  function submit(event: React.FormEvent) {
+    event.preventDefault();
+    setError("");
+    const result = hireArtist({ artistId, roleTitle, message, startDate });
+    if (result.error) setError(result.error);
+    else {
+      setArtistId("");
+      setRoleTitle("");
+      setMessage("");
+      setStartDate("");
+    }
+  }
+
+  return (
+    <div className="grid gap-8">
+      <PageHeader eyebrow="Tattoo shop" title="Hire artists" description="Send hiring requests only to verified artists with accounts on BLACKLINE." />
+      <form className="grid max-w-3xl gap-4 border border-line bg-white p-5" onSubmit={submit}>
+        <Field label="Artist">
+          <SelectInput value={artistId} onChange={(event) => setArtistId(event.target.value)}>
+            <option value="">Choose an artist</option>
+            {artists.map((artist) => (
+              <option key={artist.id} value={artist.id}>{artist.name} · {artist.neighborhood}</option>
+            ))}
+          </SelectInput>
+        </Field>
+        <Field label="Role or position"><TextInput value={roleTitle} onChange={(event) => setRoleTitle(event.target.value)} placeholder="Resident tattoo artist" /></Field>
+        <Field label="Introduction and offer"><Area value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Tell the artist about the role, schedule, and studio." /></Field>
+        <Field label="Expected start date"><TextInput type="date" value={startDate} min="2026-11-10" onChange={(event) => setStartDate(event.target.value)} /></Field>
+        {error ? <p role="alert" className="text-sm">{error}</p> : null}
+        <Button type="submit" className="justify-self-start">Send hire request</Button>
+      </form>
+
+      <section>
+        <PageHeader eyebrow="Artist directory" title="Find platform artists" />
+        <TextInput value={q} onChange={(event) => setQ(event.target.value)} placeholder="Search artist, studio, location, or specialty" aria-label="Search artists" />
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {artists.map((artist) => (
+            <article key={artist.id} className="border border-line bg-white p-4">
+              <div className="flex items-center gap-3">
+                <Photo src={artist.photo} alt="" className="h-16 w-14" />
+                <div>
+                  <p className="font-medium">{artist.name}</p>
+                  <p className="text-xs text-mute">{artist.neighborhood}, {artist.borough}</p>
+                </div>
+              </div>
+              <p className="mt-3 text-sm text-mute">{artist.specialties.slice(0, 3).join(" · ")}</p>
+              <div className="mt-4 flex gap-2">
+                <Button href={`/artists/${artist.slug}`} variant="secondary">View profile</Button>
+                <Button type="button" onClick={() => setArtistId(artist.id)}>Hire</Button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="mb-4 font-display text-2xl">Hire requests</h2>
+        {requests.length ? (
+          <ul className="border border-line bg-white">
+            {requests.map((request) => {
+              const artist = state.artists.find((item) => item.id === request.artistId);
+              return (
+                <li key={request.id} className="border-b border-line p-4 last:border-b-0">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium">{artist?.name ?? "Artist"} · {request.roleTitle}</p>
+                      <p className="mt-1 text-sm text-mute">{request.message}</p>
+                      <p className="mt-2 text-xs text-mute">Start date: {formatDate(request.startDate)}</p>
+                    </div>
+                    <StatusPill status={request.status === "accepted" ? "confirmed" : request.status === "declined" ? "declined" : "pending"} />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : <Empty title="No hire requests" body="Send the first request to a verified artist." />}
+      </section>
+    </div>
+  );
+}
+
+export function ArtistHiring() {
+  const { state, session, respondToHire } = useDemo();
+  const requests = (Array.isArray(state.hireRequests) ? state.hireRequests : [])
+    .filter((request) => request.artistId === session?.userId)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return (
+    <div className="grid gap-6">
+      <PageHeader eyebrow="Artist" title="Shop hire requests" description="Accepting a request adds the shop association to your artist profile." />
+      {requests.length ? (
+        <ul className="border border-line bg-white">
+          {requests.map((request) => {
+            const shop = state.shops.find((item) => item.id === request.shopId);
+            return (
+              <li key={request.id} className="border-b border-line p-5 last:border-b-0">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="font-medium">{shop?.name ?? "Tattoo shop"} · {request.roleTitle}</p>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-mute">{request.message}</p>
+                    <p className="mt-2 text-xs text-mute">Start date: {formatDate(request.startDate)}</p>
+                  </div>
+                  {request.status === "pending" ? (
+                    <div className="flex gap-2">
+                      <Button type="button" onClick={() => respondToHire(request.id, "accepted")}>Accept</Button>
+                      <Button type="button" variant="secondary" onClick={() => respondToHire(request.id, "declined")}>Decline</Button>
+                    </div>
+                  ) : <StatusPill status={request.status === "accepted" ? "confirmed" : "declined"} />}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      ) : <Empty title="No shop hire requests" body="Verified shops can invite you from your artist profile." />}
     </div>
   );
 }

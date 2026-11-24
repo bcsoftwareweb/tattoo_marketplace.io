@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { transitionBooking } from "@/lib/booking";
 import { balanceSplit, depositSplit } from "@/lib/money";
 import { createSeed } from "@/lib/seed";
-import { createBookingRequest, createSocialPost, slotsFor, updateArtistShops } from "@/lib/mutations";
+import { createBookingRequest, createSocialPost, respondToHireRequest, sendHireRequest, slotsFor, updateArtistShops } from "@/lib/mutations";
 import { filterArtists } from "@/lib/filters";
 import type { Actor, Booking, PlatformSettings } from "@/lib/types";
 
@@ -135,6 +135,33 @@ describe("money", () => {
 });
 
 describe("marketplace data", () => {
+  it("restricts hiring to approved platform artists and adds accepted shop associations", () => {
+    const state = createSeed();
+    const sent = sendHireRequest(state, {
+      artistId: "nova-reyes",
+      roleTitle: "Resident artist",
+      message: "Join our Williamsburg team.",
+      startDate: "2026-12-01",
+    }, { role: "shop", userId: "atelier-north" }, "2026-11-24T18:00:00Z");
+    expect(sent.error).toBeUndefined();
+    expect(sent.state.hireRequests[0]).toMatchObject({
+      shopId: "atelier-north",
+      artistId: "nova-reyes",
+      status: "pending",
+    });
+
+    const accepted = respondToHireRequest(
+      sent.state,
+      sent.state.hireRequests[0].id,
+      "accepted",
+      { role: "artist", userId: "nova-reyes" },
+      "2026-11-24T19:00:00Z",
+    );
+    expect(accepted.error).toBeUndefined();
+    expect(accepted.state.hireRequests[0].status).toBe("accepted");
+    expect(accepted.state.artists.find((artist) => artist.id === "nova-reyes")?.shopIds).toContain("atelier-north");
+  });
+
   it("lets an artist control shop associations", () => {
     const state = createSeed();
     const result = updateArtistShops(

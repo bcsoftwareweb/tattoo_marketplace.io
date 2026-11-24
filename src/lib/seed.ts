@@ -23,7 +23,7 @@ import type {
 const COMMISSION = 12;
 
 // Raise this whenever sample artists, bookings, reviews, or payments are added, so browsers with saved data pick them up.
-export const SEED_VERSION = 5;
+export const SEED_VERSION = 6;
 
 export const ADMIN_PROFILE = {
   id: "avery-quinn",
@@ -1840,6 +1840,7 @@ function buildState(): DemoState {
   const base: DemoState = {
     artists,
     shops: SHOPS,
+    hireRequests: [],
     customers: CUSTOMERS,
     styles: buildStyles(),
     categories: buildCategories(),
@@ -1915,7 +1916,7 @@ function withMissing<T extends { id: string }>(current: T[], incoming: T[]) {
 }
 
 export function upgradeState(stored: DemoState): DemoState {
-  if ((stored.seedVersion ?? 1) >= SEED_VERSION && Array.isArray(stored.posts) && Array.isArray(stored.shops)) return stored;
+  if ((stored.seedVersion ?? 1) >= SEED_VERSION && Array.isArray(stored.posts) && Array.isArray(stored.shops) && Array.isArray(stored.hireRequests)) return stored;
   const seed = createSeed();
   const known = new Set(stored.artists.map((artist) => artist.id));
   const newArtists = new Set(seed.artists.filter((artist) => !known.has(artist.id)).map((artist) => artist.id));
@@ -1929,6 +1930,7 @@ export function upgradeState(stored: DemoState): DemoState {
     ...stored,
     artists: withMissing(stored.artists, seed.artists),
     shops: withMissing((stored as DemoState).shops ?? [], seed.shops),
+    hireRequests: Array.isArray(stored.hireRequests) ? stored.hireRequests : [],
     services: withMissing(stored.services, seed.services),
     portfolio: withMissing(stored.portfolio, seed.portfolio),
     bookings: withMissing(stored.bookings, seed.bookings),

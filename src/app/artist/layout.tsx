@@ -11,6 +11,7 @@ const items = [
   { href: "/artist/bookings", label: "Bookings" },
   { href: "/artist/messages", label: "Messages" },
   { href: "/artist/posts", label: "Community posts" },
+  { href: "/artist/hiring", label: "Shop requests" },
   { href: "/artist/earnings", label: "Earnings" },
 ];
 

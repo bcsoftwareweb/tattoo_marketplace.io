@@ -18,6 +18,7 @@ import type {
   SocialPost,
   TattooStyle,
   TattooShop,
+  HireRequest,
 } from "@/lib/types";
 
 export interface Result {
@@ -786,6 +787,125 @@ export function updateShopProfile(
       shops: state.shops.map((item) => item.id === shopId
         ? { ...next, name: next.name.trim(), address: next.address.trim(), neighborhood: next.neighborhood.trim(), website: next.website.trim() }
         : item),
+    },
+  };
+}
+
+export interface HireDraft {
+  artistId: string;
+  roleTitle: string;
+  message: string;
+  startDate: string;
+}
+
+export function sendHireRequest(state: DemoState, draft: HireDraft, actor: Actor, now: string): Result {
+  if (actor.role !== "shop") return fail(state, "Only shop accounts can send hire requests.");
+  const shop = state.shops.find((item) => item.id === actor.userId);
+  if (!shop || shop.status !== "active") return fail(state, "This shop account cannot send hire requests.");
+  const artist = state.artists.find((item) => item.id === draft.artistId);
+  if (!artist || artist.verificationStatus !== "approved") {
+    return fail(state, "You can only hire approved artists with a platform account.");
+  }
+  if (!draft.roleTitle.trim()) return fail(state, "Enter a role or position title.");
+  if (!draft.message.trim()) return fail(state, "Add a message to the artist.");
+  if (!DATE_PATTERN.test(draft.startDate) || draft.startDate < DEMO_TODAY) {
+    return fail(state, "Choose a valid future start date.");
+  }
+  if (state.hireRequests.some((item) =>
+    item.shopId === shop.id
+    && item.artistId === artist.id
+    && item.status === "pending",
+  )) {
+    return fail(state, "A hire request is already pending for this artist.");
+  }
+
+  const request: HireRequest = {
+    id: uid("hire"),
+    shopId: shop.id,
+    artistId: artist.id,
+    roleTitle: draft.roleTitle.trim(),
+    message: draft.message.trim(),
+    startDate: draft.startDate,
+    status: "pending",
+    createdAt: now,
+    updatedAt: now,
+  };
+  return {
+    state: {
+      ...state,
+      hireRequests: [request, ...state.hireRequests],
+      notifications: [
+        {
+          id: uid("nt"),
+          userId: artist.id,
+          role: "artist",
+          title: `Hire request from ${shop.name}`,
+          body: `${draft.roleTitle.trim()} · starting ${draft.startDate}`,
+          href: "/artist/hiring",
+          read: false,
+          createdAt: now,
+          kind: "system",
+        },
+        ...state.notifications,
+      ],
+      activity: [
+        { id: uid("act"), userId: shop.id, role: "shop", text: `Sent a hire request to ${artist.name}.`, createdAt: now },
+        ...state.activity,
+      ],
+    },
+    id: request.id,
+  };
+}
+
+export function respondToHireRequest(
+  state: DemoState,
+  requestId: string,
+  response: "accepted" | "declined",
+  actor: Actor,
+  now: string,
+): Result {
+  if (actor.role !== "artist") return fail(state, "Only artists can respond to hire requests.");
+  const request = state.hireRequests.find((item) => item.id === requestId);
+  if (!request) return fail(state, "Hire request not found.");
+  if (request.artistId !== actor.userId) return fail(state, "This hire request is not for your artist account.");
+  if (request.status !== "pending") return fail(state, "This hire request has already been resolved.");
+  const shop = state.shops.find((item) => item.id === request.shopId);
+  if (!shop) return fail(state, "Shop not found.");
+  const updated: HireRequest = { ...request, status: response, updatedAt: now };
+  const artists = state.artists.map((artist) => {
+    if (artist.id !== request.artistId || response !== "accepted") return artist;
+    const shopIds = [...new Set([...(artist.shopIds ?? []), shop.id])];
+    return { ...artist, shopIds };
+  });
+  return {
+    state: {
+      ...state,
+      artists,
+      hireRequests: state.hireRequests.map((item) => item.id === requestId ? updated : item),
+      notifications: [
+        {
+          id: uid("nt"),
+          userId: shop.id,
+          role: "shop",
+          title: response === "accepted" ? "Artist accepted your hire request" : "Artist declined your hire request",
+          body: `${state.artists.find((artist) => artist.id === request.artistId)?.name ?? "The artist"} ${response} the ${request.roleTitle} request.`,
+          href: "/shop/hiring",
+          read: false,
+          createdAt: now,
+          kind: "system",
+        },
+        ...state.notifications,
+      ],
+      activity: [
+        {
+          id: uid("act"),
+          userId: request.artistId,
+          role: "artist",
+          text: `${response === "accepted" ? "Accepted" : "Declined"} a hire request from ${shop.name}.`,
+          createdAt: now,
+        },
+        ...state.activity,
+      ],
     },
   };
 }

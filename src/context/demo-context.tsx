@@ -36,10 +36,13 @@ import {
   updateWorkingHours,
   updateArtistShops,
   updateShopProfile,
+  sendHireRequest,
+  respondToHireRequest,
   type ArtistApplication,
   type ArtistPatch,
   type BookingDraft,
   type SocialPostDraft,
+  type HireDraft,
 } from "@/lib/mutations";
 import { createSeed, upgradeState } from "@/lib/seed";
 import { loadLocalAccounts, loadSession, loadState, saveLocalAccounts, saveSession, saveState } from "@/lib/storage";
@@ -95,6 +98,8 @@ interface DemoContextValue {
   removePost: (postId: string) => string | null;
   updateArtistShopAssociations: (shopIds: string[]) => string | null;
   saveShop: (patch: Partial<Pick<TattooShop, "name" | "phone" | "photo" | "bio" | "borough" | "neighborhood" | "address" | "website">>) => string | null;
+  hireArtist: (draft: HireDraft) => { id?: string; error?: string };
+  respondToHire: (requestId: string, response: "accepted" | "declined") => string | null;
 }
 
 const DemoContext = createContext<DemoContextValue | null>(null);
@@ -272,6 +277,20 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         const who = actor();
         if (!who) return "Sign in again.";
         return commit(updateShopProfile(state, who.userId, patch, who), "Shop profile saved.");
+      },
+      hireArtist: (draft) => {
+        const who = actor();
+        if (!who) return { error: "Sign in as a shop to hire artists." };
+        const result = sendHireRequest(state, draft, who, now());
+        if (result.error) return { error: result.error };
+        setState(result.state);
+        toast("Hire request sent.");
+        return { id: result.id };
+      },
+      respondToHire: (requestId, response) => {
+        const who = actor();
+        if (!who) return "Sign in again.";
+        return commit(respondToHireRequest(state, requestId, response, who, now()), response === "accepted" ? "Hire request accepted." : "Hire request declined.");
       },
       favorite: (artistId) => {
         const who = actor();

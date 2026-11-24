@@ -137,6 +137,20 @@ export interface TattooShop {
   joinedAt: string;
 }
 
+export type HireStatus = "pending" | "accepted" | "declined" | "cancelled";
+
+export interface HireRequest {
+  id: string;
+  shopId: string;
+  artistId: string;
+  roleTitle: string;
+  message: string;
+  startDate: string;
+  status: HireStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Customer {
   id: string;
   name: string;
@@ -290,6 +304,7 @@ export interface PlatformSettings {
 export interface DemoState {
   artists: Artist[];
   shops: TattooShop[];
+  hireRequests: HireRequest[];
   customers: Customer[];
   styles: TattooStyle[];
   categories: Category[];
