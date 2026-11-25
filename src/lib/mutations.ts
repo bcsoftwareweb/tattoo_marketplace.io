@@ -454,6 +454,53 @@ export function sendMessage(state: DemoState, conversationId: string, body: stri
   };
 }
 
+export function sendDepositLink(state: DemoState, conversationId: string, bookingId: string, actor: Actor, now: string): Result {
+  if (actor.role !== "artist") return fail(state, "Only artists can send a deposit link.");
+  const conversation = state.conversations.find((item) => item.id === conversationId);
+  if (!conversation || conversation.artistId !== actor.userId) return fail(state, "This conversation does not belong to you.");
+  const booking = state.bookings.find((item) => item.id === bookingId);
+  if (!booking) return fail(state, "Booking not found.");
+  if (booking.artistId !== actor.userId || booking.customerId !== conversation.customerId) {
+    return fail(state, "This booking is not in this conversation.");
+  }
+  if (booking.status !== "awaiting_deposit" || booking.quote == null || booking.deposit == null) {
+    return fail(state, "Send a quote and wait for the customer to confirm before requesting the deposit.");
+  }
+
+  const message: ChatMessage = {
+    id: uid("msg"),
+    senderRole: "artist",
+    senderId: actor.userId,
+    body: `Deposit link for ${booking.serviceName}: ${moneyLabel(booking.deposit)} due to hold ${booking.appointmentDate}.`,
+    depositBookingId: booking.id,
+    createdAt: now,
+  };
+  const next = sendOnto(state, conversationId, message);
+  return {
+    state: {
+      ...next,
+      notifications: [
+        {
+          id: uid("nt"),
+          userId: conversation.customerId,
+          role: "customer",
+          title: "Deposit link from the artist",
+          body: `${booking.serviceName} · ${moneyLabel(booking.deposit)} deposit`,
+          href: `/customer/messages?thread=${conversationId}`,
+          read: false,
+          createdAt: now,
+          kind: "payment",
+        },
+        ...state.notifications,
+      ],
+    },
+  };
+}
+
+function moneyLabel(amount: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(amount);
+}
+
 export function markNotificationRead(state: DemoState, id: string, actor: Actor): Result {
   return {
     state: {

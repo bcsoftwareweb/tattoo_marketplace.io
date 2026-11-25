@@ -13,6 +13,7 @@ import {
   deleteService,
   createSocialPost,
   removeSocialPost,
+  sendDepositLink,
   deleteStyle,
   ensureConversation,
   markAllRead,
@@ -96,6 +97,7 @@ interface DemoContextValue {
   submitApplication: (input: ArtistApplication) => { id?: string; error?: string };
   publishPost: (draft: SocialPostDraft) => { id?: string; error?: string };
   removePost: (postId: string) => string | null;
+  sendBookingDepositLink: (conversationId: string, bookingId: string) => string | null;
   updateArtistShopAssociations: (shopIds: string[]) => string | null;
   saveShop: (patch: Partial<Pick<TattooShop, "name" | "phone" | "photo" | "bio" | "borough" | "neighborhood" | "address" | "website">>) => string | null;
   hireArtist: (draft: HireDraft) => { id?: string; error?: string };
@@ -308,6 +310,11 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         const who = actor();
         if (!who) return "Sign in again.";
         return commit(sendMessage(state, conversationId, body, attachment, who, now()));
+      },
+      sendBookingDepositLink: (conversationId, bookingId) => {
+        const who = actor();
+        if (!who) return "Sign in again.";
+        return commit(sendDepositLink(state, conversationId, bookingId, who, now()), "Deposit link sent.");
       },
       requestAppointment: (draft) => {
         const who = actor();

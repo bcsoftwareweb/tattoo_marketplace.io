@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { transitionBooking } from "@/lib/booking";
 import { balanceSplit, depositSplit } from "@/lib/money";
 import { createSeed } from "@/lib/seed";
-import { createBookingRequest, createSocialPost, respondToHireRequest, sendHireRequest, slotsFor, updateArtistShops } from "@/lib/mutations";
+import { createBookingRequest, createSocialPost, respondToHireRequest, sendDepositLink, sendHireRequest, slotsFor, updateArtistShops } from "@/lib/mutations";
 import { filterArtists } from "@/lib/filters";
 import type { Actor, Booking, PlatformSettings } from "@/lib/types";
 
@@ -135,6 +135,27 @@ describe("money", () => {
 });
 
 describe("marketplace data", () => {
+  it("sends a payable deposit link into the artist and customer conversation", () => {
+    const state = createSeed();
+    const booking = state.bookings.find((item) => item.status === "awaiting_deposit");
+    const conversation = state.conversations.find((item) =>
+      item.artistId === booking?.artistId && item.customerId === booking?.customerId,
+    );
+    if (!booking || !conversation) throw new Error("Expected a demo deposit booking and conversation.");
+    const result = sendDepositLink(
+      state,
+      conversation.id,
+      booking.id,
+      { role: "artist", userId: booking.artistId },
+      "2026-11-24T18:00:00Z",
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.state.conversations.find((item) => item.id === conversation.id)?.messages.at(-1)).toMatchObject({
+      senderRole: "artist",
+      depositBookingId: booking.id,
+    });
+  });
+
   it("restricts hiring to approved platform artists and adds accepted shop associations", () => {
     const state = createSeed();
     const sent = sendHireRequest(state, {

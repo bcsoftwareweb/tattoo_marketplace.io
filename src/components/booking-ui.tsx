@@ -59,7 +59,7 @@ export function BookingScreen({ role }: { role: Role }) {
 }
 
 function BookingBody({ role, booking, onAct }: { role: Role; booking: Booking; onAct: (action: BookingAction) => void }) {
-  const { state } = useDemo();
+  const { state, sendBookingDepositLink, toast } = useDemo();
   const artist = state.artists.find((item) => item.id === booking.artistId);
   const customer = state.customers.find((item) => item.id === booking.customerId);
   const split = booking.quote && booking.deposit ? quoteSplit(booking.quote, booking.deposit, state.settings.commissionPercent) : null;
@@ -149,6 +149,24 @@ function BookingBody({ role, booking, onAct }: { role: Role; booking: Booking; o
             </form>
           ) : null}
           {role === "artist" && booking.status === "confirmed" ? <Button type="button" onClick={() => onAct({ type: "complete" })}>Mark completed</Button> : null}
+          {role === "artist" && booking.status === "awaiting_deposit" ? (
+            <Button
+              type="button"
+              onClick={() => {
+                const conversation = state.conversations.find((item) =>
+                  item.artistId === booking.artistId && item.customerId === booking.customerId,
+                );
+                if (!conversation) {
+                  toast("Open a conversation with the customer before sending the link.");
+                  return;
+                }
+                const failure = sendBookingDepositLink(conversation.id, booking.id);
+                if (failure) toast(failure);
+              }}
+            >
+              Send deposit link
+            </Button>
+          ) : null}
           {role === "customer" && (booking.status === "artist_proposed_changes" || booking.status === "awaiting_customer_confirmation") ? (
             <div className="grid gap-2">
               <Button type="button" onClick={() => onAct({ type: "customer_accept" })}>Accept terms</Button>

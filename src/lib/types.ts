@@ -221,6 +221,7 @@ export interface ChatMessage {
   senderId: string;
   body: string;
   attachment?: { name: string; url: string };
+  depositBookingId?: string;
   createdAt: string;
 }
 

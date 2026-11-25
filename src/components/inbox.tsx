@@ -7,7 +7,7 @@ import { useDemo } from "@/context/demo-context";
 import { readImageFile } from "@/lib/files";
 import { formatDateTime } from "@/lib/format";
 import { conversationsFor } from "@/lib/selectors";
-import { Empty, Photo } from "@/components/ui";
+import { Button, Empty, Photo } from "@/components/ui";
 
 function shortDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -32,7 +32,7 @@ function AttachIcon() {
 }
 
 export function Inbox({ role }: { role: "customer" | "artist" }) {
-  const { state, session, postMessage, toast } = useDemo();
+  const { state, session, postMessage, sendBookingDepositLink, toast } = useDemo();
   const params = useSearchParams();
   const router = useRouter();
   const [body, setBody] = useState("");
@@ -76,6 +76,15 @@ export function Inbox({ role }: { role: "customer" | "artist" }) {
   }
 
   const other = active ? person(active) : null;
+  const activeBooking = active
+    ? [...state.bookings]
+      .filter((booking) =>
+        booking.customerId === active.customerId
+        && booking.artistId === active.artistId
+        && booking.status === "awaiting_deposit",
+      )
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]
+    : undefined;
 
   return (
     <div className="grid h-[calc(100svh-7rem)] min-w-0 grid-rows-[minmax(0,1fr)] overflow-hidden border border-line bg-white md:h-[calc(100svh-8rem)] lg:grid-cols-[320px_minmax(0,1fr)]">
@@ -123,6 +132,19 @@ export function Inbox({ role }: { role: "customer" | "artist" }) {
               )}
               {other.detail ? <p className="truncate text-xs text-mute">{other.detail}</p> : null}
             </div>
+            {role === "artist" && activeBooking ? (
+              <Button
+                type="button"
+                className="ml-auto h-9 shrink-0 px-3"
+                variant="secondary"
+                onClick={() => {
+                  const failure = sendBookingDepositLink(active.id, activeBooking.id);
+                  if (failure) toast(failure);
+                }}
+              >
+                Send deposit link
+              </Button>
+            ) : null}
           </header>
 
           <ol className="flex min-h-0 flex-1 flex-col-reverse gap-2 overflow-y-auto px-3 py-4 lg:px-5">
@@ -134,6 +156,14 @@ export function Inbox({ role }: { role: "customer" | "artist" }) {
                     {message.body ? <p className="whitespace-pre-wrap">{message.body}</p> : null}
                     {message.attachment ? (
                       <Photo src={message.attachment.url} alt={message.attachment.name} className={`max-h-56 w-full rounded-xl ${message.body ? "mt-2" : ""}`} />
+                    ) : null}
+                    {message.depositBookingId && role === "customer" ? (
+                      <Button
+                        href={`/checkout?booking=${message.depositBookingId}`}
+                        className="mt-3 w-full bg-ink text-white"
+                      >
+                        Pay deposit
+                      </Button>
                     ) : null}
                   </div>
                   <p className="mt-1 px-1 text-[11px] text-mute">{formatDateTime(message.createdAt)}</p>
