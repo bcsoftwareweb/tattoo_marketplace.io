@@ -2,6 +2,7 @@ import { portraits, workAt } from "@/lib/images";
 import { addDays, weekdayIndex } from "@/lib/format";
 import { balanceSplit, depositSplit } from "@/lib/money";
 import { deriveState } from "@/lib/derive";
+import { appointmentDurationForService, holdsAppointmentSlot } from "@/lib/availability";
 import type {
   Artist,
   AvailabilityDay,
@@ -24,7 +25,7 @@ import type {
 const COMMISSION = 12;
 
 // Raise this whenever demo data or persisted state schemas change, so browsers with saved data pick them up.
-export const SEED_VERSION = 7;
+export const SEED_VERSION = 8;
 
 export const ADMIN_PROFILE = {
   id: "avery-quinn",
@@ -1829,15 +1830,14 @@ const SHOPS: TattooShop[] = [
 ];
 
 function alignCalendar(artists: Artist[], bookings: Booking[]) {
-  const active = new Set(["confirmed", "completed", "disputed"]);
   const waiting = new Set(["pending", "artist_proposed_changes", "awaiting_customer_confirmation", "awaiting_deposit"]);
   return artists.map((artist) => ({
     ...artist,
     availability: artist.availability.map((day) => {
       const holds = bookings.some(
-        (booking) => booking.artistId === artist.id && active.has(booking.status) && booking.appointmentDate === day.date,
+        (booking) => booking.artistId === artist.id && holdsAppointmentSlot(booking) && booking.appointmentDate === day.date,
       );
-      if (holds) return { ...day, status: "booked" as const };
+      if (holds) return { ...day, status: "open" as const };
       const requested = bookings.some((booking) => {
         if (booking.artistId !== artist.id || !waiting.has(booking.status)) return false;
         return booking.appointmentDate === day.date || booking.proposedDate === day.date || booking.requestedDate === day.date;
@@ -1849,9 +1849,14 @@ function alignCalendar(artists: Artist[], bookings: Booking[]) {
 }
 
 function buildState(): DemoState {
-  const bookings = buildBookings();
-  const artists = alignCalendar([...ARTISTS, ...MORE_ARTISTS].map(toArtist), bookings);
-  const services = artists.flatMap(servicesFor);
+  const seedBookings = buildBookings();
+  const artistRecords = [...ARTISTS, ...MORE_ARTISTS].map(toArtist);
+  const services = artistRecords.flatMap(servicesFor);
+  const bookings = seedBookings.map((booking) => ({
+    ...booking,
+    durationMinutes: booking.durationMinutes ?? appointmentDurationForService(booking.serviceId, services),
+  }));
+  const artists = alignCalendar(artistRecords, bookings);
   const portfolio = artists.flatMap((artist, index) => portfolioFor(artist, index * 2));
   const transactions = buildTransactions(bookings);
   const base: DemoState = {
@@ -1869,7 +1874,7 @@ function buildState(): DemoState {
     reviews: buildReviews(),
     transactions,
     notifications: [
-      { id: "nt-maya-1", userId: "maya-chen", role: "customer", title: "Deposit due", body: "Amara Blake is holding December 2. Pay the deposit to confirm.", href: "/customer/bookings/detail?id=bk-maya-amara", read: false, createdAt: "2026-11-06T17:05:00Z", kind: "payment" },
+      { id: "nt-maya-1", userId: "maya-chen", role: "customer", title: "Deposit due", body: "Amara Blake is holding your requested time on December 2. Pay the deposit to confirm.", href: "/customer/bookings/detail?id=bk-maya-amara", read: false, createdAt: "2026-11-06T17:05:00Z", kind: "payment" },
       { id: "nt-maya-2", userId: "maya-chen", role: "customer", title: "Cass proposed a new date", body: "November 28 at 2:00 PM, with a revised price for the snake.", href: "/customer/bookings/detail?id=bk-maya-cass", read: false, createdAt: "2026-11-09T16:05:00Z", kind: "booking" },
       { id: "nt-maya-3", userId: "maya-chen", role: "customer", title: "Appointment reminder", body: "Olive branch with Nova Reyes is on November 18 at 2:00 PM.", href: "/customer/bookings/detail?id=bk-maya-nova", read: false, createdAt: "2026-11-10T09:00:00Z", kind: "reminder" },
       { id: "nt-maya-4", userId: "maya-chen", role: "customer", title: "New message from Julian Cho", body: "A readable wave is two sessions minimum.", href: "/customer/messages?thread=conv-maya-julian", read: true, createdAt: "2026-11-09T13:00:00Z", kind: "message" },
@@ -1900,8 +1905,8 @@ function buildState(): DemoState {
     ],
     settings: {
       commissionPercent: COMMISSION,
-      bookingPolicy: "Artists respond to requests by accepting, declining, or proposing a new time and price. A date is held only after the deposit is confirmed.",
-      cancellationPolicy: "Customers can cancel a pending or confirmed booking. Confirmed dates return to the artist's calendar.",
+      bookingPolicy: "Artists respond to requests by accepting, declining, or proposing a new time and price. The appointment time is reserved only after the deposit is confirmed.",
+      cancellationPolicy: "Customers can cancel a pending or confirmed booking. Cancelled appointment times return to the artist's calendar.",
       platformName: "BLACKLINE",
       supportEmail: "hello@blackline.demo",
       tagline: "A curated index of New York tattoo artists.",
@@ -1943,14 +1948,28 @@ export function upgradeState(stored: DemoState): DemoState {
     const added = ids.filter((id) => newArtists.has(id) && !current.includes(id));
     if (added.length) favorites[customerId] = [...current, ...added];
   }
+  const services = withMissing(stored.services, seed.services);
+  const bookings = withMissing(stored.bookings, seed.bookings).map((booking) => ({
+    ...booking,
+    durationMinutes: booking.durationMinutes ?? appointmentDurationForService(booking.serviceId, services),
+  }));
+  const artists = withMissing(stored.artists, seed.artists).map((artist) => ({
+    ...artist,
+    availability: artist.availability.map((day) => {
+      const hasHeldAppointment = bookings.some(
+        (booking) => booking.artistId === artist.id && booking.appointmentDate === day.date && holdsAppointmentSlot(booking),
+      );
+      return day.status === "booked" && hasHeldAppointment ? { ...day, status: "open" as const } : day;
+    }),
+  }));
   return deriveState({
     ...stored,
-    artists: withMissing(stored.artists, seed.artists),
+    artists,
     shops: withMissing((stored as DemoState).shops ?? [], seed.shops),
     hireRequests: Array.isArray(stored.hireRequests) ? stored.hireRequests : [],
-    services: withMissing(stored.services, seed.services),
+    services,
     portfolio: withMissing(stored.portfolio, seed.portfolio),
-    bookings: withMissing(stored.bookings, seed.bookings),
+    bookings,
     posts: withMissing((stored as DemoState).posts ?? [], seed.posts).map((post) => ({
       ...post,
       likes: post.likes ?? [],

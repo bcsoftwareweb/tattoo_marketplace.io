@@ -44,6 +44,30 @@ describe("saved data upgrade", () => {
     expect(upgraded.favorites["maya-chen"]).toEqual(["julian-cho", "tess-callahan", "marco-ruiz"]);
   });
 
+  it("reopens legacy booked dates so existing appointments reserve only their time slots", () => {
+    const seed = createSeed();
+    const booking = seed.bookings.find((item) => item.status === "confirmed");
+    if (!booking) throw new Error("Expected a confirmed seed booking.");
+    const saved = {
+      ...seed,
+      artists: seed.artists.map((artist) => (
+        artist.id === booking.artistId
+          ? {
+              ...artist,
+              availability: artist.availability.map((day) => (
+                day.date === booking.appointmentDate ? { ...day, status: "booked" as const } : day
+              )),
+            }
+          : artist
+      )),
+      seedVersion: SEED_VERSION - 1,
+    };
+
+    const upgraded = upgradeState(saved);
+    const artist = upgraded.artists.find((item) => item.id === booking.artistId);
+    expect(artist?.availability.find((day) => day.date === booking.appointmentDate)?.status).toBe("open");
+  });
+
   it("leaves current data alone", () => {
     const current = createSeed();
     expect(upgradeState(current)).toBe(current);

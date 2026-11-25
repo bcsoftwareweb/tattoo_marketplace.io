@@ -5,10 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useDemo } from "@/context/demo-context";
 import type { BookingAction } from "@/lib/booking";
-import { TIME_SLOTS } from "@/lib/constants";
 import { formatDate, formatDateTime, formatTime, money } from "@/lib/format";
 import { quoteSplit } from "@/lib/money";
 import { bookingPath } from "@/lib/permissions";
+import { slotsFor } from "@/lib/mutations";
 import type { Booking, Role } from "@/lib/types";
 import { Button, Empty, Field, PageHeader, Photo, SelectInput, StatusPill, TextInput, Area } from "@/components/ui";
 
@@ -141,7 +141,7 @@ function BookingBody({ role, booking, onAct }: { role: Role; booking: Booking; o
               <Field label="Proposed date"><TextInput type="date" value={date} min="2026-11-10" onChange={(event) => setDate(event.target.value)} /></Field>
               <Field label="Proposed time">
                 <SelectInput value={time} onChange={(event) => setTime(event.target.value)}>
-                  {TIME_SLOTS.map((slot) => <option key={slot} value={slot}>{formatTime(slot)}</option>)}
+                  {slotsFor(state, booking.artistId, date, booking.durationMinutes).map((slot) => <option key={slot} value={slot}>{formatTime(slot)}</option>)}
                 </SelectInput>
               </Field>
               <Button type="button" variant="secondary" onClick={() => onAct({ type: "propose", quote: numbers.quote, deposit: numbers.deposit, date, time, note })}>Propose changes</Button>
@@ -255,7 +255,7 @@ export function CheckoutScreen() {
     <div className={`${"mx-auto grid max-w-5xl gap-8 px-5 py-12 md:grid-cols-2 md:px-8"}`}>
       <section>
         <p className="text-xs uppercase tracking-[0.18em] text-mute">Checkout</p>
-        <h1 className="mt-3 font-display text-4xl">Hold {formatDate(booking.appointmentDate)}</h1>
+        <h1 className="mt-3 font-display text-4xl">Hold {formatDate(booking.appointmentDate)} at {formatTime(booking.appointmentTime)}</h1>
         <p className="mt-4 text-sm leading-6 text-mute">Paying the deposit confirms {booking.serviceName} with {artist?.name}.</p>
         <dl className="mt-8 grid gap-3 border border-line bg-white p-5 text-sm">
           <Row label="Tattoo price" value={money(split.quote)} />

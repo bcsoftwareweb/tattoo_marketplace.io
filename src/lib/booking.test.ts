@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import { transitionBooking } from "@/lib/booking";
 import { balanceSplit, depositSplit } from "@/lib/money";
 import { createSeed } from "@/lib/seed";
-import { addPostComment, createBookingRequest, createSocialPost, respondToHireRequest, sendDepositLink, sendHireRequest, slotsFor, togglePostLike, updateArtistShops } from "@/lib/mutations";
+import { addPostComment, applyBookingAction, createBookingRequest, createSocialPost, respondToHireRequest, sendDepositLink, sendHireRequest, slotsFor, togglePostLike, updateArtistShops } from "@/lib/mutations";
 import { filterArtists } from "@/lib/filters";
 import type { Actor, Booking, PlatformSettings } from "@/lib/types";
 
 const settings: PlatformSettings = {
   commissionPercent: 12,
-  bookingPolicy: "Hold the date after the simulated deposit.",
+  bookingPolicy: "Hold the appointment time after the simulated deposit.",
   cancellationPolicy: "Customers can cancel before the sitting.",
   platformName: "BLACKLINE",
   supportEmail: "hello@blackline.demo",
@@ -28,6 +28,7 @@ function pending(overrides: Partial<Booking> = {}): Booking {
     artistId: "nova-reyes",
     serviceId: "svc-nova-reyes-small",
     serviceName: "Small piece",
+    durationMinutes: 90,
     idea: "A four-inch olive branch on the inner forearm.",
     placement: "Forearm",
     size: "Small (2–4 in)",
@@ -95,13 +96,54 @@ describe("booking transitions", () => {
     if (!paid.ok) return;
     expect(paid.booking.status).toBe("confirmed");
     expect(paid.transactions[0]?.type).toBe("deposit");
-    expect(paid.blockDate).toBe("2026-11-25");
-
     const done = transitionBooking(paid.booking, { type: "complete" }, artist, settings, paid.transactions.map((item, index) => ({ ...item, id: `tx-${index}` })), now);
     expect(done.ok).toBe(true);
     if (!done.ok) return;
     expect(done.booking.status).toBe("completed");
     expect(done.transactions[0]?.type).toBe("balance");
+  });
+
+  it("reserves only the paid appointment time and releases it on cancellation", () => {
+    const state = createSeed();
+    const artistId = "nova-reyes";
+    const date = state.artists.find((item) => item.id === artistId)?.availability.find(
+      (day) => slotsFor(state, artistId, day.date).length > 1,
+    )?.date;
+    if (!date) throw new Error("Expected an artist date with multiple available times.");
+    const [time, ...otherTimes] = slotsFor(state, artistId, date);
+    if (!time || !otherTimes.length) throw new Error("Expected multiple appointment times.");
+    const booking = pending({
+      id: "bk-slot-payment",
+      status: "awaiting_deposit",
+      appointmentDate: date,
+      requestedDate: date,
+      appointmentTime: time,
+      requestedTime: time,
+      quote: 400,
+      deposit: 120,
+    });
+    const waitingState = { ...state, bookings: [booking, ...state.bookings] };
+    const paid = applyBookingAction(waitingState, booking.id, { type: "pay_deposit" }, customer, now);
+    expect(paid.error).toBeUndefined();
+    expect(slotsFor(paid.state, artistId, date, booking.durationMinutes)).not.toContain(time);
+    expect(slotsFor(paid.state, artistId, date, booking.durationMinutes)).toContain(otherTimes[0]);
+
+    const competing = pending({
+      ...booking,
+      id: "bk-competing-slot",
+    });
+    const conflict = applyBookingAction(
+      { ...paid.state, bookings: [...paid.state.bookings, competing] },
+      competing.id,
+      { type: "pay_deposit" },
+      customer,
+      now,
+    );
+    expect(conflict.error).toContain("appointment time is no longer available");
+
+    const cancelled = applyBookingAction(paid.state, booking.id, { type: "cancel", note: "Reschedule." }, customer, now);
+    expect(cancelled.error).toBeUndefined();
+    expect(slotsFor(cancelled.state, artistId, date, booking.durationMinutes)).toContain(time);
   });
 
   it("refunds only after money exists", () => {

@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDemo } from "@/context/demo-context";
 import { MonthCalendar } from "@/components/calendar";
+import { appointmentDurationForService, appointmentSlotsForDate } from "@/lib/availability";
 import { PLACEMENTS, SIZES } from "@/lib/constants";
 import { readImageFile } from "@/lib/files";
 import { formatTime, money } from "@/lib/format";
-import { slotsFor } from "@/lib/mutations";
 import { portfolioFor, servicesFor } from "@/lib/selectors";
 import type { ReferenceImage } from "@/lib/types";
 import { Button, Field, frame, Photo, SelectInput, TextInput, Area } from "@/components/ui";
@@ -28,7 +28,15 @@ export function RequestForm({ slug }: { slug: string }) {
   const [references, setReferences] = useState<ReferenceImage[]>([]);
   const [month, setMonth] = useState("2026-11");
   const [error, setError] = useState("");
-  const slots = artist && date ? slotsFor(state, artist.id, date) : [];
+  const slotServiceId = serviceId === "custom" ? null : serviceId;
+  const slotDuration = appointmentDurationForService(slotServiceId, state.services);
+  const slotsByDate = artist
+    ? Object.fromEntries(artist.availability.map((day) => [
+        day.date,
+        appointmentSlotsForDate(artist, day.date, state.bookings, slotDuration),
+      ]))
+    : undefined;
+  const slots = date ? slotsByDate?.[date]?.available ?? [] : [];
 
   if (!artist) return <div className={`${frame} py-16`}><h1 className="font-display text-4xl">Artist not found</h1></div>;
   if (!session || session.role !== "customer") {
@@ -83,8 +91,10 @@ export function RequestForm({ slug }: { slug: string }) {
         <div className="mt-8 grid gap-4">
           <Field label="Service">
             <SelectInput value={serviceId} onChange={(event) => {
-              setServiceId(event.target.value);
-              const service = services.find((item) => item.id === event.target.value);
+              const nextServiceId = event.target.value;
+              setServiceId(nextServiceId);
+              setTime("");
+              const service = services.find((item) => item.id === nextServiceId);
               if (service) setBudget(String(service.minPrice));
             }}>
               {services.map((service) => <option key={service.id} value={service.id}>{service.name} · {money(service.minPrice)}–{money(service.maxPrice)}</option>)}
@@ -129,16 +139,17 @@ export function RequestForm({ slug }: { slug: string }) {
         </div>
       </div>
       <div className="grid gap-4">
-        <MonthCalendar month={month} onMonth={setMonth} days={artist.availability} selected={date} onPick={(next) => { setDate(next); setTime(""); }} />
+        <MonthCalendar month={month} onMonth={setMonth} days={artist.availability} slotsByDate={slotsByDate} disableUnavailable selected={date} onPick={(next) => { setDate(next); setTime(""); }} />
         <Field label="Time">
           <SelectInput value={time} onChange={(event) => setTime(event.target.value)} required>
             <option value="">Choose a time</option>
             {slots.map((slot) => <option key={slot} value={slot}>{formatTime(slot)}</option>)}
           </SelectInput>
         </Field>
-        {!date ? <p className="text-sm text-mute">Choose an open day. Shaded days are blocked and booked days are already held.</p> : null}
+        {!date ? <p className="text-sm text-mute">Choose an available day and time. Booked appointment times are unavailable.</p> : null}
+        {date && !slots.length ? <p className="text-sm text-mute">No times are available for this service on that day. Choose another date or service.</p> : null}
         {error ? <p role="alert" className="text-sm">{error}</p> : null}
-        <Button type="submit">Submit request</Button>
+        <Button type="submit" disabled={!slots.includes(time)}>Submit request</Button>
         <p className="text-xs leading-5 text-mute">Submitting creates a pending request. Nothing is charged.</p>
       </div>
     </form>

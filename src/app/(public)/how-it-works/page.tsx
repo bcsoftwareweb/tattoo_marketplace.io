@@ -3,10 +3,10 @@ export const metadata = { title: "How it works" };
 const frame = "mx-auto w-full max-w-[1440px] px-5 md:px-8";
 
 const steps = [
-  ["Find a chair", "Search by style, borough, price, and who actually has an open day."],
+  ["Find a chair", "Search by style, borough, price, and who has available appointment times."],
   ["Write the request", "Pick a service or ask for a custom quote, describe the tattoo, and attach a reference."],
   ["Let the artist answer", "They can accept, decline, or propose another time and price. You confirm before any deposit."],
-  ["Confirm with a deposit", "Pay the deposit at checkout and the date moves to confirmed on both calendars."],
+  ["Confirm with a deposit", "Pay the deposit at checkout to reserve the agreed appointment time on both calendars."],
 ];
 
 export default function Page() {

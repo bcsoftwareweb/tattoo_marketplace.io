@@ -190,6 +190,7 @@ export interface Booking {
   artistId: string;
   serviceId: string | null;
   serviceName: string;
+  durationMinutes?: number;
   idea: string;
   placement: string;
   size: string;

@@ -33,8 +33,6 @@ export interface TransitionOk {
   transactions: TransactionDraft[];
   notifications: Notice[];
   activity: ActivityDraft[];
-  blockDate: string | null;
-  releaseDate: string | null;
 }
 
 export type TransitionResult = TransitionOk | { ok: false; error: string };
@@ -109,7 +107,7 @@ export function transitionBooking(
           booking.customerId,
           status === "awaiting_deposit" ? "Request accepted" : "Quote needs confirmation",
           status === "awaiting_deposit"
-            ? "Your appointment was accepted. A deposit will hold the date."
+            ? "Your appointment was accepted. A deposit will reserve the selected time."
             : "The artist kept your date and sent a revised quote to confirm.",
           booking.id,
           "booking",
@@ -119,8 +117,6 @@ export function transitionBooking(
         { userId: booking.artistId, role: "artist", text: `Updated ${booking.serviceName} to ${status.replaceAll("_", " ")}.`, createdAt: now },
         { userId: booking.customerId, role: "customer", text: `The artist responded to ${booking.serviceName}.`, createdAt: now },
       ],
-      blockDate: null,
-      releaseDate: null,
     };
   }
 
@@ -165,8 +161,6 @@ export function transitionBooking(
         { userId: booking.artistId, role: "artist", text: `Proposed a new time for ${booking.serviceName}.`, createdAt: now },
         { userId: booking.customerId, role: "customer", text: `A new time was proposed for ${booking.serviceName}.`, createdAt: now },
       ],
-      blockDate: null,
-      releaseDate: null,
     };
   }
 
@@ -187,8 +181,6 @@ export function transitionBooking(
         { userId: booking.artistId, role: "artist", text: `Declined ${booking.serviceName}.`, createdAt: now },
         { userId: booking.customerId, role: "customer", text: `${booking.serviceName} was declined.`, createdAt: now },
       ],
-      blockDate: null,
-      releaseDate: null,
     };
   }
 
@@ -215,8 +207,6 @@ export function transitionBooking(
         { userId: booking.customerId, role: "customer", text: `Accepted terms for ${booking.serviceName}.`, createdAt: now },
         { userId: booking.artistId, role: "artist", text: `Customer accepted ${booking.serviceName}.`, createdAt: now },
       ],
-      blockDate: null,
-      releaseDate: null,
     };
   }
 
@@ -237,8 +227,6 @@ export function transitionBooking(
         { userId: booking.customerId, role: "customer", text: `Declined the proposal for ${booking.serviceName}.`, createdAt: now },
         { userId: booking.artistId, role: "artist", text: `Customer declined ${booking.serviceName}.`, createdAt: now },
       ],
-      blockDate: null,
-      releaseDate: null,
     };
   }
 
@@ -271,8 +259,6 @@ export function transitionBooking(
         { userId: booking.customerId, role: "customer", text: `Confirmed ${booking.serviceName} with a deposit.`, createdAt: now },
         { userId: booking.artistId, role: "artist", text: `Deposit confirmed for ${booking.serviceName}.`, createdAt: now },
       ],
-      blockDate: booking.appointmentDate,
-      releaseDate: null,
     };
   }
 
@@ -299,8 +285,6 @@ export function transitionBooking(
         { userId: booking.customerId, role: "customer", text: `Cancelled ${booking.serviceName}.`, createdAt: now },
         { userId: booking.artistId, role: "artist", text: `${booking.serviceName} was cancelled.`, createdAt: now },
       ],
-      blockDate: null,
-      releaseDate: booking.status === "confirmed" ? booking.appointmentDate : null,
     };
   }
 
@@ -334,8 +318,6 @@ export function transitionBooking(
         { userId: booking.artistId, role: "artist", text: `Completed ${booking.serviceName}.`, createdAt: now },
         { userId: booking.customerId, role: "customer", text: `${booking.serviceName} was marked complete.`, createdAt: now },
       ],
-      blockDate: null,
-      releaseDate: null,
     };
   }
 
@@ -357,8 +339,6 @@ export function transitionBooking(
         { userId: booking.customerId, role: "customer", text: `Opened a dispute on ${booking.serviceName}.`, createdAt: now },
         { userId: ADMIN_ID, role: "admin", text: `Dispute opened on ${booking.serviceName}.`, createdAt: now },
       ],
-      blockDate: null,
-      releaseDate: null,
     };
   }
 
@@ -397,8 +377,6 @@ export function transitionBooking(
         { userId: ADMIN_ID, role: "admin", text: `Refunded ${booking.serviceName}.`, createdAt: now },
         { userId: booking.customerId, role: "customer", text: `${booking.serviceName} was refunded.`, createdAt: now },
       ],
-      blockDate: null,
-      releaseDate: booking.appointmentDate,
     };
   }
 

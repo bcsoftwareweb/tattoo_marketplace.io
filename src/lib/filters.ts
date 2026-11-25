@@ -1,6 +1,7 @@
 import { DEMO_TODAY } from "@/lib/constants";
+import { appointmentSlotsForDate } from "@/lib/availability";
 import { addDays } from "@/lib/format";
-import type { Artist } from "@/lib/types";
+import type { Artist, Booking } from "@/lib/types";
 
 export type PriceFilter = "any" | "under-200" | "200-350" | "350-500" | "500-plus";
 export type AvailabilityFilter = "any" | "open-7" | "open-30";
@@ -27,12 +28,17 @@ function matchesPrice(price: number, filter: PriceFilter) {
   return true;
 }
 
-function hasOpening(artist: Artist, today: string, days: number) {
+function hasOpening(artist: Artist, today: string, days: number, bookings: Booking[]) {
   const end = addDays(today, days);
-  return artist.availability.some((day) => day.status === "open" && day.date >= today && day.date <= end);
+  return artist.availability.some(
+    (day) =>
+      day.date >= today &&
+      day.date <= end &&
+      appointmentSlotsForDate(artist, day.date, bookings, 90, today).available.length > 0,
+  );
 }
 
-export function filterArtists(artists: Artist[], query: ArtistQuery) {
+export function filterArtists(artists: Artist[], query: ArtistQuery, bookings: Booking[] = []) {
   const today = query.today ?? DEMO_TODAY;
   const needle = query.q?.trim().toLowerCase() ?? "";
   const terms = needle
@@ -46,8 +52,8 @@ export function filterArtists(artists: Artist[], query: ArtistQuery) {
     if (query.style && !artist.styleIds.includes(query.style)) return false;
     if (query.specialty && !artist.specialties.includes(query.specialty)) return false;
     if (query.price && !matchesPrice(artist.startingPrice, query.price)) return false;
-    if (query.availability === "open-7" && !hasOpening(artist, today, 7)) return false;
-    if (query.availability === "open-30" && !hasOpening(artist, today, 30)) return false;
+    if (query.availability === "open-7" && !hasOpening(artist, today, 7, bookings)) return false;
+    if (query.availability === "open-30" && !hasOpening(artist, today, 30, bookings)) return false;
     if (!terms.length) return true;
     const haystack = [
       artist.name,

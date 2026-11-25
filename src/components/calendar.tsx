@@ -3,18 +3,23 @@
 import { DEMO_TODAY } from "@/lib/constants";
 import { monthLabel, shiftMonth, weekdayIndex } from "@/lib/format";
 import { cn } from "@/lib/format";
+import type { AppointmentDaySlots } from "@/lib/availability";
 import type { AvailabilityDay } from "@/lib/types";
 
 export function MonthCalendar({
   month,
   onMonth,
   days,
+  slotsByDate,
+  disableUnavailable = false,
   selected,
   onPick,
 }: {
   month: string;
   onMonth: (month: string) => void;
   days: AvailabilityDay[];
+  slotsByDate?: Record<string, AppointmentDaySlots>;
+  disableUnavailable?: boolean;
   selected?: string;
   onPick: (date: string) => void;
 }) {
@@ -38,21 +43,27 @@ export function MonthCalendar({
         {cells.map((date, index) => {
           if (!date) return <span key={`empty-${index}`} />;
           const status = byDate.get(date) ?? "open";
+          const slots = slotsByDate?.[date];
+          const noAvailableTimes = status === "open" && !!slots && slots.available.length === 0;
+          const partiallyBooked = status === "open" && !!slots && slots.available.length > 0 && slots.available.length < slots.scheduled.length;
+          const displayStatus = noAvailableTimes ? "booked" : status;
+          const statusText = noAvailableTimes ? "no available times" : partiallyBooked ? "partially booked" : displayStatus;
           const past = date < DEMO_TODAY;
           return (
             <button
               key={date}
               type="button"
-              disabled={past && status !== "booked"}
+              disabled={(past && displayStatus !== "booked") || (disableUnavailable && displayStatus !== "open")}
               onClick={() => onPick(date)}
-              aria-label={`${date}, ${status}`}
+              aria-label={`${date}, ${statusText}`}
               aria-pressed={selected === date}
               className={cn(
                 "h-11 border text-sm",
                 selected === date && "border-ink bg-ink text-white",
-                selected !== date && status === "open" && "border-line bg-white",
-                selected !== date && status === "blocked" && "border-detail bg-detail text-mute",
-                selected !== date && status === "booked" && "border-ink bg-paper",
+                selected !== date && displayStatus === "open" && !partiallyBooked && "border-line bg-white",
+                selected !== date && displayStatus === "open" && partiallyBooked && "border-dashed border-ink bg-white",
+                selected !== date && displayStatus === "blocked" && "border-detail bg-detail text-mute",
+                selected !== date && displayStatus === "booked" && "border-ink bg-paper",
                 past && "opacity-50",
               )}
             >
@@ -64,7 +75,10 @@ export function MonthCalendar({
       <ul className="mt-4 flex flex-wrap gap-4 text-xs text-mute">
         <li>Open</li>
         <li>Shaded days are blocked</li>
-        <li>Outlined days are booked</li>
+        <li>Outlined days have no available times</li>
+        {slotsByDate && Object.values(slotsByDate).some((item) => item.available.length > 0 && item.available.length < item.scheduled.length) ? (
+          <li>Dashed outline: some time slots are booked</li>
+        ) : null}
       </ul>
     </div>
   );

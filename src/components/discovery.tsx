@@ -34,7 +34,7 @@ export function Discovery() {
   const query: ArtistQuery = {
     q: params.get("q") ?? "",
   };
-  const results = filterArtists(state.artists, query);
+  const results = filterArtists(state.artists, query, state.bookings);
 
   function update(next: Record<string, string>) {
     const search = new URLSearchParams(params.toString());

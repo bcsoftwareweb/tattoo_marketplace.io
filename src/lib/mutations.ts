@@ -1,4 +1,5 @@
 import { transitionBooking, type BookingAction } from "@/lib/booking";
+import { appointmentDurationForService, appointmentSlotsForDate } from "@/lib/availability";
 import { ADMIN_ID, BOROUGHS, DEMO_TODAY, TIME_SLOTS } from "@/lib/constants";
 import { deriveState } from "@/lib/derive";
 import { addDays, uid, weekdayIndex } from "@/lib/format";
@@ -35,14 +36,10 @@ function artistOf(state: DemoState, id: string) {
   return state.artists.find((artist) => artist.id === id) ?? null;
 }
 
-export function slotsFor(state: DemoState, artistId: string, date: string) {
+export function slotsFor(state: DemoState, artistId: string, date: string, durationMinutes?: number) {
   const artist = artistOf(state, artistId);
-  if (!artist || date < DEMO_TODAY) return [];
-  const day = artist.availability.find((item) => item.date === date);
-  if (!day || day.status !== "open") return [];
-  const hours = artist.workingHours.find((item) => item.day === weekdayIndex(date));
-  if (!hours || hours.closed) return [];
-  return TIME_SLOTS.filter((slot) => slot >= hours.open && slot < hours.close);
+  if (!artist) return [];
+  return appointmentSlotsForDate(artist, date, state.bookings, durationMinutes).available;
 }
 
 function setDay(state: DemoState, artistId: string, date: string, status: "open" | "blocked" | "booked") {
@@ -59,28 +56,23 @@ function setDay(state: DemoState, artistId: string, date: string, status: "open"
   };
 }
 
-function releaseDay(state: DemoState, artistId: string, date: string) {
-  const stillHeld = state.bookings.some(
-    (booking) =>
-      booking.artistId === artistId &&
-      booking.appointmentDate === date &&
-      (booking.status === "confirmed" || booking.status === "completed"),
-  );
-  if (stillHeld) return state;
-  return setDay(state, artistId, date, "open");
-}
-
 export function applyBookingAction(state: DemoState, bookingId: string, action: BookingAction, actor: Actor, now: string): Result {
   const booking = state.bookings.find((item) => item.id === bookingId);
   if (!booking) return fail(state, "Booking not found.");
-  if (action.type === "pay_deposit") {
-    const artist = artistOf(state, booking.artistId);
-    const day = artist?.availability.find((item) => item.date === booking.appointmentDate);
-    if (day?.status === "booked") return fail(state, "That date was just taken. Ask the artist for another day.");
-  }
   const result = transitionBooking(booking, action, actor, state.settings, state.transactions, now);
   if (!result.ok) return fail(state, result.error);
-  let next: DemoState = {
+  const requestedSlot = action.type === "propose"
+    ? { date: action.date, time: action.time }
+    : action.type === "customer_accept"
+      ? { date: booking.proposedDate ?? booking.appointmentDate, time: booking.proposedTime ?? booking.appointmentTime }
+      : action.type === "accept" || action.type === "pay_deposit"
+        ? { date: booking.appointmentDate, time: booking.appointmentTime }
+        : null;
+  const durationMinutes = booking.durationMinutes ?? appointmentDurationForService(booking.serviceId, state.services);
+  if (requestedSlot && !slotsFor(state, booking.artistId, requestedSlot.date, durationMinutes).includes(requestedSlot.time as (typeof TIME_SLOTS)[number])) {
+    return fail(state, "That appointment time is no longer available. Ask the artist to choose another time.");
+  }
+  const next: DemoState = {
     ...state,
     bookings: state.bookings.map((item) => (item.id === bookingId ? result.booking : item)),
     transactions: [...state.transactions, ...result.transactions.map((item) => ({ ...item, id: uid("tx") }))],
@@ -90,8 +82,6 @@ export function applyBookingAction(state: DemoState, bookingId: string, action: 
     ],
     activity: [...result.activity.map((item) => ({ ...item, id: uid("act") })), ...state.activity],
   };
-  if (result.blockDate) next = setDay(next, booking.artistId, result.blockDate, "booked");
-  if (result.releaseDate) next = releaseDay(next, booking.artistId, result.releaseDate);
   return { state: next, id: bookingId };
 }
 
@@ -117,7 +107,8 @@ export function createBookingRequest(state: DemoState, draft: BookingDraft, acto
   const idea = draft.idea.trim();
   if (idea.length < 20) return fail(state, "Describe the tattoo in at least a sentence.");
   if (!draft.placement || !draft.size) return fail(state, "Choose a placement and size.");
-  if (!slotsFor(state, artist.id, draft.requestedDate).includes(draft.requestedTime as (typeof TIME_SLOTS)[number])) {
+  const durationMinutes = appointmentDurationForService(draft.serviceId, state.services);
+  if (!slotsFor(state, artist.id, draft.requestedDate, durationMinutes).includes(draft.requestedTime as (typeof TIME_SLOTS)[number])) {
     return fail(state, "That date and time are not open.");
   }
   const budget = Math.round(draft.customerBudget);
@@ -135,6 +126,7 @@ export function createBookingRequest(state: DemoState, draft: BookingDraft, acto
     artistId: artist.id,
     serviceId: draft.serviceId,
     serviceName,
+    durationMinutes,
     idea,
     placement: draft.placement,
     size: draft.size,
@@ -348,7 +340,7 @@ export function toggleAvailability(state: DemoState, artistId: string, date: str
   const artist = artistOf(state, artistId);
   const day = artist?.availability.find((item) => item.date === date);
   if (!day) return fail(state, "That date is outside the published calendar.");
-  if (day.status === "booked") return fail(state, "Confirmed appointments keep the day booked.");
+  if (day.status === "booked") return fail(state, "This date is fully booked.");
   return { state: setDay(state, artistId, date, day.status === "open" ? "blocked" : "open") };
 }
 
@@ -471,7 +463,7 @@ export function sendDepositLink(state: DemoState, conversationId: string, bookin
     id: uid("msg"),
     senderRole: "artist",
     senderId: actor.userId,
-    body: `Deposit link for ${booking.serviceName}: ${moneyLabel(booking.deposit)} due to hold ${booking.appointmentDate}.`,
+    body: `Deposit link for ${booking.serviceName}: ${moneyLabel(booking.deposit)} due to reserve ${booking.appointmentDate} at ${booking.appointmentTime}.`,
     depositBookingId: booking.id,
     createdAt: now,
   };

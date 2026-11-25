@@ -8,6 +8,7 @@ import { MonthCalendar } from "@/components/calendar";
 import { CommunityMediaInput, type CommunityMediaSelection } from "@/components/community-media-input";
 import { FlashVideo } from "@/components/flash-video";
 import { useDemo } from "@/context/demo-context";
+import { appointmentSlotsForDate } from "@/lib/availability";
 import { BOROUGHS, PLACEMENTS, WEEKDAYS } from "@/lib/constants";
 import { readImageFile } from "@/lib/files";
 import { hashtagLabel, parseHashtags } from "@/lib/hashtags";
@@ -671,11 +672,28 @@ export function ArtistCalendar() {
   useEffect(() => { if (artist) setHours(artist.workingHours); }, [artist]);
   if (!artist) return null;
   const dayBookings = state.bookings.filter((booking) => booking.artistId === artist.id && (booking.appointmentDate === selected || booking.requestedDate === selected));
+  const slotsByDate = Object.fromEntries(artist.availability.map((day) => [
+    day.date,
+    appointmentSlotsForDate(artist, day.date, state.bookings),
+  ]));
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="Artist" title="Availability" description="Open days can be requested. Confirmed appointments lock the day. Block a day to take it off the public calendar." />
+      <PageHeader eyebrow="Artist" title="Availability" description="Confirmed appointments reserve their time slots. Block a day to close all times on the public calendar." />
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <MonthCalendar month={month} onMonth={setMonth} days={artist.availability} selected={selected} onPick={(date) => { setSelected(date); const status = artist.availability.find((day) => day.date === date)?.status; if (date >= "2026-11-10" && status !== "booked") toggleDay(date); }} />
+        <MonthCalendar
+          month={month}
+          onMonth={setMonth}
+          days={artist.availability}
+          slotsByDate={slotsByDate}
+          selected={selected}
+          onPick={(date) => {
+            setSelected(date);
+            const status = artist.availability.find((day) => day.date === date)?.status;
+            const slots = slotsByDate[date];
+            const noAvailableTimes = slots && slots.available.length === 0;
+            if (date >= "2026-11-10" && status !== "booked" && !noAvailableTimes) toggleDay(date);
+          }}
+        />
         <div>
           <h2 className="font-display text-2xl">{formatDate(selected)}</h2>
           <BookingCards bookings={dayBookings} role="artist" empty="No appointments on this day." />

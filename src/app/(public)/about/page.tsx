@@ -5,10 +5,10 @@ const frame = "mx-auto w-full max-w-[1440px] px-5 md:px-8";
 export const metadata = { title: "About" };
 
 const points = [
-  ["The index", "Approved artists only. Each listing carries a neighborhood, the styles they tattoo, a starting price, and the next open day."],
+  ["The index", "Approved artists only. Each listing carries a neighborhood, the styles they tattoo, a starting price, and the next available appointment times."],
   ["The page", "Portfolio, services, hours, and reviews are public before anyone sends a message. You can read a studio without an account."],
-  ["The request", "A sitting starts as a written brief: the idea, placement, size, budget, references, and a day the artist has opened."],
-  ["The answer", "The artist accepts, declines, or counters with another time and price. The date is held only after you confirm."],
+  ["The request", "A sitting starts as a written brief: the idea, placement, size, budget, references, and an available appointment time."],
+  ["The answer", "The artist accepts, declines, or counters with another time and price. The agreed time is reserved after the deposit is confirmed."],
 ];
 
 export default function Page() {
@@ -60,7 +60,7 @@ export default function Page() {
             <p className="font-display text-xs uppercase tracking-[0.28em] text-mist">Clients</p>
             <h2 className="mt-4 font-display text-3xl tracking-tight">Find a chair you can book.</h2>
             <p className="mt-4 max-w-md text-sm leading-7 text-mist">
-              Search by style, borough, price, and who has an open day. Save a studio, write the artist, and confirm a deposit only after the quote is agreed.
+              Search by style, borough, price, and who has open appointment times. Save a studio, write the artist, and confirm a deposit only after the quote is agreed.
             </p>
             <Link href="/artists" className="mt-6 inline-flex h-11 items-center bg-white px-4 text-sm font-medium text-ink">Find artists</Link>
           </div>

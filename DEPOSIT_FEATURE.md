@@ -12,7 +12,7 @@ A deposit lets a customer reserve an artist's time after both sides agree on the
 4. If the artist accepts at the customer's budget, the booking moves directly to **Awaiting deposit**. If the quote or appointment terms differ, the customer first reviews and accepts the artist's terms.
 5. Once the booking is **Awaiting deposit**, the customer can open **Customer → My Bookings → Pending**, select the booking, and choose **Continue to checkout**. The artist can also send a deposit link from the booking details; the link appears in Messages.
 6. The customer reviews the quote, deposit due, and remaining balance, then enters card details and submits checkout.
-7. After a successful payment, the booking becomes **Confirmed**, the customer and artist are notified, and the appointment date is held.
+7. After a successful payment, the booking becomes **Confirmed**, the customer and artist are notified, and the agreed appointment time is reserved. Other available times that day remain bookable.
 8. When the artist marks the confirmed appointment complete, the demo records the remaining balance as settled.
 
 ## Current demo behavior
@@ -22,6 +22,8 @@ This application is currently a frontend-only demo:
 - The checkout form validates card details locally. It does not contact a payment processor or charge a card.
 - Booking state and simulated transactions are stored in the browser; there is no server-side payment record.
 - Confirming a deposit creates a simulated transaction and changes the booking status to **Confirmed**.
+- Confirmed appointments reserve their scheduled time range, not the entire day. The selected service duration is saved with the request and determines the range, with a 90-minute minimum; custom quotes use the 90-minute minimum.
+- Cancelled or refunded appointments release their time range. Older saved demo data is migrated from date-wide booking markers to appointment-level reservations.
 - Marking an appointment complete records a simulated balance transaction. It does not charge the customer's card.
 - An administrator can record a simulated refund for a booking with recorded payments. This does not issue a real card refund.
 
@@ -61,6 +63,8 @@ The platform should clearly disclose the deposit amount, what the deposit reserv
 
 - [Booking UI and checkout](src/components/booking-ui.tsx) — booking details, artist deposit-link action, customer checkout.
 - [Booking state transitions](src/lib/booking.ts) — quote acceptance, customer confirmation, deposit confirmation, completion, and refund transitions.
+- [Appointment availability](src/lib/availability.ts) — working-hour checks, service-duration windows, and overlap detection.
 - [Money splits](src/lib/money.ts) — current commission calculations for deposit and balance.
 - [Deposit-link mutation](src/lib/mutations.ts) — creates a message containing the booking's deposit link.
 - [Booking and transaction types](src/lib/types.ts) — booking statuses, commission settings, and transaction records.
+- [Demo data migration](src/lib/seed.ts) — snapshots service duration and migrates older date-wide booking states.
