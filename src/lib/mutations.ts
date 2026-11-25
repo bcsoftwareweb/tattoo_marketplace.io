@@ -1135,6 +1135,8 @@ export function createSocialPost(state: DemoState, draft: SocialPostDraft, actor
     caption,
     placement: draft.placement,
     hashtags,
+    likes: [],
+    comments: [],
     createdAt: now,
     status: "published",
   };
@@ -1155,6 +1157,62 @@ export function createSocialPost(state: DemoState, draft: SocialPostDraft, actor
       ],
     },
     id: post.id,
+  };
+}
+
+function canEngageWithCommunity(state: DemoState, actor: Actor) {
+  if (actor.role === "customer") {
+    return state.customers.some((customer) => customer.id === actor.userId && customer.status === "active");
+  }
+  if (actor.role === "artist") return state.artists.some((artist) => artist.id === actor.userId);
+  if (actor.role === "shop") {
+    return state.shops.some((shop) => shop.id === actor.userId && shop.status === "active");
+  }
+  return actor.role === "admin" && actor.userId === ADMIN_ID;
+}
+
+export function togglePostLike(state: DemoState, postId: string, actor: Actor): Result {
+  if (!canEngageWithCommunity(state, actor)) return fail(state, "Sign in with an active account to like posts.");
+  const post = state.posts.find((item) => item.id === postId && item.status === "published");
+  if (!post) return fail(state, "Post not found.");
+  const likes = post.likes ?? [];
+  const alreadyLiked = likes.some((like) => like.role === actor.role && like.userId === actor.userId);
+  return {
+    state: {
+      ...state,
+      posts: state.posts.map((item) => item.id === postId
+        ? {
+            ...item,
+            likes: alreadyLiked
+              ? likes.filter((like) => like.role !== actor.role || like.userId !== actor.userId)
+              : [...likes, { role: actor.role, userId: actor.userId }],
+          }
+        : item),
+    },
+  };
+}
+
+export function addPostComment(state: DemoState, postId: string, body: string, actor: Actor, now: string): Result {
+  if (!canEngageWithCommunity(state, actor)) return fail(state, "Sign in with an active account to comment.");
+  const post = state.posts.find((item) => item.id === postId && item.status === "published");
+  if (!post) return fail(state, "Post not found.");
+  const commentBody = body.trim();
+  if (!commentBody) return fail(state, "Write a comment before posting.");
+  if (commentBody.length > 500) return fail(state, "Comments must be 500 characters or fewer.");
+  const comment = {
+    id: uid("comment"),
+    role: actor.role,
+    userId: actor.userId,
+    body: commentBody,
+    createdAt: now,
+  };
+  return {
+    state: {
+      ...state,
+      posts: state.posts.map((item) => item.id === postId
+        ? { ...item, comments: [...(item.comments ?? []), comment] }
+        : item),
+    },
   };
 }
 

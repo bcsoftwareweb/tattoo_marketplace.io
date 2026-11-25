@@ -14,6 +14,7 @@ import type {
   PortfolioItem,
   Review,
   Service,
+  SocialPost,
   TattooStyle,
   Transaction,
   TattooShop,
@@ -22,8 +23,8 @@ import type {
 
 const COMMISSION = 12;
 
-// Raise this whenever sample artists, bookings, reviews, or payments are added, so browsers with saved data pick them up.
-export const SEED_VERSION = 6;
+// Raise this whenever demo data or persisted state schemas change, so browsers with saved data pick them up.
+export const SEED_VERSION = 7;
 
 export const ADMIN_PROFILE = {
   id: "avery-quinn",
@@ -1026,7 +1027,7 @@ const CUSTOMERS: Customer[] = [
   },
 ];
 
-const CUSTOMER_POSTS = [
+const CUSTOMER_POSTS: SocialPost[] = [
   {
     id: "post-maya-olive",
     authorRole: "customer" as const,
@@ -1038,6 +1039,10 @@ const CUSTOMER_POSTS = [
     caption: "Healed fine-line olive branch. Nova kept the line soft and let the spacing breathe.",
     placement: "Forearm",
     hashtags: ["fineline", "olivebranch", "nyctattoo", "healed"],
+    likes: [{ role: "customer", userId: "samira-patel" }],
+    comments: [
+      { id: "comment-maya-1", role: "customer", userId: "jordan-ellis", body: "The fine-line detail healed so beautifully.", createdAt: "2026-11-10T19:00:00Z" },
+    ],
     createdAt: "2026-11-10T18:30:00Z",
     status: "published" as const,
   },
@@ -1052,6 +1057,10 @@ const CUSTOMER_POSTS = [
     caption: "The anklet is still settling in, but I love how it follows the ankle.",
     placement: "Ankle",
     hashtags: ["ornamental", "anklet", "firsttattoo", "healed"],
+    likes: [{ role: "customer", userId: "maya-chen" }, { role: "artist", userId: "nova-reyes" }],
+    comments: [
+      { id: "comment-samira-1", role: "customer", userId: "maya-chen", body: "Love how it wraps around the ankle.", createdAt: "2026-11-09T09:15:00Z" },
+    ],
     createdAt: "2026-11-08T20:10:00Z",
     status: "published" as const,
   },
@@ -1066,6 +1075,8 @@ const CUSTOMER_POSTS = [
     caption: "First sitting for the geometric shoulder panel. Already measuring the next session.",
     placement: "Shoulder",
     hashtags: ["geometric", "blackwork", "workinprogress", "brooklyn"],
+    likes: [{ role: "customer", userId: "samira-patel" }],
+    comments: [],
     createdAt: "2026-11-07T16:45:00Z",
     status: "published" as const,
   },
@@ -1079,6 +1090,10 @@ const CUSTOMER_POSTS = [
     caption: "A collaborative ornamental floral piece. Priya brought the linework, Nova finished the fine-line detail.",
     placement: "Back",
     hashtags: ["collaboration", "ornamental", "fineline", "artistcredit"],
+    likes: [{ role: "artist", userId: "priya-shah" }, { role: "customer", userId: "maya-chen" }],
+    comments: [
+      { id: "comment-nova-1", role: "artist", userId: "priya-shah", body: "A great collaboration from start to finish.", createdAt: "2026-11-11T16:00:00Z" },
+    ],
     createdAt: "2026-11-11T15:20:00Z",
     status: "published" as const,
   },
@@ -1936,7 +1951,11 @@ export function upgradeState(stored: DemoState): DemoState {
     services: withMissing(stored.services, seed.services),
     portfolio: withMissing(stored.portfolio, seed.portfolio),
     bookings: withMissing(stored.bookings, seed.bookings),
-    posts: withMissing((stored as DemoState).posts ?? [], seed.posts),
+    posts: withMissing((stored as DemoState).posts ?? [], seed.posts).map((post) => ({
+      ...post,
+      likes: post.likes ?? [],
+      comments: post.comments ?? [],
+    })),
     reviews: withMissing(stored.reviews, seed.reviews),
     transactions: withMissing(stored.transactions, seed.transactions),
     favorites,

@@ -21,6 +21,21 @@ describe("saved data upgrade", () => {
     expect(upgraded.posts.length).toBeGreaterThan(0);
   });
 
+  it("adds engagement fields to older posts while preserving existing interactions", () => {
+    const seed = createSeed();
+    const saved = {
+      ...seed,
+      posts: seed.posts.map(({ likes, comments, ...post }, index) => (
+        index === 0 ? post : { ...post, likes, comments }
+      )),
+      seedVersion: SEED_VERSION - 1,
+    } as unknown as typeof seed;
+    const upgraded = upgradeState(saved);
+    expect(upgraded.posts[0]).toMatchObject({ likes: [], comments: [] });
+    expect(upgraded.posts[1].likes).toEqual(seed.posts[1].likes);
+    expect(upgraded.posts[1].comments).toEqual(seed.posts[1].comments);
+  });
+
   it("adds new sample artists and bookings without undoing visitor changes", () => {
     const upgraded = upgradeState(savedBeforeUpgrade());
     expect(upgraded.seedVersion).toBe(SEED_VERSION);

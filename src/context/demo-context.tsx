@@ -5,6 +5,7 @@ import { DEMO_ACCOUNTS, accountBlock, accountForRole, authenticate } from "@/lib
 import type { BookingAction } from "@/lib/booking";
 import {
   addPortfolio,
+  addPostComment,
   addService,
   applyBookingAction,
   createBookingRequest,
@@ -29,6 +30,7 @@ import {
   setVerification,
   toggleAvailability,
   toggleFavorite,
+  togglePostLike,
   toggleFeatured,
   updateArtistProfile,
   updateCustomer,
@@ -100,6 +102,8 @@ interface DemoContextValue {
   submitStudioApplication: (input: StudioApplication) => { id?: string; error?: string };
   publishPost: (draft: SocialPostDraft) => { id?: string; error?: string };
   removePost: (postId: string) => string | null;
+  likePost: (postId: string) => string | null;
+  commentOnPost: (postId: string, body: string) => string | null;
   sendBookingDepositLink: (conversationId: string, bookingId: string) => string | null;
   updateArtistShopAssociations: (shopIds: string[]) => string | null;
   saveShop: (patch: Partial<Pick<TattooShop, "name" | "phone" | "photo" | "bio" | "borough" | "neighborhood" | "address" | "website">>) => string | null;
@@ -418,6 +422,16 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         const who = actor();
         if (!who) return "Sign in again.";
         return commit(removeSocialPost(state, postId, who), "Post removed.");
+      },
+      likePost: (postId) => {
+        const who = actor();
+        if (!who) return "Sign in with an account to like posts.";
+        return commit(togglePostLike(state, postId, who));
+      },
+      commentOnPost: (postId, body) => {
+        const who = actor();
+        if (!who) return "Sign in with an account to comment.";
+        return commit(addPostComment(state, postId, body, who, now()), "Comment added.");
       },
     };
   }, [ready, session, state, toasts]);

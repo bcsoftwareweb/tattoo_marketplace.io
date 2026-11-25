@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { transitionBooking } from "@/lib/booking";
 import { balanceSplit, depositSplit } from "@/lib/money";
 import { createSeed } from "@/lib/seed";
-import { createBookingRequest, createSocialPost, respondToHireRequest, sendDepositLink, sendHireRequest, slotsFor, updateArtistShops } from "@/lib/mutations";
+import { addPostComment, createBookingRequest, createSocialPost, respondToHireRequest, sendDepositLink, sendHireRequest, slotsFor, togglePostLike, updateArtistShops } from "@/lib/mutations";
 import { filterArtists } from "@/lib/filters";
 import type { Actor, Booking, PlatformSettings } from "@/lib/types";
 
@@ -214,6 +214,25 @@ describe("marketplace data", () => {
       authorId: "nova-reyes",
       taggedArtistIds: ["priya-shah"],
     });
+  });
+
+  it("lets signed-in members like and comment on published community posts", () => {
+    const state = createSeed();
+    const actor = { role: "customer" as const, userId: "maya-chen" };
+    const postId = "post-maya-olive";
+    const liked = togglePostLike(state, postId, actor);
+    expect(liked.error).toBeUndefined();
+    expect(liked.state.posts.find((post) => post.id === postId)?.likes).toContainEqual(actor);
+    expect(togglePostLike(liked.state, postId, actor).state.posts.find((post) => post.id === postId)?.likes).not.toContainEqual(actor);
+
+    const commented = addPostComment(state, postId, "  Looks amazing!  ", actor, "2026-11-12T12:00:00Z");
+    expect(commented.error).toBeUndefined();
+    expect(commented.state.posts.find((post) => post.id === postId)?.comments.at(-1)).toMatchObject({
+      role: "customer",
+      userId: "maya-chen",
+      body: "Looks amazing!",
+    });
+    expect(addPostComment(state, postId, "  ", actor, "2026-11-12T12:00:00Z").error).toBe("Write a comment before posting.");
   });
 
   it("filters public artists and hides unlisted applications", () => {

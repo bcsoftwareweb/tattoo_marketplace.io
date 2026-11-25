@@ -246,8 +246,21 @@ export interface SocialPost {
   caption: string;
   placement: string;
   hashtags: string[];
+  likes: PostLike[];
+  comments: PostComment[];
   createdAt: string;
   status: "published" | "removed";
+}
+
+export interface PostLike {
+  role: Role;
+  userId: string;
+}
+
+export interface PostComment extends PostLike {
+  id: string;
+  body: string;
+  createdAt: string;
 }
 
 export interface Transaction {
