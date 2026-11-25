@@ -771,6 +771,103 @@ export function submitArtistApplication(state: DemoState, input: ArtistApplicati
   };
 }
 
+export interface StudioApplication {
+  name: string;
+  email: string;
+  phone: string;
+  website: string;
+  photo: string;
+  borough: string;
+  neighborhood: string;
+  address: string;
+  bio: string;
+  representativeName: string;
+  representativeRole: string;
+  studioPermit: string;
+  permitDocument: string;
+  artistsCount: number;
+  openingDate: string;
+  instagram: string;
+}
+
+export function submitStudioApplication(state: DemoState, input: StudioApplication, now: string): Result {
+  const name = input.name.trim();
+  const email = input.email.trim().toLowerCase();
+  const address = input.address.trim();
+  const neighborhood = input.neighborhood.trim();
+  const representative = input.representativeName.trim();
+  const permit = input.studioPermit.trim();
+
+  if (name.length < 2) return fail(state, "Enter the studio name.");
+  if (!EMAIL_PATTERN.test(email)) return fail(state, "Enter a valid studio email address.");
+  if (state.shops.some((shop) => shop.email.toLowerCase() === email)) return fail(state, "An application or account already uses that email.");
+  if (input.phone.replace(/\D/g, "").length < 10) return fail(state, "Enter a studio phone number.");
+  if (!BOROUGHS.includes(input.borough as (typeof BOROUGHS)[number])) return fail(state, "Choose a New York borough.");
+  if (neighborhood.length < 2) return fail(state, "Enter the neighborhood.");
+  if (address.length < 8) return fail(state, "Enter the full studio address.");
+  if (representative.length < 2) return fail(state, "Enter the representative's name.");
+  if (input.representativeRole.trim().length < 2) return fail(state, "Enter the representative's role.");
+  if (input.bio.trim().length < 40) return fail(state, "Describe the studio in at least a sentence or two.");
+  if (permit.length < 2) return fail(state, "Enter the studio permit number.");
+  if (!input.permitDocument.startsWith("data:image/")) return fail(state, "Upload a photo or scan of the studio permit.");
+  if (!Number.isFinite(input.artistsCount) || input.artistsCount < 1 || input.artistsCount > 100) {
+    return fail(state, "Enter the number of artists between 1 and 100.");
+  }
+  if (input.openingDate && !DATE_PATTERN.test(input.openingDate)) return fail(state, "Enter a valid opening date.");
+
+  const baseSlug = slugify(name);
+  let slug = baseSlug;
+  let suffix = 2;
+  while (state.shops.some((shop) => shop.slug === slug)) {
+    slug = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+  const id = uid("shop");
+  const shop: TattooShop = {
+    id,
+    name,
+    slug,
+    email,
+    phone: input.phone.trim(),
+    photo: input.photo,
+    bio: input.bio.trim(),
+    borough: input.borough,
+    neighborhood,
+    address,
+    website: input.website.trim(),
+    status: "active",
+    applicationStatus: "pending",
+    applicationNote: `Submitted by ${representative}, ${input.representativeRole.trim()}. Permit ${permit}. ${input.artistsCount} artist${input.artistsCount === 1 ? "" : "s"}.${input.openingDate ? ` Opening date ${input.openingDate}.` : ""} Instagram ${input.instagram.trim() || "not provided"}.`,
+    joinedAt: now.slice(0, 10),
+  };
+
+  return {
+    id,
+    state: deriveState({
+      ...state,
+      shops: [...state.shops, shop],
+      notifications: [
+        {
+          id: uid("nt"),
+          userId: ADMIN_ID,
+          role: "admin",
+          title: "Studio application waiting",
+          body: `${name} submitted a shop application from ${neighborhood}.`,
+          href: "/admin/marketplace",
+          read: false,
+          createdAt: now,
+          kind: "verification",
+        },
+        ...state.notifications,
+      ],
+      activity: [
+        { id: uid("act"), userId: ADMIN_ID, role: "admin", text: `${name} submitted a studio application.`, createdAt: now },
+        ...state.activity,
+      ],
+    }),
+  };
+}
+
 export function saveStyle(state: DemoState, input: TattooStyle, actor: Actor): Result {
   if (actor.role !== "admin") return fail(state, "Only an administrator can edit styles.");
   const name = input.name.trim();

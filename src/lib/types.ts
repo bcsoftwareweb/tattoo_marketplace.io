@@ -134,6 +134,8 @@ export interface TattooShop {
   address: string;
   website: string;
   status: AccountStatus;
+  applicationStatus?: "pending" | "approved" | "rejected";
+  applicationNote?: string;
   joinedAt: string;
 }
 

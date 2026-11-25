@@ -1,10 +1,40 @@
 import { describe, expect, it } from "vitest";
 import { ADMIN_ID } from "@/lib/constants";
 import { filterArtists } from "@/lib/filters";
-import { submitArtistApplication, type ArtistApplication } from "@/lib/mutations";
+import { submitArtistApplication, submitStudioApplication, type ArtistApplication } from "@/lib/mutations";
 import { createSeed } from "@/lib/seed";
 
 const now = "2026-11-12T16:00:00Z";
+
+describe("studio applications", () => {
+  it("files an organization application separately from artist applications", () => {
+    const result = submitStudioApplication(createSeed(), {
+      name: "Court Street Collective",
+      email: "hello@courtstreetcollective.demo",
+      phone: "347-555-0188",
+      website: "https://courtstreetcollective.demo",
+      photo: "",
+      borough: "Brooklyn",
+      neighborhood: "Cobble Hill",
+      address: "220 Court Street, Brooklyn, NY 11201",
+      bio: "An independent Brooklyn tattoo studio with resident artists and a shared private-room practice.",
+      representativeName: "Renee Ortiz",
+      representativeRole: "Owner",
+      studioPermit: "SP-44012",
+      permitDocument: "data:image/jpeg;base64,AAAA",
+      artistsCount: 6,
+      openingDate: "",
+      instagram: "@courtstreetcollective",
+    }, now);
+    expect(result.error).toBeUndefined();
+    const shop = result.state.shops.find((item) => item.email === "hello@courtstreetcollective.demo");
+    expect(shop).toMatchObject({
+      name: "Court Street Collective",
+      applicationStatus: "pending",
+      status: "active",
+    });
+  });
+});
 
 function draft(overrides: Partial<ArtistApplication> = {}): ArtistApplication {
   return {

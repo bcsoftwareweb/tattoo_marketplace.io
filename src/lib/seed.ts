@@ -1792,6 +1792,7 @@ const SHOPS: TattooShop[] = [
     address: "118 N 6th Street, Brooklyn, NY 11249",
     website: "ateliernorth.demo",
     status: "active",
+    applicationStatus: "approved",
     joinedAt: "2024-01-10",
   },
   {
@@ -1807,6 +1808,7 @@ const SHOPS: TattooShop[] = [
     address: "31-18 30th Avenue, Astoria, NY 11102",
     website: "30thavenue.demo",
     status: "active",
+    applicationStatus: "approved",
     joinedAt: "2024-04-18",
   },
 ];

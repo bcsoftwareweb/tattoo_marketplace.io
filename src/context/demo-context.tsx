@@ -22,6 +22,7 @@ import {
   saveStyle,
   sendMessage,
   submitArtistApplication,
+  submitStudioApplication,
   setCustomerStatus,
   setReportStatus,
   setReviewStatus,
@@ -44,6 +45,7 @@ import {
   type BookingDraft,
   type SocialPostDraft,
   type HireDraft,
+  type StudioApplication,
 } from "@/lib/mutations";
 import { createSeed, upgradeState } from "@/lib/seed";
 import { loadLocalAccounts, loadSession, loadState, saveLocalAccounts, saveSession, saveState } from "@/lib/storage";
@@ -95,6 +97,7 @@ interface DemoContextValue {
   removeCategory: (id: string) => string | null;
   savePlatform: (patch: Partial<PlatformSettings>) => string | null;
   submitApplication: (input: ArtistApplication) => { id?: string; error?: string };
+  submitStudioApplication: (input: StudioApplication) => { id?: string; error?: string };
   publishPost: (draft: SocialPostDraft) => { id?: string; error?: string };
   removePost: (postId: string) => string | null;
   sendBookingDepositLink: (conversationId: string, bookingId: string) => string | null;
@@ -392,6 +395,12 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       },
       submitApplication: (input) => {
         const result = submitArtistApplication(state, input, now());
+        if (result.error) return { error: result.error };
+        setState(result.state);
+        return { id: result.id };
+      },
+      submitStudioApplication: (input) => {
+        const result = submitStudioApplication(state, input, now());
         if (result.error) return { error: result.error };
         setState(result.state);
         return { id: result.id };
