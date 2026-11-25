@@ -131,7 +131,7 @@ export function PublicFooter() {
         <div className="grid grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-4 md:contents md:gap-0">
           <FooterColumn title="Company" links={[["/about", "About Us"], ["/legal/privacy", "Privacy Policy"], ["/legal/terms", "Terms of Service"]]} />
           <FooterColumn title="Marketplace" links={[["/artists", "Find artists"], ["/community", "Community"], ["/styles", "Styles"], ["/how-it-works", "How it works"]]} />
-          <FooterColumn title="Studios" links={[["/for-artists", "Artist application"]]} />
+          <FooterColumn title="Studios" links={[["/for-artists", "Artist application"], ["/for-artists", "Studio Application"]]} />
           <FooterColumn title="Support" links={[["/legal/cancellation", "Cancellation & Refund Policy"], ["/contact", "Contact"]]} />
         </div>
       </div>
