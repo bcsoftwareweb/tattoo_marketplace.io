@@ -111,7 +111,7 @@ export function mixArtwork(feed: readonly Artwork[], random: () => number = Math
 export function artworkFeed(state: DemoState) {
   const seen = new Set<string>();
   const feed: Artwork[] = [];
-  for (const piece of GALLERY) {
+  for (const piece of [...state.portfolio, ...GALLERY]) {
     if (seen.has(piece.image)) continue;
     const artwork = toArtwork(piece, state);
     if (!artwork) continue;

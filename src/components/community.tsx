@@ -77,7 +77,7 @@ export function CommunityPage() {
         ].join(" ").toLowerCase();
         return terms.every((term) => haystack.includes(term));
       })
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      .sort((a, b) => Number(a.authorRole === "artist") - Number(b.authorRole === "artist") || b.createdAt.localeCompare(a.createdAt));
   }, [state.posts, state.customers, state.artists, query]);
 
   const handleComment = (event: React.FormEvent<HTMLFormElement>, postId: string) => {

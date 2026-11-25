@@ -323,7 +323,7 @@ export function ArtistPosts() {
 
   return (
     <div className="grid gap-8">
-      <PageHeader eyebrow="Artist" title="Community posts" description="Share finished work, collaborations, and work in progress." />
+      <PageHeader eyebrow="Artist" title="Community posts" description="This feed is mainly for customer tattoos. Share collaborations or occasional community updates here; add your tattoo work to your Discover portfolio gallery." />
       <form className="grid max-w-3xl gap-4 border border-line bg-white p-5" onSubmit={publish}>
         <Field label="Photo">
           {image ? (
@@ -537,7 +537,7 @@ export function ArtistPortfolio() {
   const items = portfolioFor(state, artist.id);
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="Artist" title="Portfolio" description="Add, edit, and remove the pieces on your public page." />
+      <PageHeader eyebrow="Artist" title="Portfolio" description="Manage the tattoo work shown in your Discover portfolio gallery and public artist profile." />
       <form className="grid gap-3 border border-line bg-white p-4 md:grid-cols-2" onSubmit={(event) => {
         event.preventDefault();
         const error = addPortfolioItem({ title, description, category, styleId, image });

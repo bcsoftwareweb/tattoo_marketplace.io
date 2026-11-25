@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { artworkFeed, mixArtwork } from "@/lib/artwork";
+import { addPortfolio } from "@/lib/mutations";
 import { createSeed } from "@/lib/seed";
 
 function series(seed: number) {
@@ -19,6 +20,20 @@ describe("artwork feed", () => {
     expect(feed.every((item) => item.verified)).toBe(true);
     expect(feed.some((item) => item.artistId === "ellis-ward")).toBe(false);
     expect(feed.length).toBeGreaterThan(8);
+  });
+
+  it("shows artist portfolio uploads in Discover", () => {
+    const state = createSeed();
+    const result = addPortfolio(state, "nova-reyes", {
+      image: "data:image/jpeg;base64,artist-upload",
+      title: "New artist upload",
+      description: "A new piece added to the artist portfolio.",
+      category: state.categories[0].name,
+      styleId: state.artists.find((artist) => artist.id === "nova-reyes")!.styleIds[0],
+    }, { role: "artist", userId: "nova-reyes" });
+
+    expect(result.error).toBeUndefined();
+    expect(artworkFeed(result.state).some((item) => item.title === "New artist upload")).toBe(true);
   });
 
   it("opens each reload with a different mix of every artist", () => {
