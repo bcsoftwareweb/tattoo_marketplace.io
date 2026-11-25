@@ -25,7 +25,7 @@ import type {
 const COMMISSION = 12;
 
 // Raise this whenever demo data or persisted state schemas change, so browsers with saved data pick them up.
-export const SEED_VERSION = 8;
+export const SEED_VERSION = 9;
 
 export const ADMIN_PROFILE = {
   id: "avery-quinn",
@@ -1868,6 +1868,7 @@ function buildState(): DemoState {
     categories: buildCategories(),
     services,
     portfolio,
+    designOwnershipRequests: [],
     bookings,
     conversations: buildConversations(),
     posts: CUSTOMER_POSTS,
@@ -1938,7 +1939,13 @@ function withMissing<T extends { id: string }>(current: T[], incoming: T[]) {
 }
 
 export function upgradeState(stored: DemoState): DemoState {
-  if ((stored.seedVersion ?? 1) >= SEED_VERSION && Array.isArray(stored.posts) && Array.isArray(stored.shops) && Array.isArray(stored.hireRequests)) return stored;
+  if (
+    (stored.seedVersion ?? 1) >= SEED_VERSION &&
+    Array.isArray(stored.posts) &&
+    Array.isArray(stored.shops) &&
+    Array.isArray(stored.hireRequests) &&
+    Array.isArray(stored.designOwnershipRequests)
+  ) return stored;
   const seed = createSeed();
   const known = new Set(stored.artists.map((artist) => artist.id));
   const newArtists = new Set(seed.artists.filter((artist) => !known.has(artist.id)).map((artist) => artist.id));
@@ -1969,6 +1976,7 @@ export function upgradeState(stored: DemoState): DemoState {
     hireRequests: Array.isArray(stored.hireRequests) ? stored.hireRequests : [],
     services,
     portfolio: withMissing(stored.portfolio, seed.portfolio),
+    designOwnershipRequests: Array.isArray(stored.designOwnershipRequests) ? stored.designOwnershipRequests : seed.designOwnershipRequests,
     bookings,
     posts: withMissing((stored as DemoState).posts ?? [], seed.posts).map((post) => ({
       ...post,

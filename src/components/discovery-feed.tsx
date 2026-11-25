@@ -5,10 +5,11 @@ import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useDemo } from "@/context/demo-context";
 import { artworkFeed, mixArtwork, type Artwork } from "@/lib/artwork";
 import { money } from "@/lib/format";
+import { RelativeTime } from "@/components/relative-time";
 import { recommendArtists, recommendSketches, type Recommendation, type SearchTaste } from "@/lib/recommend";
 import type { Artist } from "@/lib/types";
 import { useSearchDock } from "@/components/mobile-dock";
-import { Button, frame, Modal, Photo } from "@/components/ui";
+import { Button, DesignOwnershipBadge, frame, Modal, Photo } from "@/components/ui";
 
 const SAVED_KEY = "blackline.saved-art.v1";
 const SEARCH_KEY = "blackline.searches.v1";
@@ -261,11 +262,13 @@ function SearchIdeas({
             {sketches.items.map((item) => (
               <li key={item.id}>
                 <Link href={`/artwork/?id=${item.id}`} className="block">
-                  <span className="block aspect-[3/4] overflow-hidden">
+                  <span className="relative block aspect-[3/4] overflow-hidden">
                     <Photo src={item.image} alt={item.title} className="h-full w-full" />
+                    {item.ownershipVerified ? <span className="absolute left-2 top-2"><DesignOwnershipBadge artistName={item.artistName} /></span> : null}
                   </span>
                   <span className="mt-2 block truncate text-sm">{item.title}</span>
                   <span className="block truncate text-xs text-mute">{item.artistName}</span>
+                  <RelativeTime dateTime={item.uploadedAt} className="mt-1 block text-xs text-mute" />
                 </Link>
               </li>
             ))}
@@ -309,6 +312,7 @@ function ArtworkCard({ item, saved, onSave }: { item: Artwork; saved: boolean; o
       <div className="relative">
         <Link href={`/artwork/?id=${item.id}`} className={`relative block overflow-hidden ${ASPECT[item.aspect]}`}>
           <Photo src={item.image} alt={item.title} className="absolute inset-0 h-full w-full" />
+          {item.ownershipVerified ? <span className="absolute left-2 top-2"><DesignOwnershipBadge artistName={item.artistName} /></span> : null}
         </Link>
         <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="absolute right-2 top-2 grid h-9 w-9 place-items-center bg-white text-ink">
           <Bookmark filled={saved} />
@@ -320,6 +324,7 @@ function ArtworkCard({ item, saved, onSave }: { item: Artwork; saved: boolean; o
         {`, ${item.neighborhood}`}
         {item.verified ? " · Verified" : ""}
       </p>
+      <RelativeTime dateTime={item.uploadedAt} className="mt-1 block text-xs text-mute" />
     </article>
   );
 }

@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDemo } from "@/context/demo-context";
 import { artworkById, relatedArtwork } from "@/lib/artwork";
-import { formatDate } from "@/lib/format";
-import { Button, frame, Modal, Photo } from "@/components/ui";
+import { RelativeTime } from "@/components/relative-time";
+import { Button, DesignOwnershipBadge, frame, Modal, Photo } from "@/components/ui";
 
 const SAVED_KEY = "blackline.saved-art.v1";
 
@@ -63,12 +63,15 @@ export function ArtworkDetail() {
     <article className={`${frame} py-8 md:py-12`}>
       <Link href="/" className="text-sm text-mist">Discover</Link>
       <div className="mt-6 grid items-start gap-10 lg:grid-cols-[1.3fr_0.7fr]">
-        <Photo
-          src={artwork.image}
-          alt={artwork.title}
-          loading="eager"
-          className="mx-auto block aspect-[9/16] h-[calc(100svh-13rem)] w-auto max-w-full lg:h-[calc(100svh-11.5rem)]"
-        />
+        <div className="relative mx-auto w-fit">
+          <Photo
+            src={artwork.image}
+            alt={artwork.title}
+            loading="eager"
+            className="mx-auto block aspect-[9/16] h-[calc(100svh-13rem)] w-auto max-w-full lg:h-[calc(100svh-11.5rem)]"
+          />
+          {artwork.ownershipVerified ? <span className="absolute left-2 top-2"><DesignOwnershipBadge artistName={artwork.artistName} /></span> : null}
+        </div>
         <div>
           <p className="font-display text-xs uppercase tracking-[0.22em] text-mute">{artwork.styleName}</p>
           <h1 className="mt-3 font-express text-5xl leading-[0.9]">{artwork.title}</h1>
@@ -82,7 +85,7 @@ export function ArtworkDetail() {
           <p className="mt-6 text-sm leading-7 text-mist">{artwork.description}</p>
           <dl className="mt-6 grid grid-cols-2 gap-4 text-sm">
             <div><dt className="text-xs uppercase tracking-[0.16em] text-mute">Placement</dt><dd className="mt-1">{artwork.placement}</dd></div>
-            <div><dt className="text-xs uppercase tracking-[0.16em] text-mute">Uploaded</dt><dd className="mt-1">{formatDate(artwork.uploadedAt)}</dd></div>
+            <div><dt className="text-xs uppercase tracking-[0.16em] text-mute">Posted</dt><dd><RelativeTime dateTime={artwork.uploadedAt} className="mt-1 block" /></dd></div>
             <div><dt className="text-xs uppercase tracking-[0.16em] text-mute">Views</dt><dd className="mt-1">{artwork.views}</dd></div>
             <div><dt className="text-xs uppercase tracking-[0.16em] text-mute">Saves</dt><dd className="mt-1">{artwork.saves}</dd></div>
           </dl>
@@ -109,9 +112,13 @@ export function ArtworkDetail() {
           <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {related.map((item) => (
               <Link key={item.id} href={`/artwork/?id=${item.id}`}>
-                <Photo src={item.image} alt={item.title} className="aspect-[3/4] w-full" />
+                <span className="relative block">
+                  <Photo src={item.image} alt={item.title} className="aspect-[3/4] w-full" />
+                  {item.ownershipVerified ? <span className="absolute left-2 top-2"><DesignOwnershipBadge artistName={item.artistName} /></span> : null}
+                </span>
                 <p className="mt-2 text-sm">{item.title}</p>
                 <p className="mt-1 text-xs text-mute">{item.artistName}</p>
+                <RelativeTime dateTime={item.uploadedAt} className="mt-1 block text-xs text-mute" />
               </Link>
             ))}
           </div>

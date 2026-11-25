@@ -242,6 +242,20 @@ export function StatusPill({ status, role }: { status: BookingStatus; role?: Rol
   );
 }
 
+export function DesignOwnershipBadge({ artistName }: { artistName: string }) {
+  return (
+    <span
+      title={`Design ownership verified for ${artistName}`}
+      className="pointer-events-none inline-flex max-w-full items-center gap-1.5 border border-white/40 bg-ink/90 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-white shadow-sm"
+    >
+      <svg viewBox="0 0 16 16" aria-hidden="true" className="h-3 w-3 shrink-0">
+        <path d="m3 8 3.2 3.2L13 4.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span className="truncate">Owned by {artistName}</span>
+    </span>
+  );
+}
+
 export function Photo({ src, alt, className, loading = "lazy" }: { src?: string; alt: string; className?: string; loading?: "lazy" | "eager" }) {
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [src]);

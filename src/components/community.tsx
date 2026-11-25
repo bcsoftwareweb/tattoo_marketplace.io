@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useDemo } from "@/context/demo-context";
 import { FlashVideo } from "@/components/flash-video";
+import { RelativeTime } from "@/components/relative-time";
 import { hashtagLabel } from "@/lib/hashtags";
-import { formatDateTime } from "@/lib/format";
 import { Button, Empty, frame, Photo } from "@/components/ui";
 import type { PostComment, Role } from "@/lib/types";
 
@@ -256,7 +256,7 @@ export function CommunityPage() {
                       ))}
                     </div>
                   ) : null}
-                  <p className="text-[11px] uppercase tracking-[0.12em] text-mute">{formatDateTime(post.createdAt)}</p>
+                  <RelativeTime dateTime={post.createdAt} className="text-[11px] text-mute" />
 
                   <section id={`comments-${post.id}`} className="grid gap-3 border-t border-panel pt-3" aria-label="Comments">
                     {comments.map((comment: PostComment) => (

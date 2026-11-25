@@ -7,9 +7,11 @@ import { BookingCards } from "@/components/booking-ui";
 import { MonthCalendar } from "@/components/calendar";
 import { CommunityMediaInput, type CommunityMediaSelection } from "@/components/community-media-input";
 import { FlashVideo } from "@/components/flash-video";
+import { RelativeTime } from "@/components/relative-time";
 import { useDemo } from "@/context/demo-context";
 import { appointmentSlotsForDate } from "@/lib/availability";
 import { BOROUGHS, PLACEMENTS, WEEKDAYS } from "@/lib/constants";
+import { latestDesignOwnershipRequest } from "@/lib/design-ownership";
 import { readImageFile } from "@/lib/files";
 import { hashtagLabel, parseHashtags } from "@/lib/hashtags";
 import { formatDate, formatDateTime, formatDuration, money, weekdayName } from "@/lib/format";
@@ -19,7 +21,7 @@ import { adminStats, artistFinance } from "@/lib/selectors";
 import { homeFor } from "@/lib/permissions";
 import { verificationLabel } from "@/lib/status";
 import type { Artist, BookingStatus, Category, Customer, Service, TattooShop, TattooStyle } from "@/lib/types";
-import { Button, Empty, Field, PageHeader, Photo, SelectInput, StatGrid, StatusPill, Tabs, TextInput, Area } from "@/components/ui";
+import { Button, DesignOwnershipBadge, Empty, Field, PageHeader, Photo, SelectInput, StatGrid, StatusPill, Tabs, TextInput, Area } from "@/components/ui";
 
 function useSignedArtist() {
   const { state, session } = useDemo();
@@ -227,7 +229,7 @@ export function CustomerPosts() {
                         {post.hashtags.map((tag) => <span key={tag} className="text-xs text-mute">{hashtagLabel(tag)}</span>)}
                       </div>
                     ) : null}
-                    <p className="text-xs text-mute">{formatDateTime(post.createdAt)}</p>
+                    <RelativeTime dateTime={post.createdAt} className="text-xs text-mute" />
                     <Button type="button" variant="secondary" onClick={() => removePost(post.id)}>Remove</Button>
                   </div>
                 </article>
@@ -406,7 +408,7 @@ export function ArtistPosts() {
                       {post.hashtags.map((tag) => <span key={tag} className="text-xs text-mute">{hashtagLabel(tag)}</span>)}
                     </div>
                   ) : null}
-                  <p className="text-xs text-mute">{formatDateTime(post.createdAt)}</p>
+                  <RelativeTime dateTime={post.createdAt} className="text-xs text-mute" />
                   <Button type="button" variant="secondary" onClick={() => removePost(post.id)}>Remove</Button>
                 </div>
               </article>
@@ -535,7 +537,7 @@ export function ArtistProfileEditor() {
 
 export function ArtistPortfolio() {
   const artist = useSignedArtist();
-  const { state, addPortfolioItem, editPortfolio, removePortfolio, toast } = useDemo();
+  const { state, addPortfolioItem, editPortfolio, removePortfolio, submitDesignOwnershipClaim, toast } = useDemo();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(state.categories[0]?.name ?? "");
@@ -543,6 +545,10 @@ export function ArtistPortfolio() {
   const [image, setImage] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
   const [editDescription, setEditDescription] = useState("");
+  const [claimingItemId, setClaimingItemId] = useState<string | null>(null);
+  const [claimStatement, setClaimStatement] = useState("");
+  const [claimEvidenceUrl, setClaimEvidenceUrl] = useState("");
+  const [claimAttested, setClaimAttested] = useState(false);
   if (!artist) return null;
   const items = portfolioFor(state, artist.id);
   return (
@@ -566,12 +572,22 @@ export function ArtistPortfolio() {
         <div className="md:col-span-2"><Button type="submit">Add piece</Button></div>
       </form>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
+        {items.map((item) => {
+          const claim = latestDesignOwnershipRequest(state, item.id);
+          const canRequestOwnership = !claim || claim.status === "rejected";
+          return (
           <article key={item.id} className="border border-line bg-white">
-            <Photo src={item.image} alt={item.title} className="aspect-[4/5] w-full" />
+            <div className="relative">
+              <Photo src={item.image} alt={item.title} className="aspect-[4/5] w-full" />
+              {claim?.status === "approved" ? <span className="absolute left-2 top-2"><DesignOwnershipBadge artistName={artist.name} /></span> : null}
+            </div>
             <div className="p-3">
               <h2 className="font-medium">{item.title}</h2>
               <p className="mt-1 text-xs text-mute">{item.category}</p>
+              {claim?.status === "pending" ? <p className="mt-2 text-xs uppercase tracking-wide text-mute">Ownership claim pending admin review</p> : null}
+              {claim?.status === "rejected" ? (
+                <p className="mt-2 text-sm text-mute">Claim not approved{claim.reviewerNote ? `: ${claim.reviewerNote}` : "."}</p>
+              ) : null}
               {editing === item.id ? (
                 <div className="mt-2 grid gap-2">
                   <Area value={editDescription} onChange={(event) => setEditDescription(event.target.value)} />
@@ -582,9 +598,53 @@ export function ArtistPortfolio() {
                 <Button type="button" variant="secondary" onClick={() => { setEditing(item.id); setEditDescription(item.description); }}>Edit</Button>
                 <Button type="button" variant="ghost" onClick={() => removePortfolio(item.id)}>Delete</Button>
               </div>
+              {canRequestOwnership ? (
+                <div className="mt-4 border-t border-line pt-4">
+                  {claimingItemId === item.id ? (
+                    <form className="grid gap-3" onSubmit={(event) => {
+                      event.preventDefault();
+                      const error = submitDesignOwnershipClaim(item.id, {
+                        statement: claimStatement,
+                        evidenceUrl: claimEvidenceUrl,
+                        attested: claimAttested,
+                      });
+                      if (!error) {
+                        setClaimingItemId(null);
+                        setClaimStatement("");
+                        setClaimEvidenceUrl("");
+                        setClaimAttested(false);
+                      }
+                    }}>
+                      <p className="text-sm font-medium">Request design ownership verification</p>
+                      <Field label="Creator statement" hint="Explain when and how you created and first published this design.">
+                        <Area value={claimStatement} onChange={(event) => setClaimStatement(event.target.value)} minLength={40} maxLength={1000} required />
+                      </Field>
+                      <Field label="Earliest public post or supporting evidence link (optional)">
+                        <TextInput type="url" value={claimEvidenceUrl} onChange={(event) => setClaimEvidenceUrl(event.target.value)} placeholder="https://" />
+                      </Field>
+                      <label className="flex items-start gap-2 text-xs leading-5 text-mute">
+                        <input type="checkbox" className="mt-1" checked={claimAttested} onChange={(event) => setClaimAttested(event.target.checked)} required />
+                        <span>I created this original design and understand the team will review my claim before any ownership badge appears.</span>
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="submit">Send for review</Button>
+                        <Button type="button" variant="ghost" onClick={() => setClaimingItemId(null)}>Cancel</Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <Button type="button" variant="secondary" onClick={() => {
+                      setClaimingItemId(item.id);
+                      setClaimStatement("");
+                      setClaimEvidenceUrl("");
+                      setClaimAttested(false);
+                    }}>{claim?.status === "rejected" ? "Resubmit ownership claim" : "Request ownership verification"}</Button>
+                  )}
+                </div>
+              ) : null}
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -1180,12 +1240,16 @@ export function AdminFinance() {
 }
 
 export function AdminMarketplace() {
-  const { state, editStyle, removeStyle, editCategory, removeCategory, featureArtist, moderateReview, resolveReport } = useDemo();
+  const { state, editStyle, removeStyle, editCategory, removeCategory, featureArtist, moderateReview, resolveReport, reviewDesignOwnershipClaim } = useDemo();
   const [style, setStyle] = useState<TattooStyle>({ id: "", name: "", slug: "", description: "", image: state.styles[0]?.image ?? "" });
   const [category, setCategory] = useState<Category>({ id: "", name: "", description: "" });
+  const [ownershipNotes, setOwnershipNotes] = useState<Record<string, string>>({});
+  const ownershipClaims = state.designOwnershipRequests
+    .filter((request) => request.status === "pending" && latestDesignOwnershipRequest(state, request.portfolioItemId)?.id === request.id)
+    .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
   return (
     <div className="grid gap-10">
-      <PageHeader eyebrow="Administrator" title="Marketplace" description="Styles, categories, featured artists, reports, and reviews." />
+      <PageHeader eyebrow="Administrator" title="Marketplace" description="Styles, categories, featured artists, design ownership claims, reports, and reviews." />
       <section className="grid gap-3">
         <h2 className="font-display text-2xl">Styles</h2>
         <form className="grid gap-3 border border-line bg-white p-4 md:grid-cols-2" onSubmit={(event) => { event.preventDefault(); if (!editStyle(style)) setStyle({ id: "", name: "", slug: "", description: "", image: state.styles[0]?.image ?? "" }); }}>
@@ -1214,6 +1278,57 @@ export function AdminMarketplace() {
             </li>
           ))}
         </ul>
+      </section>
+      <section>
+        <h2 className="font-display text-2xl">Design ownership claims</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-mute">Compare the artist’s statement, supporting evidence, and platform publication time against other posts. Approve only after due diligence confirms the artist was first to publish this design.</p>
+        {ownershipClaims.length ? (
+          <ul className="mt-4 grid gap-4">
+            {ownershipClaims.map((request) => {
+              const piece = state.portfolio.find((item) => item.id === request.portfolioItemId);
+              const artist = state.artists.find((item) => item.id === request.artistId);
+              if (!piece || !artist) return null;
+              return (
+                <li key={request.id} className="grid gap-4 border border-line bg-white p-4 md:grid-cols-[10rem_1fr]">
+                  <Photo src={piece.image} alt={piece.title} className="aspect-[4/5] w-full" />
+                  <div className="grid content-start gap-3">
+                    <div>
+                      <h3 className="font-medium">{piece.title} · {artist.name}</h3>
+                      <p className="mt-1 text-xs text-mute">{piece.category} · Published on BLACKLINE: {piece.createdAt ? formatDateTime(piece.createdAt) : "date not recorded for this older portfolio piece"}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-4 text-sm">
+                      <Link href={`/artwork/?id=${piece.id}`} className="underline">Open this design</Link>
+                      <Link href="/" className="underline">Compare with designs on Discover</Link>
+                    </div>
+                    <p className="text-sm leading-6">{request.statement}</p>
+                    {request.evidenceUrl ? <a href={request.evidenceUrl} target="_blank" rel="noopener noreferrer" className="text-sm underline">Open supporting evidence</a> : <p className="text-xs text-mute">No external evidence link was provided.</p>}
+                    <Field label="Review note (required when rejecting)">
+                      <Area value={ownershipNotes[request.id] ?? ""} onChange={(event) => setOwnershipNotes((current) => ({ ...current, [request.id]: event.target.value }))} />
+                    </Field>
+                    <div className="flex flex-wrap gap-2">
+                      <Button type="button" variant="secondary" onClick={() => {
+                        const error = reviewDesignOwnershipClaim(request.id, "approved", ownershipNotes[request.id] ?? "");
+                        if (!error) setOwnershipNotes((current) => {
+                          const next = { ...current };
+                          delete next[request.id];
+                          return next;
+                        });
+                      }}>Approve and add badge</Button>
+                      <Button type="button" variant="ghost" disabled={!ownershipNotes[request.id]?.trim()} onClick={() => {
+                        const error = reviewDesignOwnershipClaim(request.id, "rejected", ownershipNotes[request.id] ?? "");
+                        if (!error) setOwnershipNotes((current) => {
+                          const next = { ...current };
+                          delete next[request.id];
+                          return next;
+                        });
+                      }}>Reject claim</Button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : <p className="mt-3 text-sm text-mute">No design ownership claims are waiting for review.</p>}
       </section>
       <section>
         <h2 className="font-display text-2xl">Reports</h2>

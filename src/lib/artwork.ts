@@ -1,4 +1,5 @@
 import { PLACEMENTS } from "@/lib/constants";
+import { hasVerifiedDesignOwnership } from "@/lib/design-ownership";
 import { GALLERY } from "@/lib/gallery";
 import type { DemoState, PortfolioItem } from "@/lib/types";
 
@@ -11,6 +12,7 @@ export interface Artwork {
   artistSlug: string;
   artistPhoto: string;
   verified: boolean;
+  ownershipVerified: boolean;
   borough: string;
   neighborhood: string;
   image: string;
@@ -49,6 +51,7 @@ function toArtwork(piece: PortfolioItem, state: DemoState): Artwork | null {
   const n = hash(piece.id);
   const views = 120 + (n % 4800);
   const lane: ArtworkLane = n % 5 === 0 ? "featured" : views > 2200 ? "popular" : "recent";
+  const uploadedAt = piece.createdAt ?? `${dayOffset(n % 140)}T12:00:00.000Z`;
   return {
     id: piece.id,
     artistId: artist.id,
@@ -56,6 +59,7 @@ function toArtwork(piece: PortfolioItem, state: DemoState): Artwork | null {
     artistSlug: artist.slug,
     artistPhoto: artist.photo,
     verified: true,
+    ownershipVerified: hasVerifiedDesignOwnership(state, piece.id),
     borough: artist.borough,
     neighborhood: artist.neighborhood,
     image: piece.image,
@@ -68,7 +72,7 @@ function toArtwork(piece: PortfolioItem, state: DemoState): Artwork | null {
     tags: [piece.category, style?.name ?? "Tattoo", artist.neighborhood].filter(Boolean),
     views,
     saves: 6 + (n % 380),
-    uploadedAt: dayOffset(n % 140),
+    uploadedAt,
     lane,
     aspect: ASPECTS[n % ASPECTS.length],
   };

@@ -1,6 +1,6 @@
 1:"$Sreact.fragment"
 2:"/tattoo_marketplace.io/_next/static/chunks/3qfy96eoyh-ek.js"
-3:"/tattoo_marketplace.io/_next/static/chunks/349_4tf2oyo6r.js"
+3:"/tattoo_marketplace.io/_next/static/chunks/32hrb6yy6bzlq.js"
 4:I[29114,["$2","$3"],"DemoProvider"]
 5:I[39756,["$2","$3"],"default"]
 6:"/tattoo_marketplace.io/_next/static/chunks/0nm00po0co77n.js"
@@ -10,27 +10,28 @@
 a:I[22016,["$2","$3","$9"],""]
 c:"ClientSegmentRoot"
 d:I[92825,["$2","$3"],"$c"]
-e:"/tattoo_marketplace.io/_next/static/chunks/0z-2i9xfg3l77.js"
-f:I[91121,["$2","$3","$e"],"default"]
-12:"/tattoo_marketplace.io/_next/static/chunks/0qdhh56-_ke7j.js"
-13:"/tattoo_marketplace.io/_next/static/chunks/3dcqcyv_mdbyw.js"
-14:I[57614,["$2","$3","$e","$12","$13"],"ArtistOverview"]
-15:I[97367,["$2","$3"],"OutletBoundary"]
-16:"$Sreact.suspense"
-18:"ViewportBoundary"
-19:I[97367,["$2","$3"],"$18"]
-1b:"MetadataBoundary"
-1c:I[97367,["$2","$3"],"$1b"]
-1e:I[68027,["$2","$3"],"default",1]
-:HL["/tattoo_marketplace.io/_next/static/chunks/12v_slo6nj_86.css","style"]
+e:"/tattoo_marketplace.io/_next/static/chunks/1j-vurt5qppij.js"
+f:"/tattoo_marketplace.io/_next/static/chunks/3det6emtqwxs_.js"
+10:I[91121,["$2","$3","$e","$f"],"default"]
+13:"/tattoo_marketplace.io/_next/static/chunks/0cdxdzmp6cg4_.js"
+14:"/tattoo_marketplace.io/_next/static/chunks/02esuu9nprdjk.js"
+15:I[57614,["$2","$3","$e","$f","$13","$14"],"ArtistOverview"]
+16:I[97367,["$2","$3"],"OutletBoundary"]
+17:"$Sreact.suspense"
+19:"ViewportBoundary"
+1a:I[97367,["$2","$3"],"$19"]
+1c:"MetadataBoundary"
+1d:I[97367,["$2","$3"],"$1c"]
+1f:I[68027,["$2","$3"],"default",1]
+:HL["/tattoo_marketplace.io/_next/static/chunks/2pgxjei1_z7yy.css","style"]
 :HL["/tattoo_marketplace.io/_next/static/media/07c7676b89ed2778-s.p.2bn3s6zvc0dyp.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/tattoo_marketplace.io/_next/static/media/237858b39a32779d-s.p.2cyn07wtgehh0.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/tattoo_marketplace.io/_next/static/media/2b81eeca71e9850c-s.p.3vm0tq4e-zz_5.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-11:[["children",{"s":"__PAGE__","h":512,"d":{"r":["$","$1","c",{"children":[["$","$L14",null,{}],[["$","script","script-0",{"src":"/tattoo_marketplace.io/_next/static/chunks/0qdhh56-_ke7j.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/tattoo_marketplace.io/_next/static/chunks/3dcqcyv_mdbyw.js","async":true,"nonce":"$undefined"}]],["$","$L15",null,{"children":["$","$16",null,{"name":"Next.MetadataOutlet","children":"$@17"}]}]]}],"p":false,"v":null}}]]
-b:[["children",{"s":"artist","h":512,"d":{"r":["$","$1","c",{"children":[[["$","script","script-0",{"src":"/tattoo_marketplace.io/_next/static/chunks/0z-2i9xfg3l77.js","async":true,"nonce":"$undefined"}]],["$","$Ld",null,{"Component":"$f","slots":{"children":["$","$L5",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L8",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]},"serverProvidedParams":{"params":{},"promises":["$@10"]}}]]}],"p":false,"v":null},"c":"$Q11"}]]
-0:{"P":null,"c":["","artist",""],"q":"","i":false,"t":{"t":{"s":"","h":528,"d":{"r":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/tattoo_marketplace.io/_next/static/chunks/12v_slo6nj_86.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/tattoo_marketplace.io/_next/static/chunks/3qfy96eoyh-ek.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/tattoo_marketplace.io/_next/static/chunks/349_4tf2oyo6r.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"en","data-scroll-behavior":"smooth","className":"_0bjUvq_variable Q_8U8a_variable ON88Zq_variable h-full","children":["$","body",null,{"className":"min-h-full antialiased","children":["$","$L4",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","error":"$7","errorStyles":[],"errorScripts":[["$","script","script-0",{"src":"/tattoo_marketplace.io/_next/static/chunks/0nm00po0co77n.js","async":true,"nonce":"$undefined"}]],"template":["$","$L8",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","main",null,{"className":"grid min-h-screen place-items-center bg-ink px-6 text-white","children":["$","div",null,{"className":"max-w-xl","children":[["$","p",null,{"className":"text-xs uppercase tracking-[0.22em] text-mist","children":"404"}],["$","h1",null,{"className":"mt-4 font-express text-5xl leading-none md:text-7xl","children":"This page is not in the index."}],["$","$La",null,{"href":"/","className":"mt-8 inline-flex h-11 items-center border border-white px-4 text-sm","children":"Back to Blackline"}]]}]}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]}]}]]}],"p":false,"v":null},"c":"$Qb"},"h":{"r":["$","$1","h",{"children":[null,["$","$L19",null,{"children":"$L1a"}],["$","$L1c",null,{"children":[["$","div",null,{"hidden":true,"children":["$","$16",null,{"name":"Next.Metadata","children":"$L1d"}]}],null]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"p":false,"v":null}},"m":"$undefined","G":["$1e",[["$","link","0",{"rel":"stylesheet","href":"/tattoo_marketplace.io/_next/static/chunks/12v_slo6nj_86.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"r":"$undefined","s":"$undefined","a":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"hjJwYSD2zfTS3yLlNW-64"}
-10:"$b:0:1:d:r:props:children:1:props:serverProvidedParams:params"
-1a:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-1f:I[27201,["$2","$3"],"IconMark"]
-17:null
-1d:[["$","title","0",{"children":"Studio overview · BLACKLINE"}],["$","meta","1",{"name":"description","content":"A curated marketplace of New York tattoo artists. Browse work by style and borough, then request an appointment."}],["$","link","2",{"rel":"icon","href":"/tattoo_marketplace.io/favicon.ico?favicon.117ezoe8m31dk.ico","sizes":"48x48","type":"image/x-icon"}],["$","link","3",{"rel":"icon","href":"/tattoo_marketplace.io/icon.svg?icon.0tgre-e_8a8a7.svg","sizes":"any","type":"image/svg+xml"}],["$","$L1f","4",{}]]
+12:[["children",{"s":"__PAGE__","h":512,"d":{"r":["$","$1","c",{"children":[["$","$L15",null,{}],[["$","script","script-0",{"src":"/tattoo_marketplace.io/_next/static/chunks/0cdxdzmp6cg4_.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/tattoo_marketplace.io/_next/static/chunks/02esuu9nprdjk.js","async":true,"nonce":"$undefined"}]],["$","$L16",null,{"children":["$","$17",null,{"name":"Next.MetadataOutlet","children":"$@18"}]}]]}],"p":false,"v":null}}]]
+b:[["children",{"s":"artist","h":512,"d":{"r":["$","$1","c",{"children":[[["$","script","script-0",{"src":"/tattoo_marketplace.io/_next/static/chunks/1j-vurt5qppij.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/tattoo_marketplace.io/_next/static/chunks/3det6emtqwxs_.js","async":true,"nonce":"$undefined"}]],["$","$Ld",null,{"Component":"$10","slots":{"children":["$","$L5",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L8",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]},"serverProvidedParams":{"params":{},"promises":["$@11"]}}]]}],"p":false,"v":null},"c":"$Q12"}]]
+0:{"P":null,"c":["","artist",""],"q":"","i":false,"t":{"t":{"s":"","h":528,"d":{"r":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/tattoo_marketplace.io/_next/static/chunks/2pgxjei1_z7yy.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/tattoo_marketplace.io/_next/static/chunks/3qfy96eoyh-ek.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/tattoo_marketplace.io/_next/static/chunks/32hrb6yy6bzlq.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"en","data-scroll-behavior":"smooth","className":"_0bjUvq_variable Q_8U8a_variable ON88Zq_variable h-full","children":["$","body",null,{"className":"min-h-full antialiased","children":["$","$L4",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","error":"$7","errorStyles":[],"errorScripts":[["$","script","script-0",{"src":"/tattoo_marketplace.io/_next/static/chunks/0nm00po0co77n.js","async":true,"nonce":"$undefined"}]],"template":["$","$L8",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","main",null,{"className":"grid min-h-screen place-items-center bg-ink px-6 text-white","children":["$","div",null,{"className":"max-w-xl","children":[["$","p",null,{"className":"text-xs uppercase tracking-[0.22em] text-mist","children":"404"}],["$","h1",null,{"className":"mt-4 font-express text-5xl leading-none md:text-7xl","children":"This page is not in the index."}],["$","$La",null,{"href":"/","className":"mt-8 inline-flex h-11 items-center border border-white px-4 text-sm","children":"Back to Blackline"}]]}]}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]}]}]]}],"p":false,"v":null},"c":"$Qb"},"h":{"r":["$","$1","h",{"children":[null,["$","$L1a",null,{"children":"$L1b"}],["$","$L1d",null,{"children":[["$","div",null,{"hidden":true,"children":["$","$17",null,{"name":"Next.Metadata","children":"$L1e"}]}],null]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"p":false,"v":null}},"m":"$undefined","G":["$1f",[["$","link","0",{"rel":"stylesheet","href":"/tattoo_marketplace.io/_next/static/chunks/2pgxjei1_z7yy.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"r":"$undefined","s":"$undefined","a":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"-tyETtTq8h6fpOBBEfZSS"}
+11:"$b:0:1:d:r:props:children:1:props:serverProvidedParams:params"
+1b:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+20:I[27201,["$2","$3"],"IconMark"]
+18:null
+1e:[["$","title","0",{"children":"Studio overview · BLACKLINE"}],["$","meta","1",{"name":"description","content":"A curated marketplace of New York tattoo artists. Browse work by style and borough, then request an appointment."}],["$","link","2",{"rel":"icon","href":"/tattoo_marketplace.io/favicon.ico?favicon.117ezoe8m31dk.ico","sizes":"48x48","type":"image/x-icon"}],["$","link","3",{"rel":"icon","href":"/tattoo_marketplace.io/icon.svg?icon.0tgre-e_8a8a7.svg","sizes":"any","type":"image/svg+xml"}],["$","$L20","4",{}]]

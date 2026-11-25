@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDemo } from "@/context/demo-context";
+import { hasVerifiedDesignOwnership } from "@/lib/design-ownership";
 import { formatDate, formatDuration, formatTime, money, weekdayName } from "@/lib/format";
 import { portfolioFor, reviewsFor, servicesFor } from "@/lib/selectors";
 import { verificationLabel } from "@/lib/status";
-import { Button, frame, Photo, Rating } from "@/components/ui";
+import { Button, DesignOwnershipBadge, frame, Photo, Rating } from "@/components/ui";
 
 export function ArtistProfile({ slug }: { slug: string }) {
   const { state, session, favorite, openThread, toast } = useDemo();
@@ -127,7 +128,10 @@ export function ArtistProfile({ slug }: { slug: string }) {
           <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
             {portfolio.map((item) => (
               <figure key={item.id} className="min-w-0">
-                <Photo src={item.image} alt={item.title} className="aspect-[4/5] w-full" />
+                <div className="relative">
+                  <Photo src={item.image} alt={item.title} className="aspect-[4/5] w-full" />
+                  {hasVerifiedDesignOwnership(state, item.id) ? <span className="absolute left-2 top-2"><DesignOwnershipBadge artistName={artist.name} /></span> : null}
+                </div>
                 <figcaption className="mt-3">
                   <p className="text-sm font-medium sm:text-base">{item.title}</p>
                   <p className="mt-1 text-sm text-mute">{item.category} · {item.description}</p>

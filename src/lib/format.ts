@@ -32,6 +32,31 @@ export function formatDateTime(iso: string) {
   }).format(new Date(iso));
 }
 
+export function formatRelativeTime(iso: string, now = new Date()) {
+  const timestamp = Date.parse(iso);
+  if (!Number.isFinite(timestamp)) return "Date unavailable";
+
+  const difference = timestamp - now.getTime();
+  const seconds = Math.floor(Math.abs(difference) / 1000);
+  if (seconds < 60) return difference > 0 ? "in less than a minute" : "Just now";
+
+  const unit = seconds < 60 * 60
+    ? { size: 60, label: "min" }
+    : seconds < 24 * 60 * 60
+      ? { size: 60 * 60, label: "hour" }
+      : seconds < 7 * 24 * 60 * 60
+        ? { size: 24 * 60 * 60, label: "day" }
+        : seconds < 30 * 24 * 60 * 60
+          ? { size: 7 * 24 * 60 * 60, label: "week" }
+          : seconds < 365 * 24 * 60 * 60
+            ? { size: 30 * 24 * 60 * 60, label: "month" }
+            : { size: 365 * 24 * 60 * 60, label: "year" };
+  const count = Math.floor(seconds / unit.size);
+  const label = unit.label === "min" ? "min" : `${unit.label}${count === 1 ? "" : "s"}`;
+  const relative = `${count} ${label}`;
+  return difference > 0 ? `in ${relative}` : `${relative} ago`;
+}
+
 export function formatTime(time: string) {
   const [hourPart, minutePart] = time.split(":");
   const hour = Number(hourPart);

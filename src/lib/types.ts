@@ -90,6 +90,22 @@ export interface PortfolioItem {
   description: string;
   category: string;
   styleId: string;
+  createdAt?: string;
+}
+
+export type DesignOwnershipStatus = "pending" | "approved" | "rejected";
+
+export interface DesignOwnershipRequest {
+  id: string;
+  portfolioItemId: string;
+  artistId: string;
+  statement: string;
+  evidenceUrl?: string;
+  status: DesignOwnershipStatus;
+  submittedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  reviewerNote?: string;
 }
 
 export interface Artist {
@@ -329,6 +345,7 @@ export interface DemoState {
   categories: Category[];
   services: Service[];
   portfolio: PortfolioItem[];
+  designOwnershipRequests: DesignOwnershipRequest[];
   bookings: Booking[];
   conversations: Conversation[];
   posts: SocialPost[];

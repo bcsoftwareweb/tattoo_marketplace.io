@@ -21,6 +21,13 @@ describe("saved data upgrade", () => {
     expect(upgraded.posts.length).toBeGreaterThan(0);
   });
 
+  it("adds the ownership-claim collection to saved demo data", () => {
+    const seed = createSeed();
+    const saved = { ...seed, designOwnershipRequests: undefined, seedVersion: SEED_VERSION };
+    const upgraded = upgradeState(saved as unknown as typeof seed);
+    expect(upgraded.designOwnershipRequests).toEqual([]);
+  });
+
   it("adds engagement fields to older posts while preserving existing interactions", () => {
     const seed = createSeed();
     const saved = {

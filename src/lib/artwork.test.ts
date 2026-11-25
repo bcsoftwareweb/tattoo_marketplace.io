@@ -24,16 +24,17 @@ describe("artwork feed", () => {
 
   it("shows artist portfolio uploads in Discover", () => {
     const state = createSeed();
+    const uploadedAt = "2026-11-25T18:43:00.000Z";
     const result = addPortfolio(state, "nova-reyes", {
       image: "data:image/jpeg;base64,artist-upload",
       title: "New artist upload",
       description: "A new piece added to the artist portfolio.",
       category: state.categories[0].name,
       styleId: state.artists.find((artist) => artist.id === "nova-reyes")!.styleIds[0],
-    }, { role: "artist", userId: "nova-reyes" });
+    }, { role: "artist", userId: "nova-reyes" }, uploadedAt);
 
     expect(result.error).toBeUndefined();
-    expect(artworkFeed(result.state).some((item) => item.title === "New artist upload")).toBe(true);
+    expect(artworkFeed(result.state).find((item) => item.title === "New artist upload")?.uploadedAt).toBe(uploadedAt);
   });
 
   it("opens each reload with a different mix of every artist", () => {

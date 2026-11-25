@@ -2,6 +2,7 @@ import { transitionBooking, type BookingAction } from "@/lib/booking";
 import { appointmentDurationForService, appointmentSlotsForDate } from "@/lib/availability";
 import { ADMIN_ID, BOROUGHS, DEMO_TODAY, TIME_SLOTS } from "@/lib/constants";
 import { deriveState } from "@/lib/derive";
+import { latestDesignOwnershipRequest } from "@/lib/design-ownership";
 import { addDays, uid, weekdayIndex } from "@/lib/format";
 import { normalizeHashtag, parseHashtags } from "@/lib/hashtags";
 import { bookingPath, messagePath } from "@/lib/permissions";
@@ -12,6 +13,7 @@ import type {
   ChatMessage,
   Customer,
   DemoState,
+  DesignOwnershipStatus,
   PlatformSettings,
   PortfolioItem,
   ReferenceImage,
@@ -257,13 +259,14 @@ export function updateArtistShops(state: DemoState, artistId: string, shopIds: s
 export function addPortfolio(
   state: DemoState,
   artistId: string,
-  input: Omit<PortfolioItem, "id" | "artistId">,
+  input: Omit<PortfolioItem, "id" | "artistId" | "createdAt">,
   actor: Actor,
+  now = new Date().toISOString(),
 ): Result {
   if (actor.role !== "artist" || actor.userId !== artistId) return fail(state, "You can only edit your own portfolio.");
   if (!input.image || !input.title.trim() || !input.description.trim()) return fail(state, "Add an image, title, and description.");
   if (!state.categories.some((category) => category.name === input.category)) return fail(state, "Choose a category.");
-  const item: PortfolioItem = { ...input, id: uid("pf"), artistId, title: input.title.trim(), description: input.description.trim() };
+  const item: PortfolioItem = { ...input, id: uid("pf"), artistId, title: input.title.trim(), description: input.description.trim(), createdAt: now };
   return { state: { ...state, portfolio: [item, ...state.portfolio] }, id: item.id };
 }
 
@@ -271,8 +274,14 @@ export function updatePortfolio(state: DemoState, id: string, patch: Partial<Por
   const item = state.portfolio.find((entry) => entry.id === id);
   if (!item) return fail(state, "Portfolio piece not found.");
   if (actor.role !== "artist" || actor.userId !== item.artistId) return fail(state, "You can only edit your own portfolio.");
-  const next = { ...item, ...patch, id: item.id, artistId: item.artistId };
+  const next = { ...item, ...patch, id: item.id, artistId: item.artistId, createdAt: item.createdAt };
   if (!next.title.trim() || !next.description.trim()) return fail(state, "Title and description are required.");
+  if (
+    latestDesignOwnershipRequest(state, id)?.status === "approved" &&
+    (next.image !== item.image || next.title !== item.title || next.category !== item.category || next.styleId !== item.styleId)
+  ) {
+    return fail(state, "Remove this piece and upload it again before changing a design with verified ownership.");
+  }
   return { state: { ...state, portfolio: state.portfolio.map((entry) => (entry.id === id ? next : entry)) } };
 }
 
@@ -280,7 +289,136 @@ export function deletePortfolio(state: DemoState, id: string, actor: Actor): Res
   const item = state.portfolio.find((entry) => entry.id === id);
   if (!item) return fail(state, "Portfolio piece not found.");
   if (actor.role !== "artist" || actor.userId !== item.artistId) return fail(state, "You can only edit your own portfolio.");
-  return { state: { ...state, portfolio: state.portfolio.filter((entry) => entry.id !== id) } };
+  return {
+    state: {
+      ...state,
+      portfolio: state.portfolio.filter((entry) => entry.id !== id),
+      designOwnershipRequests: (state.designOwnershipRequests ?? []).filter((request) => request.portfolioItemId !== id),
+    },
+  };
+}
+
+export interface DesignOwnershipDraft {
+  statement: string;
+  evidenceUrl: string;
+  attested: boolean;
+}
+
+export function submitDesignOwnershipRequest(
+  state: DemoState,
+  portfolioItemId: string,
+  draft: DesignOwnershipDraft,
+  actor: Actor,
+  now: string,
+): Result {
+  if (actor.role !== "artist") return fail(state, "Only artists can request design ownership verification.");
+  const item = state.portfolio.find((entry) => entry.id === portfolioItemId);
+  if (!item || item.artistId !== actor.userId) return fail(state, "You can only claim a design in your own portfolio.");
+
+  const requests = state.designOwnershipRequests ?? [];
+  const latest = latestDesignOwnershipRequest(state, portfolioItemId);
+  if (latest?.status === "pending") return fail(state, "This design already has a claim awaiting review.");
+  if (latest?.status === "approved") return fail(state, "This design's ownership has already been verified.");
+  const statement = draft.statement.trim();
+  if (statement.length < 40) return fail(state, "Explain how you created and first published this design (at least 40 characters).");
+  if (!draft.attested) return fail(state, "Confirm that you created this design before submitting your claim.");
+
+  const evidenceUrl = draft.evidenceUrl.trim();
+  if (evidenceUrl) {
+    try {
+      const url = new URL(evidenceUrl);
+      if (url.protocol !== "http:" && url.protocol !== "https:") return fail(state, "Evidence links must use http or https.");
+    } catch {
+      return fail(state, "Enter a valid evidence link or leave the field blank.");
+    }
+  }
+
+  const request: DemoState["designOwnershipRequests"][number] = {
+    id: uid("own"),
+    portfolioItemId,
+    artistId: actor.userId,
+    statement,
+    evidenceUrl: evidenceUrl || undefined,
+    status: "pending",
+    submittedAt: now,
+  };
+  return {
+    state: {
+      ...state,
+      designOwnershipRequests: [...requests, request],
+      notifications: [{
+        id: uid("nt"),
+        userId: ADMIN_ID,
+        role: "admin",
+        title: "Design ownership claim",
+        body: `${state.artists.find((artist) => artist.id === actor.userId)?.name ?? "An artist"} submitted “${item.title}” for review.`,
+        href: "/admin/marketplace",
+        read: false,
+        createdAt: now,
+        kind: "verification",
+      }, ...state.notifications],
+      activity: [{
+        id: uid("act"),
+        userId: actor.userId,
+        role: "artist",
+        text: `Submitted a design ownership claim for ${item.title}.`,
+        createdAt: now,
+      }, ...state.activity],
+    },
+    id: request.id,
+  };
+}
+
+export function reviewDesignOwnershipRequest(
+  state: DemoState,
+  requestId: string,
+  status: Extract<DesignOwnershipStatus, "approved" | "rejected">,
+  reviewerNote: string,
+  actor: Actor,
+  now: string,
+): Result {
+  if (actor.role !== "admin") return fail(state, "Only an administrator can review design ownership claims.");
+  const request = (state.designOwnershipRequests ?? []).find((item) => item.id === requestId);
+  if (!request) return fail(state, "Design ownership claim not found.");
+  if (request.status !== "pending") return fail(state, "This claim has already been reviewed.");
+  if (latestDesignOwnershipRequest(state, request.portfolioItemId)?.id !== request.id) {
+    return fail(state, "Only the latest claim for this design can be reviewed.");
+  }
+  const item = state.portfolio.find((entry) => entry.id === request.portfolioItemId);
+  if (!item || item.artistId !== request.artistId) return fail(state, "The claimed portfolio piece is no longer available.");
+  const note = reviewerNote.trim();
+  if (status === "rejected" && !note) return fail(state, "Add a reason before rejecting a design ownership claim.");
+
+  return {
+    state: {
+      ...state,
+      designOwnershipRequests: (state.designOwnershipRequests ?? []).map((entry) => (
+        entry.id === requestId
+          ? { ...entry, status, reviewedAt: now, reviewedBy: actor.userId, reviewerNote: note || undefined }
+          : entry
+      )),
+      notifications: [{
+        id: uid("nt"),
+        userId: request.artistId,
+        role: "artist",
+        title: status === "approved" ? "Design ownership verified" : "Design claim not approved",
+        body: status === "approved"
+          ? `Ownership of “${item.title}” has been verified. The design now displays its ownership badge.`
+          : `The ownership claim for “${item.title}” was not approved: ${note}`,
+        href: "/artist/portfolio",
+        read: false,
+        createdAt: now,
+        kind: "verification",
+      }, ...state.notifications],
+      activity: [{
+        id: uid("act"),
+        userId: actor.userId,
+        role: "admin",
+        text: `${status === "approved" ? "Verified" : "Declined"} the design ownership claim for ${item.title}.`,
+        createdAt: now,
+      }, ...state.activity],
+    },
+  };
 }
 
 function serviceError(state: DemoState, service: Omit<Service, "id" | "artistId">) {

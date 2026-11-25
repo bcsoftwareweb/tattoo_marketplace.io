@@ -28,6 +28,8 @@ import {
   setReportStatus,
   setReviewStatus,
   setVerification,
+  submitDesignOwnershipRequest,
+  reviewDesignOwnershipRequest,
   toggleAvailability,
   toggleFavorite,
   togglePostLike,
@@ -45,6 +47,7 @@ import {
   type ArtistApplication,
   type ArtistPatch,
   type BookingDraft,
+  type DesignOwnershipDraft,
   type SocialPostDraft,
   type HireDraft,
   type StudioApplication,
@@ -73,9 +76,11 @@ interface DemoContextValue {
   toast: (text: string) => void;
   dismissToast: (id: string) => void;
   updateArtist: (patch: ArtistPatch) => string | null;
-  addPortfolioItem: (input: Omit<PortfolioItem, "id" | "artistId">) => string | null;
+  addPortfolioItem: (input: Omit<PortfolioItem, "id" | "artistId" | "createdAt">) => string | null;
   editPortfolio: (id: string, patch: Partial<PortfolioItem>) => string | null;
   removePortfolio: (id: string) => string | null;
+  submitDesignOwnershipClaim: (portfolioItemId: string, draft: DesignOwnershipDraft) => string | null;
+  reviewDesignOwnershipClaim: (requestId: string, status: "approved" | "rejected", note: string) => string | null;
   addArtistService: (input: Omit<Service, "id" | "artistId">) => string | null;
   editService: (id: string, patch: Partial<Service>) => string | null;
   removeService: (id: string) => string | null;
@@ -239,7 +244,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       addPortfolioItem: (input) => {
         const who = actor();
         if (!who) return "Sign in again.";
-        return commit(addPortfolio(state, who.userId, input, who), "Portfolio piece added.");
+        return commit(addPortfolio(state, who.userId, input, who, now()), "Portfolio piece added.");
       },
       editPortfolio: (id, patch) => {
         const who = actor();
@@ -250,6 +255,16 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         const who = actor();
         if (!who) return "Sign in again.";
         return commit(deletePortfolio(state, id, who), "Portfolio piece removed.");
+      },
+      submitDesignOwnershipClaim: (portfolioItemId, draft) => {
+        const who = actor();
+        if (!who) return "Sign in again.";
+        return commit(submitDesignOwnershipRequest(state, portfolioItemId, draft, who, now()), "Ownership claim sent for admin review.");
+      },
+      reviewDesignOwnershipClaim: (requestId, status, note) => {
+        const who = actor();
+        if (!who) return "Sign in again.";
+        return commit(reviewDesignOwnershipRequest(state, requestId, status, note, who, now()), status === "approved" ? "Design ownership verified." : "Ownership claim rejected.");
       },
       addArtistService: (input) => {
         const who = actor();
