@@ -58,24 +58,53 @@ const staticBackup = path.join(os.tmpdir(), "blackline-pages-static");
 fs.rmSync(staticBackup, { recursive: true, force: true });
 if (fs.existsSync(previousStatic)) fs.cpSync(previousStatic, staticBackup, { recursive: true });
 
-fs.rmSync(docsDir, { recursive: true, force: true });
-fs.cpSync(outDir, docsDir, { recursive: true });
+fs.mkdirSync(docsDir, { recursive: true });
+await copyTree(outDir, docsDir);
+await copyTree(path.join(outDir, "_next", "static"), path.join(docsDir, "_next", "static"), path.join("_next", "static"));
 if (fs.existsSync(staticBackup)) {
-  copyMissing(staticBackup, path.join(docsDir, "_next", "static"));
+  await copyMissing(staticBackup, path.join(docsDir, "_next", "static"));
   fs.rmSync(staticBackup, { recursive: true, force: true });
 }
 fs.writeFileSync(path.join(docsDir, ".nojekyll"), "");
 console.log("GitHub Pages files written to /docs");
 
-function copyMissing(from, to) {
+async function copyTree(from, to, relative = "") {
+  fs.mkdirSync(to, { recursive: true });
+  for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
+    const entryPath = path.join(relative, entry.name);
+    if (entryPath === path.join("_next", "static")) continue;
+    const source = path.join(from, entry.name);
+    const destination = path.join(to, entry.name);
+    if (entry.isDirectory()) {
+      await copyTree(source, destination, entryPath);
+    } else {
+      await copyFileWithRetry(source, destination);
+    }
+  }
+}
+
+async function copyMissing(from, to) {
   fs.mkdirSync(to, { recursive: true });
   for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
     const src = path.join(from, entry.name);
     const dest = path.join(to, entry.name);
     if (entry.isDirectory()) {
-      copyMissing(src, dest);
+      await copyMissing(src, dest);
       continue;
     }
-    if (!fs.existsSync(dest)) fs.copyFileSync(src, dest);
+    if (!fs.existsSync(dest)) await copyFileWithRetry(src, dest);
+  }
+}
+
+async function copyFileWithRetry(source, destination) {
+  if (fs.existsSync(destination) && fs.readFileSync(source).equals(fs.readFileSync(destination))) return;
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      fs.copyFileSync(source, destination);
+      return;
+    } catch (error) {
+      if (!["EBUSY", "EPERM", "EACCES"].includes(error.code) || attempt >= 5) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
+    }
   }
 }

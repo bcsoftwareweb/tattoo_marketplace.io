@@ -5,11 +5,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BookingCards } from "@/components/booking-ui";
 import { MonthCalendar } from "@/components/calendar";
+import { CommunityMediaInput, type CommunityMediaSelection } from "@/components/community-media-input";
+import { FlashVideo } from "@/components/flash-video";
 import { useDemo } from "@/context/demo-context";
 import { BOROUGHS, PLACEMENTS, WEEKDAYS } from "@/lib/constants";
 import { readImageFile } from "@/lib/files";
 import { hashtagLabel, parseHashtags } from "@/lib/hashtags";
 import { formatDate, formatDateTime, formatDuration, money, weekdayName } from "@/lib/format";
+import { deleteCommunityVideo, saveCommunityVideo } from "@/lib/community-video";
 import { isOpenBooking, portfolioFor, servicesFor } from "@/lib/selectors";
 import { adminStats, artistFinance } from "@/lib/selectors";
 import { homeFor } from "@/lib/permissions";
@@ -25,6 +28,14 @@ function useSignedArtist() {
 function useSignedCustomer() {
   const { state, session } = useDemo();
   return state.customers.find((customer) => customer.id === session?.userId) ?? null;
+}
+
+async function discardSavedFlash(videoId: string, toast: (message: string) => void) {
+  try {
+    await deleteCommunityVideo(videoId);
+  } catch (reason) {
+    toast(reason instanceof Error ? `An unused Flash could not be deleted: ${reason.message}` : "An unused Flash could not be deleted.");
+  }
 }
 
 export function NotificationList() {
@@ -120,7 +131,7 @@ export function CustomerFavorites() {
 export function CustomerPosts() {
   const customer = useSignedCustomer();
   const { state, publishPost, removePost, toast } = useDemo();
-  const [image, setImage] = useState("");
+  const [media, setMedia] = useState<CommunityMediaSelection>({ image: "", video: null });
   const [caption, setCaption] = useState("");
   const [placement, setPlacement] = useState("");
   const [artistName, setArtistName] = useState("");
@@ -130,37 +141,39 @@ export function CustomerPosts() {
 
   const mine = (Array.isArray(state.posts) ? state.posts : []).filter((post) => post.customerId === customer.id && post.status === "published");
 
-  async function readPhoto(file: File | undefined) {
-    if (!file) return;
-    try {
-      setImage(await readImageFile(file, 900));
-    } catch (reason) {
-      toast(reason instanceof Error ? reason.message : "Could not read that photo.");
-    }
-  }
-
-  function publish(event: React.FormEvent) {
+  async function publish(event: React.FormEvent) {
     event.preventDefault();
     setError("");
-    const hashtagValues = hashtags
-      .split(/[\s,]+/)
-      .map((tag) => tag.trim())
-      .filter(Boolean);
-    const result = publishPost({
-      image,
-      caption,
-      placement,
-      hashtags: [...hashtagValues, ...parseHashtags(caption)],
-      artistName,
-      taggedArtistIds: [],
-    });
-    if (result.error) setError(result.error);
-    else {
-      setImage("");
+    let videoId: string | undefined;
+    try {
+      if (media.video) videoId = await saveCommunityVideo(media.video);
+      const hashtagValues = hashtags
+        .split(/[\s,]+/)
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+      const result = publishPost({
+        image: media.image,
+        mediaType: media.video ? "video" : "image",
+        videoId,
+        caption,
+        placement,
+        hashtags: [...hashtagValues, ...parseHashtags(caption)],
+        artistName,
+        taggedArtistIds: [],
+      });
+      if (result.error) {
+        setError(result.error);
+        if (videoId) await discardSavedFlash(videoId, toast);
+        return;
+      }
+      setMedia({ image: "", video: null });
       setCaption("");
       setPlacement("");
       setArtistName("");
       setHashtags("");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not publish this Flash.");
+      if (videoId) await discardSavedFlash(videoId, toast);
     }
   }
 
@@ -168,15 +181,8 @@ export function CustomerPosts() {
     <div className="grid gap-8">
       <PageHeader eyebrow="Customer" title="Tattoo posts" description="Share a finished piece, healed work, or work in progress." />
       <form className="grid max-w-2xl gap-4 border border-line bg-white p-5" onSubmit={publish}>
-        <Field label="Photo">
-          {image ? (
-            <div className="grid gap-3">
-              <Photo src={image} alt="New tattoo post preview" className="max-h-96 w-full object-cover" />
-              <Button type="button" variant="secondary" onClick={() => setImage("")}>Remove photo</Button>
-            </div>
-          ) : (
-            <input type="file" accept="image/*" onChange={(event) => readPhoto(event.target.files?.[0])} />
-          )}
+        <Field label="Photo or Flash">
+          <CommunityMediaInput value={media} onChange={setMedia} />
         </Field>
         <Field label="Caption" hint="Describe the piece. Hashtags in the caption are added automatically.">
           <Area value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="Healed #fineline work by Nova Reyes…" />
@@ -196,7 +202,7 @@ export function CustomerPosts() {
           <TextInput value={hashtags} onChange={(event) => setHashtags(event.target.value)} placeholder="#healed #nyctattoo #fineline" />
         </Field>
         {error ? <p role="alert" className="text-sm">{error}</p> : null}
-        <Button type="submit" className="justify-self-start">Publish post</Button>
+        <Button type="submit" className="justify-self-start">{media.video ? "Publish Flash" : "Publish post"}</Button>
       </form>
 
       <section>
@@ -207,7 +213,11 @@ export function CustomerPosts() {
               const artist = post.artistId ? state.artists.find((item) => item.id === post.artistId) : null;
               return (
                 <article key={post.id} className="border border-line bg-white">
-                  <Photo src={post.image} alt={post.caption} className="aspect-[4/5] w-full object-cover" />
+                  {post.mediaType === "video" && post.videoId ? (
+                    <FlashVideo videoId={post.videoId} caption={post.caption} className="aspect-[4/5] w-full bg-black object-contain" />
+                  ) : (
+                    <Photo src={post.image} alt={post.caption} className="aspect-[4/5] w-full object-cover" />
+                  )}
                   <div className="grid gap-3 p-4">
                     <p className="text-sm leading-6">{post.caption}</p>
                     {artist ? <p className="text-xs text-mute">Artist: {artist.name}</p> : null}
@@ -263,7 +273,7 @@ export function CustomerProfile() {
 export function ArtistPosts() {
   const artist = useSignedArtist();
   const { state, publishPost, removePost, toast } = useDemo();
-  const [image, setImage] = useState("");
+  const [media, setMedia] = useState<CommunityMediaSelection>({ image: "", video: null });
   const [caption, setCaption] = useState("");
   const [placement, setPlacement] = useState("");
   const [hashtags, setHashtags] = useState("");
@@ -282,36 +292,38 @@ export function ArtistPosts() {
     item.id !== artist.id && item.verificationStatus === "approved",
   );
 
-  async function readPhoto(file: File | undefined) {
-    if (!file) return;
-    try {
-      setImage(await readImageFile(file, 900));
-    } catch (reason) {
-      toast(reason instanceof Error ? reason.message : "Could not read that photo.");
-    }
-  }
-
-  function publish(event: React.FormEvent) {
+  async function publish(event: React.FormEvent) {
     event.preventDefault();
     setError("");
-    const result = publishPost({
-      image,
-      caption,
-      placement,
-      artistName: "",
-      hashtags: [
-        ...hashtags.split(/[\s,]+/).map((tag) => tag.trim()).filter(Boolean),
-        ...parseHashtags(caption),
-      ],
-      taggedArtistIds,
-    });
-    if (result.error) setError(result.error);
-    else {
-      setImage("");
+    let videoId: string | undefined;
+    try {
+      if (media.video) videoId = await saveCommunityVideo(media.video);
+      const result = publishPost({
+        image: media.image,
+        mediaType: media.video ? "video" : "image",
+        videoId,
+        caption,
+        placement,
+        artistName: "",
+        hashtags: [
+          ...hashtags.split(/[\s,]+/).map((tag) => tag.trim()).filter(Boolean),
+          ...parseHashtags(caption),
+        ],
+        taggedArtistIds,
+      });
+      if (result.error) {
+        setError(result.error);
+        if (videoId) await discardSavedFlash(videoId, toast);
+        return;
+      }
+      setMedia({ image: "", video: null });
       setCaption("");
       setPlacement("");
       setHashtags("");
       setTaggedArtistIds([]);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not publish this Flash.");
+      if (videoId) await discardSavedFlash(videoId, toast);
     }
   }
 
@@ -325,15 +337,8 @@ export function ArtistPosts() {
     <div className="grid gap-8">
       <PageHeader eyebrow="Artist" title="Community posts" description="This feed is mainly for customer tattoos. Share collaborations or occasional community updates here; add your tattoo work to your Discover portfolio gallery." />
       <form className="grid max-w-3xl gap-4 border border-line bg-white p-5" onSubmit={publish}>
-        <Field label="Photo">
-          {image ? (
-            <div className="grid gap-3">
-              <Photo src={image} alt="New artist post preview" className="max-h-96 w-full object-cover" />
-              <Button type="button" variant="secondary" onClick={() => setImage("")}>Remove photo</Button>
-            </div>
-          ) : (
-            <input type="file" accept="image/*" onChange={(event) => readPhoto(event.target.files?.[0])} />
-          )}
+        <Field label="Photo or Flash">
+          <CommunityMediaInput value={media} onChange={setMedia} />
         </Field>
         <Field label="Caption" hint="Tag artists below to give collaborators public credit.">
           <Area value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="Collaboration with @artistname…" />
@@ -374,7 +379,7 @@ export function ArtistPosts() {
           </div>
         ) : null}
         {error ? <p role="alert" className="text-sm">{error}</p> : null}
-        <Button type="submit" className="justify-self-start">Publish post</Button>
+        <Button type="submit" className="justify-self-start">{media.video ? "Publish Flash" : "Publish post"}</Button>
       </form>
 
       <section>
@@ -383,7 +388,11 @@ export function ArtistPosts() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {mine.map((post) => (
               <article key={post.id} className="border border-line bg-white">
-                <Photo src={post.image} alt={post.caption} className="aspect-[4/5] w-full object-cover" />
+                {post.mediaType === "video" && post.videoId ? (
+                  <FlashVideo videoId={post.videoId} caption={post.caption} className="aspect-[4/5] w-full bg-black object-contain" />
+                ) : (
+                  <Photo src={post.image} alt={post.caption} className="aspect-[4/5] w-full object-cover" />
+                )}
                 <div className="grid gap-3 p-4">
                   <p className="text-sm leading-6">{post.caption}</p>
                   {post.taggedArtistIds?.length ? (

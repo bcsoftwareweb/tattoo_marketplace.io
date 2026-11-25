@@ -216,6 +216,29 @@ describe("marketplace data", () => {
     });
   });
 
+  it("creates a Flash post with local video metadata", () => {
+    const state = createSeed();
+    const draft = {
+      image: "",
+      mediaType: "video" as const,
+      videoId: "flash-local-1",
+      caption: "A quick look at this healed tattoo",
+      placement: "Forearm",
+      hashtags: ["healed"],
+      artistName: "",
+      taggedArtistIds: [],
+    };
+    const result = createSocialPost(state, draft, { role: "customer", userId: "maya-chen" }, "2026-11-25T18:00:00Z");
+    expect(result.error).toBeUndefined();
+    expect(result.state.posts[0]).toMatchObject({
+      mediaType: "video",
+      videoId: "flash-local-1",
+      image: "",
+    });
+    expect(createSocialPost(state, { ...draft, videoId: undefined }, { role: "customer", userId: "maya-chen" }, "2026-11-25T18:00:00Z").error)
+      .toBe("Choose a photo or Flash video for the post.");
+  });
+
   it("lets signed-in members like and comment on published community posts", () => {
     const state = createSeed();
     const actor = { role: "customer" as const, userId: "maya-chen" };

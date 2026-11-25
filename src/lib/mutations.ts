@@ -1081,6 +1081,8 @@ export function updateSettings(state: DemoState, patch: Partial<PlatformSettings
 
 export interface SocialPostDraft {
   image: string;
+  mediaType?: "image" | "video";
+  videoId?: string;
   caption: string;
   placement: string;
   hashtags: string[];
@@ -1090,7 +1092,7 @@ export interface SocialPostDraft {
 
 export function createSocialPost(state: DemoState, draft: SocialPostDraft, actor: Actor, now: string): Result {
   if (actor.role !== "customer" && actor.role !== "artist") return fail(state, "Only customers and artists can publish community posts.");
-  if (!draft.image) return fail(state, "Choose a photo for the post.");
+  if (draft.mediaType === "video" ? !draft.videoId : !draft.image) return fail(state, "Choose a photo or Flash video for the post.");
   const caption = draft.caption.trim();
   if (!caption) return fail(state, "Add a caption.");
   if (actor.role === "customer" && !draft.placement.trim()) return fail(state, "Choose the tattoo placement.");
@@ -1132,6 +1134,8 @@ export function createSocialPost(state: DemoState, draft: SocialPostDraft, actor
     artistId,
     taggedArtistIds,
     image: draft.image,
+    mediaType: draft.mediaType ?? "image",
+    videoId: draft.mediaType === "video" ? draft.videoId : undefined,
     caption,
     placement: draft.placement,
     hashtags,
@@ -1150,7 +1154,7 @@ export function createSocialPost(state: DemoState, draft: SocialPostDraft, actor
           id: uid("act"),
           userId: actor.userId,
           role: actor.role,
-          text: `Shared a new community post${taggedArtistIds.length ? ` with ${taggedArtistIds.length} tagged artist${taggedArtistIds.length === 1 ? "" : "s"}` : ""}${hashtags.length ? ` tagged ${hashtags.slice(0, 3).map((tag) => `#${tag}`).join(" ")}` : ""}.`,
+          text: `Shared a new ${post.mediaType === "video" ? "Flash" : "community post"}${taggedArtistIds.length ? ` with ${taggedArtistIds.length} tagged artist${taggedArtistIds.length === 1 ? "" : "s"}` : ""}${hashtags.length ? ` tagged ${hashtags.slice(0, 3).map((tag) => `#${tag}`).join(" ")}` : ""}.`,
           createdAt: now,
         },
         ...state.activity,

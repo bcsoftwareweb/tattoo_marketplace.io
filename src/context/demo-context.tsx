@@ -50,6 +50,7 @@ import {
   type StudioApplication,
 } from "@/lib/mutations";
 import { createSeed, upgradeState } from "@/lib/seed";
+import { clearCommunityVideos, deleteCommunityVideo } from "@/lib/community-video";
 import { loadLocalAccounts, loadSession, loadState, saveLocalAccounts, saveSession, saveState } from "@/lib/storage";
 import type { Actor, Category, Customer, DemoState, PlatformSettings, PortfolioItem, Role, Service, Session, TattooShop, TattooStyle } from "@/lib/types";
 import { uid } from "@/lib/format";
@@ -226,6 +227,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         setState(fresh);
         saveLocalAccounts([]);
         toast("Demo data reset to the original sample.");
+        void clearCommunityVideos().catch((reason: unknown) => {
+          toast(reason instanceof Error ? `Demo videos could not be cleared: ${reason.message}` : "Demo videos could not be cleared.");
+        });
       },
       updateArtist: (patch) => {
         const who = actor();
@@ -421,7 +425,14 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       removePost: (postId) => {
         const who = actor();
         if (!who) return "Sign in again.";
-        return commit(removeSocialPost(state, postId, who), "Post removed.");
+        const post = state.posts.find((item) => item.id === postId);
+        const error = commit(removeSocialPost(state, postId, who), "Post removed.");
+        if (!error && post?.videoId) {
+          void deleteCommunityVideo(post.videoId).catch((reason: unknown) => {
+            toast(reason instanceof Error ? `The post was removed, but its Flash could not be deleted: ${reason.message}` : "The post was removed, but its Flash could not be deleted.");
+          });
+        }
+        return error;
       },
       likePost: (postId) => {
         const who = actor();

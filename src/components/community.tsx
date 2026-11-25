@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useDemo } from "@/context/demo-context";
+import { FlashVideo } from "@/components/flash-video";
 import { hashtagLabel } from "@/lib/hashtags";
 import { formatDateTime } from "@/lib/format";
 import { Button, Empty, frame, Photo } from "@/components/ui";
@@ -39,6 +40,7 @@ export function CommunityPage() {
   const { state, session, likePost, commentOnPost, toast } = useDemo();
   const [query, setQuery] = useState("");
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+  const [feedFilter, setFeedFilter] = useState<"all" | "posts" | "flashes">("all");
 
   const posts = useMemo(() => {
     const terms = query
@@ -50,6 +52,7 @@ export function CommunityPage() {
 
     return (Array.isArray(state.posts) ? state.posts : [])
       .filter((post) => post.status === "published")
+      .filter((post) => feedFilter === "all" || (feedFilter === "flashes" ? post.mediaType === "video" : post.mediaType !== "video"))
       .filter((post) => {
         if (!terms.length) return true;
         const customer = state.customers.find((item) => item.id === post.customerId);
@@ -78,7 +81,7 @@ export function CommunityPage() {
         return terms.every((term) => haystack.includes(term));
       })
       .sort((a, b) => Number(a.authorRole === "artist") - Number(b.authorRole === "artist") || b.createdAt.localeCompare(a.createdAt));
-  }, [state.posts, state.customers, state.artists, query]);
+  }, [state.posts, state.customers, state.artists, query, feedFilter]);
 
   const handleComment = (event: React.FormEvent<HTMLFormElement>, postId: string) => {
     event.preventDefault();
@@ -124,6 +127,25 @@ export function CommunityPage() {
         </label>
       </form>
 
+      <div className="mx-auto mt-6 flex max-w-xl gap-6 border-b border-panel" role="tablist" aria-label="Community feed type">
+        {([
+          ["all", "All"],
+          ["posts", "Posts"],
+          ["flashes", "Flashes"],
+        ] as const).map(([filter, label]) => (
+          <button
+            key={filter}
+            type="button"
+            role="tab"
+            aria-selected={feedFilter === filter}
+            className={`border-b-2 px-1 pb-3 text-sm ${feedFilter === filter ? "border-white text-white" : "border-transparent text-mute hover:text-white"}`}
+            onClick={() => setFeedFilter(filter)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       <div className="mx-auto mt-6 flex max-w-xl items-center justify-between border-b border-panel pb-4">
         <p className="font-display text-xs uppercase tracking-[0.18em] text-mist">
           {posts.length} post{posts.length === 1 ? "" : "s"}
@@ -168,7 +190,16 @@ export function CommunityPage() {
                   </div>
                 </header>
 
-                <Photo src={post.image} alt={post.caption} className="max-h-[70vh] w-full bg-panel object-contain" />
+                <div className="relative">
+                  {post.mediaType === "video" && post.videoId ? (
+                    <FlashVideo videoId={post.videoId} caption={post.caption} className="max-h-[70vh] w-full bg-black object-contain" />
+                  ) : (
+                    <Photo src={post.image} alt={post.caption} className="max-h-[70vh] w-full bg-panel object-contain" />
+                  )}
+                  {post.mediaType === "video" ? (
+                    <span className="pointer-events-none absolute left-3 top-3 bg-ink/80 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-white">Flash</span>
+                  ) : null}
+                </div>
 
                 <div className="grid gap-3 p-4">
                   <div className="flex items-center gap-4">

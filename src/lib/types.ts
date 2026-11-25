@@ -243,6 +243,8 @@ export interface SocialPost {
   artistId?: string;
   taggedArtistIds?: string[];
   image: string;
+  mediaType?: "image" | "video";
+  videoId?: string;
   caption: string;
   placement: string;
   hashtags: string[];
